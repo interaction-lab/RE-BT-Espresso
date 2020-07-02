@@ -5,7 +5,7 @@
 [Bb]uilds/
 Assets/AssetStoreTools*
 Assets/CSVs*
-Assets/CleaningScripts/_pycache_*
+Assets/CleaningScripts/__pycache__*
 
 # Visual Studio cache directory
 .vs/
