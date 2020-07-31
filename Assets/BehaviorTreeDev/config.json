@@ -1,0 +1,34 @@
+{
+  "csv_folder_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/CSVs",
+  "normalized_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/normalized",
+  "hotEncoded_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/hotEncoded",
+  "upSampled_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/upSampled",
+
+  "outputPackage_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/OUTPUT",
+
+  "feature_columns": {
+    "tw": 27,
+    "tsla": 26,
+    "isNewExercise": 6,
+    "exerciseSubmissionResult": 7,
+    "KCs": 25,
+    "KCt": 2,
+    "ScaffLeft": 28
+  },
+
+  "categorical_features": ["isNewExercise", "exerciseSubmissionResult", "ScaffLeft"],
+
+  "label_columns": {
+    "robotISA": 1,
+    "kuriDialogue": 5,
+    "kuriPhysicalAction": 22
+  },
+
+  "lag_features": ["isNewExercise", "exerciseSubmissionResult"],
+  "sliding_window_length": 5,
+  
+  "treeDepth": 5,
+  "pruningNum": 4,
+  "k_fold": 5,
+  "upSampling": true
+}
