@@ -5,15 +5,31 @@ import ntpath
 import csv
 import pandas as pd
 
-DELIMITER = ','
+CSV_DELIMITER = ','
+CSV_QUOTECHAR = '"'
 
-def fileIsCSV(filename):
-	return filename.endswith(".csv") or filename.endswith(".CSV")
+CSV_EXTENSIONS = (".csv", ".CSV")
+CSV_NAME_EXTENSION = "_normalized"
+NORMALIZED_CSV_FOLDER_NAME = "normalized_CSVs"
 
-def makeModName(folderPath, oldFileName):
-	if not os.path.isdir(folderPath): os.mkdir(folderPath)
-	fileNameStem = oldFileName.split(".")[0]
-	return os.fsdecode(os.path.join(folderPath, fileNameStem + "_normalized.csv"))
+def is_file_CSV(filename):
+	return filename.endswith(CSV_EXTENSIONS)
+
+# Description: creates and adds folder called folder_name to directory: working_directory,
+#			   returns path to folder
+# ex: folder_name = "normalizedCSVs", working_directory = /path/to/directory
+# return: "/path/to/directory/normalizedCSVs"
+def add_folder_to_directory(folder_name, working_directory):
+	new_directory = os.fsdecode(os.path.join(working_directory, folder_name))
+	if not os.path.isdir(new_directory): os.makedirs(new_directory)
+	return new_directory
+
+# Description: takes parameter original_filename and adds extension to name
+# ex: original_filename = "helloWorld.txt", extension = "_addMe"
+# return: helloWorld_addMe.txt
+def make_modified_filename(original_filename, extension):
+	filename_root, filename_ext = os.path.splitext(os.path.basename(original_filename))
+	return filename_root + extension + filename_ext
 
 def updateQueue(json_object, totalQueues, row, columnName):
 	index = 0
@@ -27,65 +43,70 @@ def updateQueue(json_object, totalQueues, row, columnName):
 		if not(element == '' or element == None): return element
 	return ''
 
-
-
 ap = argparse.ArgumentParser()
 ap.add_argument("-config", "--configuration", required = True, help = "Path to the configuration file")
 args = vars(ap.parse_args())
 json_file_path = args["configuration"]
 # opening JSON file
 json_object = json.load(open(json_file_path))
-directory_in_str = json_object["csv_folder_path"]
-directory = os.fsencode(directory_in_str)
+csv_folder = json_object["csv_folder_path"]
 
-for file in os.listdir(directory):
-	fileName = os.fsdecode(file)
-	if fileIsCSV(fileName):
+json_normalized_folder = json_object["normalized_path"]
+destination_path = add_folder_to_directory(NORMALIZED_CSV_FOLDER_NAME, json_normalized_folder)
 
-		absolutePath = os.fsdecode(os.path.join(directory, file))
-		filenameEdited = makeModName(json_object["normalized_path"], fileName)
+for file in os.listdir(csv_folder):
+	complete_file_path = os.fsdecode(os.path.join(csv_folder, file))
 
-		with open(absolutePath) as csvfile, open(filenameEdited, mode='w') as csvfileMod:
-			csv_reader = csv.reader(csvfile, delimiter = DELIMITER)
-			csv_writer = csv.writer(csvfileMod, delimiter = DELIMITER, quotechar = '"', quoting=csv.QUOTE_MINIMAL)
+	if is_file_CSV(file):
+		normalized_filename = make_modified_filename(file, CSV_NAME_EXTENSION)
+		normalized_file_path = os.fsdecode(os.path.join(destination_path, normalized_filename))
 
-			totalQueues = []
-			for lag_feature in json_object["lag_features"]: totalQueues.append([])
+		current_csv_obj = open(complete_file_path)
+		normalized_csv_obj = open(normalized_file_path, mode='w')
 
-			#Create header for file, followed by one column for 'Label'
-			header = []
-			for columnName in json_object["feature_columns"]:
-				header.append(columnName)
-			header.append("Label")
-			csv_writer.writerow(header)
+		csv_reader = csv.reader(current_csv_obj, delimiter = CSV_DELIMITER)
+		csv_writer = csv.writer(normalized_csv_obj, delimiter = CSV_DELIMITER, quotechar = CSV_QUOTECHAR, quoting=csv.QUOTE_MINIMAL)
 
-			labelIndex = 0
-			for row in csv_reader:
-				example = False
-				for columnName in json_object["label_columns"]:
-					if row[json_object["label_columns"][columnName]] != "":
-						example = True
-						labelIndex = json_object["label_columns"][columnName]
-						break
-				if example:
-					newRow = []
-					for columnName in json_object["feature_columns"]:
-						#Handle lag features
-						if columnName in json_object["lag_features"]:
-							laggedFeature = updateQueue(json_object, totalQueues, row, columnName)
-							newRow.append(laggedFeature)
-						#if not lag feature then add feature to column
-						else: newRow.append(row[json_object["feature_columns"][columnName]])
-					newRow.append(row[labelIndex])
-					csv_writer.writerow(newRow)
-				else: 
-					for columnName in json_object["lag_features"]:
-						updateQueue(json_object, totalQueues, row, columnName)
+		totalQueues = [[] for lag_feature in json_object["lag_features"]]
+		print("totalQueues: {}".format(totalQueues))
 
-combined_path = os.path.join(json_object["normalized_path"], "combined_csv.csv")
+		#Create header for file, followed by one column for 'Label'
+		header = []
+		for columnName in json_object["feature_columns"]:
+			header.append(columnName)
+		header.append("Label")
+		csv_writer.writerow(header)
+
+		labelIndex = 0
+		for row in csv_reader:
+			example = False
+			for columnName in json_object["label_columns"]:
+				if row[json_object["label_columns"][columnName]] != "":
+					example = True
+					labelIndex = json_object["label_columns"][columnName]
+					break
+			if example:
+				newRow = []
+				for columnName in json_object["feature_columns"]:
+					#Handle lag features
+					if columnName in json_object["lag_features"]:
+						laggedFeature = updateQueue(json_object, totalQueues, row, columnName)
+						newRow.append(laggedFeature)
+					#if not lag feature then add feature to column
+					else: newRow.append(row[json_object["feature_columns"][columnName]])
+				newRow.append(row[labelIndex])
+				csv_writer.writerow(newRow)
+			else: 
+				for columnName in json_object["lag_features"]:
+					updateQueue(json_object, totalQueues, row, columnName)
+
+		current_csv_obj.close()
+		normalized_csv_obj.close()
+
+combined_path = os.path.join(destination_path, "combined_csv.csv")
 
 if os.path.exists(combined_path): os.remove(combined_path)
-combined_csv = pd.concat([pd.read_csv(os.fsdecode(os.path.join(json_object["normalized_path"], f))) for f in os.listdir(json_object["normalized_path"])])
+combined_csv = pd.concat([pd.read_csv(os.fsdecode(os.path.join(destination_path, f))) for f in os.listdir(destination_path)])
 combined_csv.to_csv( os.fsdecode(combined_path), index = False, encoding='utf-8-sig')
 
 
