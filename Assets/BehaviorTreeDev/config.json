@@ -1,10 +1,10 @@
 {
   "csv_folder_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/CSVs",
-  "normalized_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/normalized",
-  "hotEncoded_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/hotEncoded",
-  "upSampled_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/upSampled",
+  "normalized_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/normalized_data",
+  "hotEncoded_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/hotEncoded_data",
+  "upSampled_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/upSampled_data",
 
-  "outputPackage_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/OUTPUT",
+  "outputPackage_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/OUTPUT",
 
   "feature_columns": {
     "tw": 27,
