@@ -44,3 +44,6 @@ Assets/StreamingAssets/crashlytics-build.properties
 UWP/
 
 **/.DS_Store
+
+**/__pycache__/
+
