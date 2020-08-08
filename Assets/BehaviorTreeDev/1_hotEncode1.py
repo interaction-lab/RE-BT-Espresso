@@ -9,6 +9,7 @@ import pipeline_constants as constants
 from json_manager import json_manager
 
 CATEGORICAL_NULL_VALUE = "No Entry"
+COLUMN_AXIS = 1
 
 def get_hot_encoded_header(hot_encoder, categorical_features):
 	header_list = []
@@ -17,6 +18,26 @@ def get_hot_encoded_header(hot_encoder, categorical_features):
 		for column in category:
 			header_list.append(original_column_name + "_" + column)
 	return header_list
+
+def hot_encode_features(features_data, categorical_features):
+	# fill_null_
+	for categorical_feature in categorical_features:
+		features_data[categorical_feature].fillna(CATEGORICAL_NULL_VALUE, inplace = True)
+		features_data[categorical_feature] = features_data[categorical_feature].astype(str)
+
+	hot_encoder = OneHotEncoder()
+	hot_encoder.fit(features_data[categorical_features])
+	hot_encoded_array = hot_encoder.transform(features_data[categorical_features]).toarray()
+	hot_encoded_header = get_hot_encoded_header(hot_encoder, categorical_features)
+	return hot_encoded_array, hot_encoded_header
+
+def encode_label_column(label_column):
+	label_encoder = LabelEncoder()
+	label_encoder.fit(label_column.values.ravel())
+	label_column = np.array(label_encoder.transform(label_column.values.ravel()))
+
+	labels_reformatted = [[int(label)] for label in label_column]
+	return label_encoder, labels_reformatted
 
 def process_command_line_args():
 	ap = argparse.ArgumentParser()
@@ -36,41 +57,28 @@ def main():
 
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
-	for feature in categorical_features:
-		features_data[feature].fillna(CATEGORICAL_NULL_VALUE, inplace = True)
-		features_data[feature] = features_data[feature].astype(str)
-		
-	hot_encoder = OneHotEncoder()
-	hot_encoder.fit(features_data[categorical_features])
-	hot_encoded_header = get_hot_encoded_header(hot_encoder, categorical_features)
-	hot_encoded_array = hot_encoder.transform(features_data[categorical_features]).toarray()
+	# hot encoded features
+	hot_encoded_array, hot_encoded_header = hot_encode_features(features_data, categorical_features)
 
+	# remove hot encoded features from features_data dataframe
 	features_data = features_data.drop(columns = categorical_features)
 	features_data_array = features_data.to_numpy()
 
-	final_csv = np.append(hot_encoded_array, features_data_array, axis = 1)
-
-	le = LabelEncoder()
-
+	# encode labels
 	labels_data = pd.read_csv(combined_csv_file, usecols = [constants.LABEL_COLUMN_NAME])
-	le.fit(labels_data[[constants.LABEL_COLUMN_NAME]].values.ravel())
-	labels_data = np.array(le.transform(labels_data[[constants.LABEL_COLUMN_NAME]].values.ravel()))
+	label_encoder, labels_column_array = encode_label_column(labels_data)
 
-	labels_reformatted = []
-	for label in labels_data: labels_reformatted.append([int(label)])
+	# add hot_encoded columns, than numerical columns, then encoded labels to one array
+	final_csv = np.concatenate((hot_encoded_array, features_data_array, labels_column_array), axis = COLUMN_AXIS)
 
-	final_csv = np.append(final_csv, labels_reformatted, axis=1)
-
+	# make_formatter_string(hot_encoded_header, numerical_columns, label_column)
+	
 	hot_encode_fmt = "%i," * len(hot_encoded_header) #format hot encoded column to ints
-	feature_data_fmt = "%1.3f," * len(list(features_data.columns))
+	feature_data_fmt = "%1.3f," * len(features_data.columns)
 	total_fmt = hot_encode_fmt + feature_data_fmt + "%i" # for label
 
-	final_header = ""
-	for element in hot_encoded_header:
-		final_header += element + ","
-	for element in list(features_data.columns):
-		final_header += element + ","
-	final_header += constants.LABEL_COLUMN_NAME
+	final_header = ','.join(str(i) for i in hot_encoded_header + list(features_data.columns))
+	final_header += "," + constants.LABEL_COLUMN_NAME
 
 	if not os.path.isdir(hot_encoded_path): os.mkdir(hot_encoded_path)
 	hot_encoded_path = os.fsdecode(os.path.join(hot_encoded_path, constants.HOT_ENCODED_CSV_FILE_NAME))
@@ -78,12 +86,11 @@ def main():
 
 	np.savetxt(hot_encoded_path, final_csv, fmt = total_fmt, header = final_header, delimiter = constants.CSV_DELIMITER, comments='')
 
-
 	outputLogFile = "output.log"
 
 	f = open(outputLogFile, "w")
 	f.write("{}\n".format(total_fmt))
-	f.write(str(list(le.inverse_transform(range(len(le.classes_))))))
+	f.write(str(list(label_encoder.inverse_transform(range(len(label_encoder.classes_))))))
 	f.close()
 
 if __name__ == '__main__':
