@@ -1,12 +1,6 @@
 import json
 import json_constants as json_elements
 
-JSON_CSV_PATH = "csv_folder_path"
-JSON_NORMALIZED_PATH = "normalized_path"
-JSON_FEATURE_COLUMNS = "feature_columns"
-JSON_LABEL_COLUMNS = "label_columns"
-JSON_LAG_FEATURES = "lag_features"
-
 class json_manager:
 
 	v_json_object = None
@@ -31,3 +25,9 @@ class json_manager:
 
 	def get_sliding_window_length(self):
 		return int(self.v_json_object[json_elements.JSON_SLIDING_WINDOW_LENGTH])
+
+	def get_categorical_features(self):
+		return list(self.v_json_object[json_elements.JSON_CATEGORICAL_FEATURES])
+
+	def get_hot_encoded_path(self):
+		return str(self.v_json_object[json_elements.JSON_HOT_ENCODED_PATH])
