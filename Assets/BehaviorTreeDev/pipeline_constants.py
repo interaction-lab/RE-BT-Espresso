@@ -1,0 +1,10 @@
+NORMALIZED_CSV_FOLDER_NAME = "normalized_CSVs"
+COMBINED_CSV_FILE_NAME = "combined_csv.csv"
+
+HOT_ENCODED_CSV_FOLDER_NAME = "hotEncoded_CSVs"
+HOT_ENCODED_CSV_FILE_NAME = "hotEncoded_combined.csv"
+
+CSV_DELIMITER = ','
+CSV_QUOTECHAR = '"'
+
+LABEL_COLUMN_NAME = "Label"
