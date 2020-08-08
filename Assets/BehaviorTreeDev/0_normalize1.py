@@ -5,17 +5,11 @@ import ntpath
 import csv
 import pandas as pd
 from json_manager import json_manager
+import pipeline_constants as constants
 # from queue import Queue
-
-CSV_DELIMITER = ','
-CSV_QUOTECHAR = '"'
 
 CSV_EXTENSIONS = (".csv", ".CSV")
 CSV_NAME_EXTENSION = "_normalized"
-NORMALIZED_CSV_FOLDER_NAME = "normalized_CSVs"
-LABEL_COLUMN_NAME = "Label"
-
-COMBINED_CSV_FILE_NAME = "combined_csv.csv"
 
 def is_file_CSV(filename):
 	return filename.endswith(CSV_EXTENSIONS)
@@ -43,7 +37,6 @@ def update_lag_feature_queue(all_lag_queues, index, value):
 	current_queue = all_lag_queues[index]
 	current_queue.append(value)
 	current_queue.pop(0)
-	# print("current_queue: {}".format(current_queue))
 	for element in current_queue:
 		if not(element == '' or element == None): 
 			return element
@@ -66,7 +59,7 @@ def main():
 	lag_features = JSON_MANAGER.get_lag_features()
 	lag_window_length = JSON_MANAGER.get_sliding_window_length()
 
-	destination_path = add_folder_to_directory(NORMALIZED_CSV_FOLDER_NAME, normalized_folder)
+	destination_path = add_folder_to_directory(constants.NORMALIZED_CSV_FOLDER_NAME, normalized_folder)
 
 	for file in os.listdir(csv_folder):
 		complete_file_path = os.fsdecode(os.path.join(csv_folder, file))
@@ -78,25 +71,24 @@ def main():
 			current_csv_obj = open(complete_file_path)
 			normalized_csv_obj = open(normalized_file_path, mode='w')
 
-			csv_reader = csv.reader(current_csv_obj, delimiter = CSV_DELIMITER)
-			csv_writer = csv.writer(normalized_csv_obj, delimiter = CSV_DELIMITER, quotechar = CSV_QUOTECHAR, quoting=csv.QUOTE_MINIMAL)
+			csv_reader = csv.reader(current_csv_obj, delimiter = constants.CSV_DELIMITER)
+			csv_writer = csv.writer(normalized_csv_obj, delimiter = constants.CSV_DELIMITER, quotechar = constants.CSV_QUOTECHAR, quoting=csv.QUOTE_MINIMAL)
 
 			all_lag_queues = [[""] * lag_window_length for lag_feature in lag_features]
 			
 			header_row = list(feature_columns)
-			header_row.append(LABEL_COLUMN_NAME)
+			header_row.append(constants.LABEL_COLUMN_NAME)
 			csv_writer.writerow(header_row)
-
 
 			labelIndex = 0
 			for timeseries_row in csv_reader:
-				label_row_exists = False
+				is_a_label_row = False
 				for columnName, columnIndex in label_columns.items():
 					if timeseries_row[columnIndex] != "":
-						label_row_exists = True
+						is_a_label_row = True
 						labelIndex = columnIndex
 						break
-				if label_row_exists:
+				if is_a_label_row:
 					newRow = []
 					for columnName, columnIndex in feature_columns.items():
 						try: # checking to see if column is a lag feature. If it is, check lag_queue for anything
@@ -115,7 +107,7 @@ def main():
 			current_csv_obj.close()
 			normalized_csv_obj.close()
 
-	combined_path = os.path.join(destination_path, COMBINED_CSV_FILE_NAME)
+	combined_path = os.path.join(destination_path, constants.COMBINED_CSV_FILE_NAME)
 
 	if os.path.exists(combined_path): 
 		os.remove(combined_path)
@@ -125,3 +117,4 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
