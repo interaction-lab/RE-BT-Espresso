@@ -1,8 +1,0 @@
-JSON_CSV_PATH = "csv_folder_path"
-JSON_NORMALIZED_PATH = "normalized_path"
-JSON_HOT_ENCODED_PATH = "hotEncoded_path"
-JSON_FEATURE_COLUMNS = "feature_columns"
-JSON_LABEL_COLUMNS = "label_columns"
-JSON_LAG_FEATURES = "lag_features"
-JSON_SLIDING_WINDOW_LENGTH = "sliding_window_length"
-JSON_CATEGORICAL_FEATURES = "categorical_features"
