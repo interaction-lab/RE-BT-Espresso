@@ -88,8 +88,8 @@ def main():
 
 	f = open(OUTPUT_LOG_FILE, "w")
 	f.write("{}\n".format(total_fmt))
-	le_name_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
-	f.write(str(le_name_mapping))
+	le_name_mapping = str(dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_))))
+	f.write(json.dumps(le_name_mapping))
 	f.close()
 
 if __name__ == '__main__':
