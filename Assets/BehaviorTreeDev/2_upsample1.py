@@ -26,13 +26,8 @@ def main():
 		hot_encoded_file = os.fsdecode(os.path.join(hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
 
 		hotEncoded_data = pd.read_csv(hot_encoded_file)
-		# print("hotEncoded_data.columns: {}".format(list(hotEncoded_data.columns)))
-		numCols = len(hotEncoded_data.columns)
-		numCols_list = list(range(numCols))
-
-		features_data = pd.read_csv(hot_encoded_file, usecols = numCols_list[:-1])
-		labels_data = pd.read_csv(hot_encoded_file, usecols = [numCols_list[-1]])
-
+		features_data = pd.read_csv(hot_encoded_file, usecols = list(hotEncoded_data.columns)[:-1])
+		labels_data = pd.read_csv(hot_encoded_file, usecols = [list(hotEncoded_data.columns)[-1]])
 
 		sm = SVMSMOTE(random_state = JSON_MANAGER.get_random_state())
 		X_res, y_res = sm.fit_resample(features_data, labels_data)
