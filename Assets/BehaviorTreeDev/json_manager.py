@@ -10,7 +10,10 @@ JSON_LAG_FEATURES = "lag_features"
 JSON_SLIDING_WINDOW_LENGTH = "sliding_window_length"
 JSON_CATEGORICAL_FEATURES = "categorical_features"
 JSON_RANDOM_STATE = "random_state"
-JSON_UPSAMPLE = "upsampling"
+JSON_UPSAMPLE = "SVMSMOTE_upsampling"
+JSON_KFOLD = "k_fold"
+JSON_TREE_DEPTH = "decision_tree_depth"
+JSON_OUTPUT_PATH = "output_package_path"
 
 class json_manager:
 
@@ -51,3 +54,12 @@ class json_manager:
 
 	def get_upsample_status(self):
 		return self.v_json_object[JSON_UPSAMPLE]
+
+	def get_kfold(self):
+		return int(self.v_json_object[JSON_KFOLD])
+
+	def get_decision_tree_depth(self):
+		return int(self.v_json_object[JSON_TREE_DEPTH])
+
+	def get_output_path(self):
+		return str(self.v_json_object[JSON_OUTPUT_PATH])
