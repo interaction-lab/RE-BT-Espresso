@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# alias python=python3
+# bash script that executes WoZ -> Behavior Tree Pipeline
+# Written by Adam Wathieu, 2020
+# USC REU Summer 2020
 
 config=$1
 outputFile="output.log"
