@@ -30,5 +30,6 @@
   "treeDepth": 5,
   "pruningNum": 4,
   "k_fold": 5,
-  "upSampling": true
+  "upsampling": true,
+  "random_state": 0
 }
