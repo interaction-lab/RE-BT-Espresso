@@ -6,7 +6,7 @@ import argparse
 import os
 import json
 import pipeline_constants as constants
-from json_manager import json_manager
+from json_manager import JsonManager
 
 OUTPUT_LOG_FILE = "output.log"
 CATEGORICAL_NULL_VALUE = "No Entry"
@@ -20,7 +20,6 @@ def get_hot_encoded_header(hot_encoder, categorical_features):
 	return header_list
 
 def hot_encode_features(features_data, categorical_features):
-	# fill_null_
 	for categorical_feature in categorical_features:
 		features_data[categorical_feature].fillna(CATEGORICAL_NULL_VALUE, inplace = True)
 		features_data[categorical_feature] = features_data[categorical_feature].astype(str)
@@ -47,12 +46,12 @@ def process_command_line_args():
 
 def main():
 	json_file_path = process_command_line_args()
-	JSON_MANAGER = json_manager(json_file_path)
-	feature_columns = JSON_MANAGER.get_feature_columns()
-	categorical_features = JSON_MANAGER.get_categorical_features()
-	hot_encoded_path = JSON_MANAGER.get_hot_encoded_path()
+	json_manager = JsonManager(json_file_path)
+	feature_columns = json_manager.get_feature_columns()
+	categorical_features = json_manager.get_categorical_features()
+	hot_encoded_path = json_manager.get_hot_encoded_path()
 
-	normalized_folder = os.fsdecode(os.path.join(JSON_MANAGER.get_normalized_path(), constants.NORMALIZED_CSV_FOLDER_NAME))
+	normalized_folder = os.fsdecode(os.path.join(json_manager.get_normalized_path(), constants.NORMALIZED_CSV_FOLDER_NAME))
 	combined_csv_file = os.fsdecode(os.path.join(normalized_folder, constants.COMBINED_CSV_FILENAME))
 
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
@@ -77,8 +76,8 @@ def main():
 		os.remove(hot_encoded_file_path)
 
 	# make_formatter_string(hot_encoded_header, numerical_columns, label_column)
-	hot_encode_fmt = "%i," * len(hot_encoded_header) # format hot encoded column to ints
-	feature_data_fmt = "%1.3f," * len(features_data.columns) # format numerical columns to ints
+	hot_encode_fmt = "%i," * len(hot_encoded_header) # format hot encoded columns to ints
+	feature_data_fmt = "%1.3f," * len(features_data.columns) # format numerical columns to doubles
 	total_fmt = hot_encode_fmt + feature_data_fmt + "%i" # for label
 
 	final_header = ','.join(str(i) for i in (hot_encoded_header + list(features_data.columns)))
@@ -88,8 +87,7 @@ def main():
 
 	f = open(OUTPUT_LOG_FILE, "w")
 	f.write("{}\n".format(total_fmt))
-	le_name_mapping = str(dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_))))
-	f.write(json.dumps(le_name_mapping))
+	f.write(str((label_encoder.classes_).tolist()))
 	f.close()
 
 if __name__ == '__main__':
