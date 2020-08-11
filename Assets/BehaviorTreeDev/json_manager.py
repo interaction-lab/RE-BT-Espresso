@@ -1,21 +1,21 @@
 import json
 
-JSON_CSV_PATH = "csv_folder_path"
-JSON_NORMALIZED_PATH = "normalized_path"
-JSON_HOT_ENCODED_PATH = "hotEncoded_path"
-JSON_UPSAMPLED_PATH = "upSampled_path"
-JSON_FEATURE_COLUMNS = "feature_columns"
-JSON_LABEL_COLUMNS = "label_columns"
-JSON_LAG_FEATURES = "lag_features"
-JSON_SLIDING_WINDOW_LENGTH = "sliding_window_length"
-JSON_CATEGORICAL_FEATURES = "categorical_features"
-JSON_RANDOM_STATE = "random_state"
-JSON_UPSAMPLE = "SVMSMOTE_upsampling"
-JSON_KFOLD = "k_fold"
-JSON_TREE_DEPTH = "decision_tree_depth"
-JSON_OUTPUT_PATH = "output_package_path"
+JSON_CSV_PATH_KEY = "csv_folder_path"
+JSON_NORMALIZED_PATH_KEY = "normalized_path"
+JSON_HOT_ENCODED_PATH_KEY = "hotEncoded_path"
+JSON_UPSAMPLED_PATH_KEY = "upSampled_path"
+JSON_FEATURE_COLUMNS_KEY = "feature_columns"
+JSON_LABEL_COLUMNS_KEY = "label_columns"
+JSON_LAG_FEATURES_KEY = "lag_features"
+JSON_SLIDING_WINDOW_LENGTH_KEY = "sliding_window_length"
+JSON_CATEGORICAL_FEATURES_KEY = "categorical_features"
+JSON_RANDOM_STATE_KEY = "random_state"
+JSON_UPSAMPLE_KEY = "SVMSMOTE_upsampling"
+JSON_KFOLD_KEY = "k_fold"
+JSON_TREE_DEPTH_KEY = "decision_tree_depth"
+JSON_OUTPUT_PATH_KEY = "output_package_path"
 
-class json_manager:
+class JsonManager:
 
 	v_json_object = None
 
@@ -23,43 +23,43 @@ class json_manager:
 		self.v_json_object = json.load(open(json_file_path))
 
 	def get_feature_columns(self):
-		return self.v_json_object[JSON_FEATURE_COLUMNS]
+		return self.v_json_object[JSON_FEATURE_COLUMNS_KEY]
 
 	def get_label_columns(self):
-		return self.v_json_object[JSON_LABEL_COLUMNS]
+		return self.v_json_object[JSON_LABEL_COLUMNS_KEY]
 
 	def get_lag_features(self):
-		return list(self.v_json_object[JSON_LAG_FEATURES])
+		return list(self.v_json_object[JSON_LAG_FEATURES_KEY])
 
 	def get_csv_path(self):
-		return str(self.v_json_object[JSON_CSV_PATH])
+		return str(self.v_json_object[JSON_CSV_PATH_KEY])
 
 	def get_normalized_path(self):
-		return str(self.v_json_object[JSON_NORMALIZED_PATH])
+		return str(self.v_json_object[JSON_NORMALIZED_PATH_KEY])
 
 	def get_upsampled_path(self):
-		return str(self.v_json_object[JSON_UPSAMPLED_PATH])
+		return str(self.v_json_object[JSON_UPSAMPLED_PATH_KEY])
 
 	def get_sliding_window_length(self):
-		return int(self.v_json_object[JSON_SLIDING_WINDOW_LENGTH])
+		return int(self.v_json_object[JSON_SLIDING_WINDOW_LENGTH_KEY])
 
 	def get_categorical_features(self):
-		return list(self.v_json_object[JSON_CATEGORICAL_FEATURES])
+		return list(self.v_json_object[JSON_CATEGORICAL_FEATURES_KEY])
 
 	def get_hot_encoded_path(self):
-		return str(self.v_json_object[JSON_HOT_ENCODED_PATH])
+		return str(self.v_json_object[JSON_HOT_ENCODED_PATH_KEY])
 
 	def get_random_state(self):
-		return self.v_json_object[JSON_RANDOM_STATE]
+		return self.v_json_object[JSON_RANDOM_STATE_KEY]
 
 	def get_upsample_status(self):
-		return self.v_json_object[JSON_UPSAMPLE]
+		return self.v_json_object[JSON_UPSAMPLE_KEY]
 
 	def get_kfold(self):
-		return int(self.v_json_object[JSON_KFOLD])
+		return int(self.v_json_object[JSON_KFOLD_KEY])
 
 	def get_decision_tree_depth(self):
-		return int(self.v_json_object[JSON_TREE_DEPTH])
+		return int(self.v_json_object[JSON_TREE_DEPTH_KEY])
 
 	def get_output_path(self):
-		return str(self.v_json_object[JSON_OUTPUT_PATH])
+		return str(self.v_json_object[JSON_OUTPUT_PATH_KEY])
