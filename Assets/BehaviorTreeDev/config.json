@@ -1,10 +1,10 @@
 {
   "csv_folder_path": "/Users/adamwathieu/Documents/USC/Other/CLEANING/ThuTest/CSVs",
-  "normalized_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/normalized_data",
-  "hotEncoded_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/hotEncoded_data",
-  "upSampled_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/upSampled_data",
+  "normalized_path": "/Users/adamwathieu/Documents/USC/forkedRepo/test_data",
+  "hotEncoded_path": "/Users/adamwathieu/Documents/USC/forkedRepo/test_data",
+  "upSampled_path": "/Users/adamwathieu/Documents/USC/forkedRepo/test_data",
 
-  "outputPackage_path": "/Users/adamwathieu/Documents/USC/forkedRepo/BTFromSARDemostration/Assets/BehaviorTreeDev/OUTPUT",
+  "output_package_path": "/Users/adamwathieu/Documents/USC/forkedRepo/test_data",
 
   "feature_columns": {
     "tw": 27,
@@ -27,9 +27,8 @@
   "lag_features": ["isNewExercise", "exerciseSubmissionResult"],
   "sliding_window_length": 5,
   
-  "treeDepth": 5,
-  "pruningNum": 4,
+  "decision_tree_depth": 5,
   "k_fold": 5,
-  "upsampling": true,
+  "SVMSMOTE_upsampling": true,
   "random_state": 0
 }
