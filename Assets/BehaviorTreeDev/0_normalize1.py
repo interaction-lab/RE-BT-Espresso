@@ -4,7 +4,7 @@ import os
 import ntpath
 import csv
 import pandas as pd
-from json_manager import json_manager
+from json_manager import JsonManager
 import pipeline_constants as constants
 # from queue import Queue
 
@@ -22,15 +22,11 @@ def make_modified_filename(original_filename, extension):
 	return filename_root + extension + filename_ext
 
 # Description: updates the 2D queue all_lag_queues at index index with the value value
-# returns the first thing in the queue that isnt empty
-def update_lag_feature_queue(all_lag_queues, index, value):
-	current_queue = all_lag_queues[index]
-	current_queue.append(value)
-	current_queue.pop(0)
-	for element in current_queue:
-		if not(element == '' or element == None): 
-			return element
-	return ''
+# returns the first thing in the queue that isnt empty, else returns ''
+def update_lag_feature_queue(lag_feature_queue, value):
+	lag_feature_queue.append(value)
+	lag_feature_queue.pop(0)
+	return next((time_step for time_step in lag_feature_queue if time_step), '')
 
 def process_command_line_args():
 	ap = argparse.ArgumentParser()
@@ -40,14 +36,14 @@ def process_command_line_args():
 
 def main():
 	json_file_path = process_command_line_args()
-	JSON_MANAGER = json_manager(json_file_path)
+	json_manager = JsonManager(json_file_path)
 
-	csv_folder = JSON_MANAGER.get_csv_path()
-	normalized_folder = JSON_MANAGER.get_normalized_path()
-	feature_columns = JSON_MANAGER.get_feature_columns()
-	label_columns = JSON_MANAGER.get_label_columns()
-	lag_features = JSON_MANAGER.get_lag_features()
-	lag_window_length = JSON_MANAGER.get_sliding_window_length()
+	csv_folder = json_manager.get_csv_path()
+	normalized_folder = json_manager.get_normalized_path()
+	feature_columns = json_manager.get_feature_columns()
+	label_columns = json_manager.get_label_columns()
+	lag_features = json_manager.get_lag_features()
+	lag_window_length = json_manager.get_sliding_window_length()
 
 	destination_path = constants.add_folder_to_directory(constants.NORMALIZED_CSV_FOLDER_NAME, normalized_folder)
 
@@ -70,29 +66,26 @@ def main():
 			header_row.append(constants.LABEL_COLUMN_NAME)
 			csv_writer.writerow(header_row)
 
-			labelIndex = 0
+			label_indices = list(label_columns.values())
 			for timeseries_row in csv_reader:
-				is_a_label_row = False
-				for columnName, columnIndex in label_columns.items():
-					if timeseries_row[columnIndex] != "":
-						is_a_label_row = True
-						labelIndex = columnIndex
-						break
-				if is_a_label_row:
+				label_values = [timeseries_row[index] for index in label_indices]
+				label_value = next((label_value for label_value in label_values if label_value), None)
+
+				if label_value:
 					new_normalize_row = []
-					for columnName, columnIndex in feature_columns.items():
-						try: # checking to see if column is a lag feature. If it is, check lag_queue for anything
-							index = lag_features.index(columnName)
-							laggedFeature = update_lag_feature_queue(all_lag_queues, index, timeseries_row[columnIndex])
-							new_normalize_row.append(laggedFeature)
-						except ValueError: # column in feature columns is not a lag feature, add directly to new_normalize_row
-							new_normalize_row.append(timeseries_row[feature_columns[columnName]])
-					new_normalize_row.append(timeseries_row[labelIndex])
+					for column_name, column_index in feature_columns.items():
+						if column_name in lag_features:
+							index = lag_features.index(column_name)
+							lagged_feature = update_lag_feature_queue(all_lag_queues[index], timeseries_row[column_index])
+							new_normalize_row.append(lagged_feature)
+						else:
+							new_normalize_row.append(timeseries_row[feature_columns[column_name]])
+					new_normalize_row.append(label_value)
 					csv_writer.writerow(new_normalize_row)
 				else: 
-					for columnIndex, columnName in enumerate(lag_features):
-						value = timeseries_row[feature_columns[columnName]]
-						update_lag_feature_queue(all_lag_queues, columnIndex, value)
+					for column_index, column_name in enumerate(lag_features):
+						value = timeseries_row[feature_columns[column_name]]
+						update_lag_feature_queue(all_lag_queues[column_index], value)
 
 			current_csv_obj.close()
 			normalized_csv_obj.close()
