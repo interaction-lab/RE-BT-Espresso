@@ -107,12 +107,12 @@ def main():
 			current_csv_obj.close()
 			normalized_csv_obj.close()
 
-	combined_path = os.path.join(destination_path, constants.COMBINED_CSV_FILE_NAME)
+	combined_csv_file_path = os.path.join(destination_path, constants.COMBINED_CSV_FILENAME)
 
-	if os.path.exists(combined_path): 
-		os.remove(combined_path)
+	if os.path.exists(combined_csv_file_path): 
+		os.remove(combined_csv_file_path)
 	combined_csv = pd.concat([pd.read_csv(os.fsdecode(os.path.join(destination_path, f))) for f in os.listdir(destination_path)])
-	combined_csv.to_csv( os.fsdecode(combined_path), index = False, encoding='utf-8-sig')
+	combined_csv.to_csv( os.fsdecode(combined_csv_file_path), index = False, encoding = 'utf-8-sig')
 
 
 if __name__ == '__main__':
