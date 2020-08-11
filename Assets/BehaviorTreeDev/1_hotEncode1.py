@@ -8,8 +8,8 @@ import json
 import pipeline_constants as constants
 from json_manager import json_manager
 
+OUTPUT_LOG_FILE = "output.log"
 CATEGORICAL_NULL_VALUE = "No Entry"
-COLUMN_AXIS = 1
 
 def get_hot_encoded_header(hot_encoder, categorical_features):
 	header_list = []
@@ -53,7 +53,7 @@ def main():
 	hot_encoded_path = JSON_MANAGER.get_hot_encoded_path()
 
 	normalized_folder = os.fsdecode(os.path.join(JSON_MANAGER.get_normalized_path(), constants.NORMALIZED_CSV_FOLDER_NAME))
-	combined_csv_file = os.fsdecode(os.path.join(normalized_folder, constants.COMBINED_CSV_FILE_NAME))
+	combined_csv_file = os.fsdecode(os.path.join(normalized_folder, constants.COMBINED_CSV_FILENAME))
 
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
@@ -69,28 +69,27 @@ def main():
 	label_encoder, labels_column_array = encode_label_column(labels_data)
 
 	# add hot_encoded columns, than numerical columns, then encoded labels to one array
-	final_csv = np.concatenate((hot_encoded_array, features_data_array, labels_column_array), axis = COLUMN_AXIS)
+	final_csv = np.concatenate((hot_encoded_array, features_data_array, labels_column_array), axis = constants.COLUMN_AXIS)
+
+	hot_encoded_folder = constants.add_folder_to_directory(constants.HOT_ENCODED_CSV_FOLDER_NAME, hot_encoded_path)
+	hot_encoded_file_path = os.fsdecode(os.path.join(hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
+	if os.path.exists(hot_encoded_file_path): 
+		os.remove(hot_encoded_file_path)
 
 	# make_formatter_string(hot_encoded_header, numerical_columns, label_column)
-	
-	hot_encode_fmt = "%i," * len(hot_encoded_header) #format hot encoded column to ints
-	feature_data_fmt = "%1.3f," * len(features_data.columns)
+	hot_encode_fmt = "%i," * len(hot_encoded_header) # format hot encoded column to ints
+	feature_data_fmt = "%1.3f," * len(features_data.columns) # format numerical columns to ints
 	total_fmt = hot_encode_fmt + feature_data_fmt + "%i" # for label
 
-	final_header = ','.join(str(i) for i in hot_encoded_header + list(features_data.columns))
-	final_header += "," + constants.LABEL_COLUMN_NAME
+	final_header = ','.join(str(i) for i in (hot_encoded_header + list(features_data.columns)))
+	final_header += "," + constants.LABEL_COLUMN_NAME # for label
 
-	if not os.path.isdir(hot_encoded_path): os.mkdir(hot_encoded_path)
-	hot_encoded_path = os.fsdecode(os.path.join(hot_encoded_path, constants.HOT_ENCODED_CSV_FILE_NAME))
-	if os.path.exists(hot_encoded_path): os.remove(hot_encoded_path)
+	np.savetxt(hot_encoded_file_path, final_csv, fmt = total_fmt, header = final_header, delimiter = constants.CSV_DELIMITER, comments='')
 
-	np.savetxt(hot_encoded_path, final_csv, fmt = total_fmt, header = final_header, delimiter = constants.CSV_DELIMITER, comments='')
-
-	outputLogFile = "output.log"
-
-	f = open(outputLogFile, "w")
+	f = open(OUTPUT_LOG_FILE, "w")
 	f.write("{}\n".format(total_fmt))
-	f.write(str(list(label_encoder.inverse_transform(range(len(label_encoder.classes_))))))
+	le_name_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+	f.write(str(le_name_mapping))
 	f.close()
 
 if __name__ == '__main__':
