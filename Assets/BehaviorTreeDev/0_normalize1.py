@@ -14,16 +14,6 @@ CSV_NAME_EXTENSION = "_normalized"
 def is_file_CSV(filename):
 	return filename.endswith(CSV_EXTENSIONS)
 
-# Description: creates and adds folder called folder_name to directory: working_directory,
-#			   returns path to folder
-# ex: folder_name = "normalizedCSVs", working_directory = /path/to/directory
-# return: "/path/to/directory/normalizedCSVs"
-def add_folder_to_directory(folder_name, working_directory):
-	new_directory = os.fsdecode(os.path.join(working_directory, folder_name))
-	if not os.path.isdir(new_directory): 
-		os.makedirs(new_directory)
-	return new_directory
-
 # Description: takes parameter original_filename and adds extension to name
 # ex: original_filename = "helloWorld.txt", extension = "_addMe"
 # return: helloWorld_addMe.txt
@@ -59,7 +49,7 @@ def main():
 	lag_features = JSON_MANAGER.get_lag_features()
 	lag_window_length = JSON_MANAGER.get_sliding_window_length()
 
-	destination_path = add_folder_to_directory(constants.NORMALIZED_CSV_FOLDER_NAME, normalized_folder)
+	destination_path = constants.add_folder_to_directory(constants.NORMALIZED_CSV_FOLDER_NAME, normalized_folder)
 
 	for file in os.listdir(csv_folder):
 		complete_file_path = os.fsdecode(os.path.join(csv_folder, file))
@@ -89,16 +79,16 @@ def main():
 						labelIndex = columnIndex
 						break
 				if is_a_label_row:
-					newRow = []
+					new_normalize_row = []
 					for columnName, columnIndex in feature_columns.items():
 						try: # checking to see if column is a lag feature. If it is, check lag_queue for anything
 							index = lag_features.index(columnName)
 							laggedFeature = update_lag_feature_queue(all_lag_queues, index, timeseries_row[columnIndex])
-							newRow.append(laggedFeature)
-						except ValueError: # column in feature columns is not a lag feature, add directly to newRow
-							newRow.append(timeseries_row[feature_columns[columnName]])
-					newRow.append(timeseries_row[labelIndex])
-					csv_writer.writerow(newRow)
+							new_normalize_row.append(laggedFeature)
+						except ValueError: # column in feature columns is not a lag feature, add directly to new_normalize_row
+							new_normalize_row.append(timeseries_row[feature_columns[columnName]])
+					new_normalize_row.append(timeseries_row[labelIndex])
+					csv_writer.writerow(new_normalize_row)
 				else: 
 					for columnIndex, columnName in enumerate(lag_features):
 						value = timeseries_row[feature_columns[columnName]]
