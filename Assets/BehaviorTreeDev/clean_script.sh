@@ -29,3 +29,4 @@ echo 'Starting Behavior Tree Development...'
 sleep 1
 python3 3_behaviorTree.py -config config.json -outputLog $outputFile
 echo -ne 'Done. Check OUTPUT file.\n'
+

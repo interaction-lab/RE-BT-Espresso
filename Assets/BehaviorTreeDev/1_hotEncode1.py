@@ -21,13 +21,16 @@ def get_hot_encoded_header(hot_encoder, categorical_features):
 
 def hot_encode_features(features_data, categorical_features):
 	for categorical_feature in categorical_features:
-		features_data[categorical_feature].fillna(CATEGORICAL_NULL_VALUE, inplace = True)
+		features_data[categorical_feature].fillna(\
+			CATEGORICAL_NULL_VALUE, inplace = True)
 		features_data[categorical_feature] = features_data[categorical_feature].astype(str)
 
 	hot_encoder = OneHotEncoder()
 	hot_encoder.fit(features_data[categorical_features])
-	hot_encoded_array = hot_encoder.transform(features_data[categorical_features]).toarray()
-	hot_encoded_header = get_hot_encoded_header(hot_encoder, categorical_features)
+	hot_encoded_array = hot_encoder.transform(\
+		features_data[categorical_features]).toarray()
+	hot_encoded_header = get_hot_encoded_header(\
+		hot_encoder, categorical_features)
 	return hot_encoded_array, hot_encoded_header
 
 def encode_label_column(label_column):
@@ -40,7 +43,9 @@ def encode_label_column(label_column):
 
 def process_command_line_args():
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-config", "--configuration", required = True, help = "Path to the configuration file")
+	ap.add_argument("-config", "--configuration", \
+		required = True, \
+		help = "Path to the configuration file")
 	args = vars(ap.parse_args())
 	return args["configuration"]
 
@@ -51,27 +56,38 @@ def main():
 	categorical_features = json_manager.get_categorical_features()
 	hot_encoded_path = json_manager.get_hot_encoded_path()
 
-	normalized_folder = os.fsdecode(os.path.join(json_manager.get_normalized_path(), constants.NORMALIZED_CSV_FOLDER_NAME))
-	combined_csv_file = os.fsdecode(os.path.join(normalized_folder, constants.COMBINED_CSV_FILENAME))
+	normalized_folder = os.fsdecode(os.path.join(\
+		json_manager.get_normalized_path(), \
+		constants.NORMALIZED_CSV_FOLDER_NAME))
+	combined_csv_file = os.fsdecode(os.path.join(\
+		normalized_folder, \
+		constants.COMBINED_CSV_FILENAME))
 
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
 	# hot encoded features
-	hot_encoded_array, hot_encoded_header = hot_encode_features(features_data, categorical_features)
+	hot_encoded_array, hot_encoded_header = hot_encode_features(\
+		features_data, categorical_features)
 
 	# remove hot encoded features from features_data dataframe
 	features_data = features_data.drop(columns = categorical_features)
 	features_data_array = features_data.to_numpy()
 
 	# encode labels
-	labels_data = pd.read_csv(combined_csv_file, usecols = [constants.LABEL_COLUMN_NAME])
+	labels_data = pd.read_csv(combined_csv_file, \
+		usecols = [constants.LABEL_COLUMN_NAME])
 	label_encoder, labels_column_array = encode_label_column(labels_data)
 
 	# add hot_encoded columns, than numerical columns, then encoded labels to one array
-	final_csv = np.concatenate((hot_encoded_array, features_data_array, labels_column_array), axis = constants.COLUMN_AXIS)
+	final_csv = np.concatenate(\
+		(hot_encoded_array, features_data_array, labels_column_array), \
+		axis = constants.COLUMN_AXIS)
 
-	hot_encoded_folder = constants.add_folder_to_directory(constants.HOT_ENCODED_CSV_FOLDER_NAME, hot_encoded_path)
-	hot_encoded_file_path = os.fsdecode(os.path.join(hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
+	hot_encoded_folder = constants.add_folder_to_directory(\
+		constants.HOT_ENCODED_CSV_FOLDER_NAME, hot_encoded_path)
+	hot_encoded_file_path = os.fsdecode(os.path.join(\
+		hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
+	
 	if os.path.exists(hot_encoded_file_path): 
 		os.remove(hot_encoded_file_path)
 
@@ -83,7 +99,11 @@ def main():
 	final_header = ','.join(str(i) for i in (hot_encoded_header + list(features_data.columns)))
 	final_header += "," + constants.LABEL_COLUMN_NAME # for label
 
-	np.savetxt(hot_encoded_file_path, final_csv, fmt = total_fmt, header = final_header, delimiter = constants.CSV_DELIMITER, comments='')
+	np.savetxt(hot_encoded_file_path, final_csv, \
+		fmt = total_fmt, \
+		header = final_header, \
+		delimiter = constants.CSV_DELIMITER, \
+		comments='')
 
 	f = open(OUTPUT_LOG_FILE, "w")
 	f.write("{}\n".format(total_fmt))
