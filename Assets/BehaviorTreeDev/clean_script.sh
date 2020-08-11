@@ -24,8 +24,7 @@ echo -ne '    [upSampling....] [##############       ]   (66%)\r'
 python3 2_upsample1.py -config $config -outputLog $outputFile
 echo -ne '    [Cleaning..Done] [#####################]   (100%)\r'
 echo -ne '\n'
-echo 'Cleaning Process ended with no errors...'
-sleep 2
+echo 'Data Preparation Process Done'
 echo 'Starting Behavior Tree Development...'
 sleep 1
 python3 3_behaviorTree.py -config config.json -outputLog $outputFile
