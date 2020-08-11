@@ -11,142 +11,130 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import os
-import behaviorTree_Builder as btBuilder
 import json
+import behaviorTree_Builder as btBuilder
+from json_manager import json_manager
+import pipeline_constants as constants
 
-def plotDecisionTree(model, name, header):
-	dot_data = tree.export_graphviz(model, out_file = None, feature_names = header) 
+PRUNING_GRAPH_FILENAME = "accuracy_vs_alpha.png"
+
+def plot_decision_tree(decision_tree_model, filename, feature_header):
+	dot_data = tree.export_graphviz(decision_tree_model, out_file = None, feature_names = feature_header) 
 	graph = graphviz.Source(dot_data) 
-	graph.render(name)
+	graph.render(filename)
 
-#adds folder to workingDirectory using os module
-def addDirectory(workingDirectory, folderName):
-	newDirectory = os.fsdecode(os.path.join(workingDirectory, folderName))
-	if not os.path.isdir(newDirectory): os.mkdir(newDirectory)
-	return newDirectory
+def process_command_line_args():
+	ap = argparse.ArgumentParser()
+	ap.add_argument("-config", "--configuration", required = True, help = "Path to the configuration file")
+	ap.add_argument("-outputLog", "--outputLogFile", required = True, help = "Path to log file")
+	args = vars(ap.parse_args())
+	return args["configuration"], args["outputLogFile"]
 
+def main():
+	json_file_path, log_file_path = process_command_line_args()
+	JSON_MANAGER = json_manager(json_file_path)
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-config", "--configuration", required = True, help = "Path to the configuration file")
-ap.add_argument("-outputLog", "--outputLogFile", required = True, help = "Path to log file")
-args = vars(ap.parse_args())
-json_file_path = args["configuration"]
-log_file_path = args["outputLogFile"]
+	log_file = open(log_file_path, "r")
+	fmt = log_file.readline()
+	label_encoding = json.loads(log_file.readline())
+	log_file.close()
 
-log_file = open(log_file_path, "r")
-fmt = log_file.readline()
-labelEncoding = str(log_file.readline())
-# print("labelEncoding: {}".format(labelEncoding))
-labelEncoding = eval(labelEncoding)
-# print("testing: {}".format(testing))
+	supervised_learning_data = None
+	if JSON_MANAGER.get_upsample_status() == True:
+		upsampled_folder = os.fsdecode(os.path.join(JSON_MANAGER.get_upsampled_path(), constants.UPSAMPLED_CSV_FOLDER_NAME))
+		supervised_learning_data = os.fsdecode(os.path.join(upsampled_folder, constants.UPSAMPLED_CSV_FILENAME))
+	else:
+		hot_encoded_folder = os.fsdecode(os.path.join(JSON_MANAGER.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
+		supervised_learning_data = os.fsdecode(os.path.join(hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
 
-json_object = json.load(open(json_file_path))
-directory_in_str = json_object["upSampled_path"]
-directory = os.fsencode(directory_in_str)
-fileName = os.path.join(directory_in_str, "upSampled_combined.csv")
+	supervised_learning_dataframe = pd.read_csv(supervised_learning_data)
+	features_data = pd.read_csv(supervised_learning_data, usecols = list(supervised_learning_dataframe.columns)[:-1])
+	labels_data = pd.read_csv(supervised_learning_data, usecols = [list(supervised_learning_dataframe.columns)[-1]])
 
-upSampled_data = pd.read_csv(fileName)
-numCols = len(upSampled_data.columns)
-numCols_list = list(range(numCols))
+	kFold = JSON_MANAGER.get_kfold()
+	max_depth = JSON_MANAGER.get_decision_tree_depth()
+	output_folder = constants.add_folder_to_directory(constants.OUTPUT_FOLDER_NAME, JSON_MANAGER.get_output_path())
+	folder_name = "{}_kFold_{}_maxDepth".format(kFold, max_depth)
+	output_full_path = constants.add_folder_to_directory(folder_name, output_folder)
 
-features_data = pd.read_csv(fileName, usecols = numCols_list[:-1])
-labels_data = pd.read_csv(fileName, usecols = [numCols_list[-1]])
+	clfs = []
+	trains_accu = []
+	test_accu = []
+	# for j in range(4):
+	kf = KFold(shuffle = True, n_splits = kFold)
+	for train_index, test_index in kf.split(features_data):
+		X_train, X_test = features_data.iloc[train_index], features_data.iloc[test_index]
+		y_train, y_test = labels_data.iloc[train_index], labels_data.iloc[test_index]
 
-kFold = json_object["k_fold"]
-maxDepth = json_object["treeDepth"]
-outputPath = json_object["outputPackage_path"]
-outputPath = os.fsdecode(os.path.join(outputPath, "{}_kFold_{}_maxDepth".format(kFold, maxDepth)))
+		clf = tree.DecisionTreeClassifier(random_state = JSON_MANAGER.get_random_state(), max_depth = max_depth)
+		clf = clf.fit(X_train, y_train)
 
-pruningFigureName = "accuracy_vs_alpha.png"
+		trains_accu.append(clf.score(X_train, y_train))
+		test_accu.append(clf.score(X_test, y_test))
+		clfs.append(clf)
 
-clfs = []
-trains_accu = []
-test_accu = []
-# for j in range(4):
-kf = KFold(shuffle = True, n_splits = kFold)
-for train_index, test_index in kf.split(features_data):
-	X_train, X_test = features_data.iloc[train_index], features_data.iloc[test_index]
-	y_train, y_test = labels_data.iloc[train_index], labels_data.iloc[test_index]
+	report_file = "{}_kFold_{}_maxDepth.txt".format(kFold, max_depth)
+	dot_pdf_header = "{}_kFold_{}_maxDepth".format(kFold, max_depth)
 
-	clf = tree.DecisionTreeClassifier(random_state=0, max_depth = maxDepth)
-	clf = clf.fit(X_train, y_train)
+	report_file_path = os.path.join(output_full_path, report_file)
+	# if os.path.exists(decisionTreeFile_path): 
+	# 	os.remove(decisionTreeFile_path)
 
-	trains_accu.append(clf.score(X_train, y_train))
-	test_accu.append(clf.score(X_test, y_test))
-	clfs.append(clf)
+	f = open(report_file_path, "w")
+	f.write("Decision Tree with max_depth: {}, and kFold: {}\n".format(max_depth, kFold))
+	f.write("	Average train error with {} fold: {}\n".format(kFold, sum(trains_accu)/len(trains_accu)))
+	f.write("	Average test error with {} fold: {}\n".format(kFold, sum(test_accu)/len(test_accu)))
+	f.write("	Decision Tree (DOT format) saved to: {}\n".format(dot_pdf_header))
+	f.write("	Decision Tree (PDF format) saved to: {}.pdf\n".format(dot_pdf_header))
+	f.write("Check {} for appropriate pruning.\n\n\n".format(PRUNING_GRAPH_FILENAME))
 
-decisionTreeFile = "{}_kFold_{}_maxDepth.txt".format(kFold, maxDepth)
-decisionTreePDF = "{}_kFold_{}_maxDepth".format(kFold, maxDepth)
+	clf = tree.DecisionTreeClassifier(random_state = JSON_MANAGER.get_random_state(), max_depth = max_depth)
+	clf = clf.fit(features_data, labels_data)
+	dot_pdf_full_path = os.fsdecode(os.path.join(output_full_path, dot_pdf_header))
+	plot_decision_tree(clf, dot_pdf_full_path, features_data.columns)
 
-if not os.path.isdir(outputPath): os.mkdir(outputPath)
-decisionTreeFile_path = os.path.join(outputPath, decisionTreeFile)
-# if os.path.exists(decisionTreeFile_path): 
-# 	os.remove(decisionTreeFile_path)
-
-f = open(decisionTreeFile_path, "w")
-f.write("Decision Tree with max_depth: {}, and kFold: {}\n".format(maxDepth, kFold))
-f.write("	Average train error with {} fold: {}\n".format(kFold, sum(trains_accu)/len(trains_accu)))
-f.write("	Average test error with {} fold: {}\n".format(kFold, sum(test_accu)/len(test_accu)))
-f.write("	Decision Tree (DOT format) saved to: {}\n".format(decisionTreePDF))
-f.write("	Decision Tree (PDF format) saved to: {}.pdf\n".format(decisionTreePDF))
-f.write("Check {} for appropriate pruning.\n\n\n".format(pruningFigureName))
-
-
-clf = tree.DecisionTreeClassifier(random_state = 0, max_depth = maxDepth)
-clf = clf.fit(features_data, labels_data)
-PDF_path = os.fsdecode(os.path.join(outputPath, decisionTreePDF))
-plotDecisionTree(clf, PDF_path, features_data.columns)
+	prune_path = clf.cost_complexity_pruning_path(features_data, labels_data)
+	ccp_alphas, impurities = prune_path.ccp_alphas, prune_path.impurities
 
 
-clf = tree.DecisionTreeClassifier(max_depth = maxDepth, random_state = 0)
-path = clf.cost_complexity_pruning_path(features_data, labels_data)
-ccp_alphas, impurities = path.ccp_alphas, path.impurities
+	pruning_folder = constants.add_folder_to_directory(constants.PRUNE_FOLDER_NAME, output_full_path)
 
+	clfs = []
+	train_scores = []
+	for i, ccp_alpha in enumerate(ccp_alphas):
+		clf = tree.DecisionTreeClassifier(random_state = JSON_MANAGER.get_random_state(), max_depth = max_depth, ccp_alpha=ccp_alpha)
+		clf.fit(features_data, labels_data)
+		score = clf.score(features_data, labels_data)
 
-pruningPath = addDirectory(outputPath, "Pruning")
-clfs = []
-train_scores = []
-i = 0
-for ccp_alpha in ccp_alphas:
-	clf = tree.DecisionTreeClassifier(random_state=0, max_depth = maxDepth, ccp_alpha=ccp_alpha)
-	clf.fit(features_data, labels_data)
-	score = clf.score(features_data, labels_data)
+		clfs.append(clf)
+		train_scores.append(score)
 
-	clfs.append(clf)
-	train_scores.append(score)
+		newPrunePath = constants.add_folder_to_directory("Pruning_{}".format(i), pruning_folder)
+		decision_tree_path = os.fsdecode(os.path.join(newPrunePath, "{}_kFold_{}_maxDepth_{}_prune".format(kFold, max_depth, i)))
+		plot_decision_tree(clf, decision_tree_path, features_data.columns)
 
-	newPrunePath = addDirectory(pruningPath, "Pruning_{}".format(i))
-	decisionTreePath = os.fsdecode(os.path.join(newPrunePath, "{}_kFold_{}_maxDepth_{}_prune".format(kFold, maxDepth, i)))
-	plotDecisionTree(clf, decisionTreePath, features_data.columns)
+		decision_tree_obj = clf.tree_
+		behavior_tree_obj = btBuilder.BT_ESPRESSO_mod(decision_tree_obj, features_data.columns, label_encoding)
+		behaviot_tree_full_path = os.fsdecode(os.path.join(newPrunePath, constants.BEHAVIOR_TREE_XML_FILENAME))
+		btBuilder.saveTree(behavior_tree_obj, behaviot_tree_full_path)
 
-	decisionTree = clf.tree_
-	behaviorTree = btBuilder.BT_ESPRESSO_mod(decisionTree, features_data.columns, labelEncoding)
-	behaviorTreePath = os.fsdecode(os.path.join(newPrunePath, "behaviorTree.xml"))
-	btBuilder.saveTree(behaviorTree, behaviorTreePath)
+		f.write("prune: {} \n".format(i))
+		f.write("	ccp_alpha: {}, train score: {}\n".format(ccp_alpha, train_scores[i]))
+		f.write("	Decision Tree saved to {}\n".format(decision_tree_path))
+		f.write("	Behavior Tree saved to {}\n\n".format(behaviot_tree_full_path))
+		f.write("")
 
+	fig, ax = plt.subplots()
+	ax.set_xlabel("alpha")
+	ax.set_ylabel("accuracy")
+	ax.set_title("Accuracy vs alpha for training sets")
+	ax.plot(ccp_alphas, train_scores, marker='o', label="train", drawstyle="steps-post")
+	ax.legend()
+	graph_path = os.fsdecode(os.path.join(output_full_path, PRUNING_GRAPH_FILENAME))
+	plt.savefig(graph_path)
 
+	f.close()
 
-	f.write("prune: {} \n".format(i))
-	f.write("	ccp_alpha: {}, train score: {}\n".format(ccp_alpha, train_scores[i]))
-	f.write("	Decision Tree saved to {}\n".format(decisionTreePath))
-	f.write("	Behavior Tree saved to {}\n\n".format(behaviorTreePath))
-	f.write("")
+if __name__ == '__main__':
+	main()
 
-	i += 1
-
-
-
-
-fig, ax = plt.subplots()
-ax.set_xlabel("alpha")
-ax.set_ylabel("accuracy")
-ax.set_title("Accuracy vs alpha for training sets")
-ax.plot(ccp_alphas, train_scores, marker='o', label="train", drawstyle="steps-post")
-# ax.plot(ccp_alphas, test_scores, marker='o', label="test", drawstyle="steps-post")
-ax.legend()
-graph_path = os.fsdecode(os.path.join(outputPath, pruningFigureName))
-plt.savefig(graph_path)
-
-# print("Behavior Tree XML saved to: {}".format(os.fsdecode(os.path.abspath("test.xml"))))
-
-f.close()
