@@ -1,4 +1,5 @@
 from lxml import etree
+import numpy as np
 
 def is_leaf_node(dt, node_index):
 	return (dt.children_left[node_index] == -1 and dt.children_right[node_index] == -1)
@@ -71,16 +72,10 @@ def fallback_node(name, parent):
 	add_child(parent, fallback_node)
 	return fallback_node
 
-def findMaxIndex(numpyArray):
-	index = 0
-	maxNum = 0
-	incrementer = 0
-	for element in numpyArray:
-		if element > maxNum:
-			maxNum = element
-			index = incrementer
-		incrementer += 1
-	return index
+def find_max_index(numpy_1D_array):
+	max_element = np.amax(numpy_1D_array)
+	index = np.where(numpy_1D_array == max_element)
+	return index[0][0]
 
 def bt_espresso_mod(dt, feature_names, label_names):
 	rules = dt_to_rules(dt, feature_names)
@@ -88,9 +83,9 @@ def bt_espresso_mod(dt, feature_names, label_names):
 	root = fallback_node('root', main_behavior)
 
 	for rule in rules:
-		action = rule[0][0]
-		labelIndex = findMaxIndex(action)
-		label = label_names[labelIndex]
+		action = rule[0][0] # will return something like [0. 0. 128. 0. 3. 0.]
+		label_index = find_max_index(action) # would return 2
+		label = label_names[label_index]
 		newRule = sequence_node(str(label), root)
 		conditions = sequence_node("Conditions", newRule)
 		for decision in rule[1]:
