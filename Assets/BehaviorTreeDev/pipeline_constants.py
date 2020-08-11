@@ -9,6 +9,10 @@ HOT_ENCODED_CSV_FILENAME = "hotEncoded_combined.csv"
 UPSAMPLED_CSV_FOLDER_NAME = "upsampled_CSVs"
 UPSAMPLED_CSV_FILENAME = "upsampled_combined.csv"
 
+OUTPUT_FOLDER_NAME = "pipeline_output"
+PRUNE_FOLDER_NAME = "Pruning"
+BEHAVIOR_TREE_XML_FILENAME = "behaviorTree.xml"
+
 CSV_DELIMITER = ','
 CSV_QUOTECHAR = '"'
 
