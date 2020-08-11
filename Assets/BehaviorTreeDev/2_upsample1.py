@@ -6,7 +6,7 @@ import numpy as np
 import os
 import argparse
 import json
-from json_manager import json_manager
+from json_manager import JsonManager
 import pipeline_constants as constants
 
 def process_command_line_args():
@@ -18,18 +18,18 @@ def process_command_line_args():
 
 def main():
 	json_file_path, fmt_file_path = process_command_line_args()
-	JSON_MANAGER = json_manager(json_file_path)
+	json_manager = JsonManager(json_file_path)
 
-	if JSON_MANAGER.get_upsample_status() == True:
-		upsampled_path = JSON_MANAGER.get_upsampled_path()
-		hot_encoded_folder = os.fsdecode(os.path.join(JSON_MANAGER.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
+	if json_manager.get_upsample_status() == True:
+		upsampled_path = json_manager.get_upsampled_path()
+		hot_encoded_folder = os.fsdecode(os.path.join(json_manager.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
 		hot_encoded_file = os.fsdecode(os.path.join(hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
 
 		hotEncoded_data = pd.read_csv(hot_encoded_file)
 		features_data = pd.read_csv(hot_encoded_file, usecols = list(hotEncoded_data.columns)[:-1]) # everything except label
 		labels_data = pd.read_csv(hot_encoded_file, usecols = [list(hotEncoded_data.columns)[-1]]) # label
 
-		sm = SVMSMOTE(random_state = JSON_MANAGER.get_random_state())
+		sm = SVMSMOTE(random_state = json_manager.get_random_state())
 		X_res, y_res = sm.fit_resample(features_data, labels_data)
 		csv_ready = np.append(X_res, y_res, axis = constants.COLUMN_AXIS)
 
