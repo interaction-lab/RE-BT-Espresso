@@ -1,76 +1,75 @@
 from lxml import etree
 
-def isLeafNode(dt, nodeIndex):
-	return (dt.children_left[nodeIndex] == -1 and dt.children_right[nodeIndex] == -1)
+def is_leaf_node(dt, node_index):
+	return (dt.children_left[node_index] == -1 and dt.children_right[node_index] == -1)
 
-def build_rules_rec(dt, nodeIndex, currentBuildPath, totalArray, feature_names):
-	if isLeafNode(dt, nodeIndex):
-		totalArray.append([dt.value[nodeIndex], currentBuildPath])
-		# return totalArray
+def build_rules_rec(dt, node_index, current_build_path, total_rule_array, feature_names):
+	if is_leaf_node(dt, node_index):
+		total_rule_array.append([dt.value[node_index], current_build_path])
 	else:
-		trueRule = feature_names[dt.feature[nodeIndex]] + " <= " + str(dt.threshold[nodeIndex])
-		falseRule = feature_names[dt.feature[nodeIndex]] + " > " + str(dt.threshold[nodeIndex])	
+		trueRule = feature_names[dt.feature[node_index]] + " <= " + str(dt.threshold[node_index])
+		falseRule = feature_names[dt.feature[node_index]] + " > " + str(dt.threshold[node_index])	
 
-		leftPath = currentBuildPath.copy()
+		leftPath = current_build_path.copy()
 		leftPath.append([trueRule])
-		build_rules_rec(dt, dt.children_left[nodeIndex], leftPath, totalArray, feature_names)
+		build_rules_rec(dt, dt.children_left[node_index], leftPath, total_rule_array, feature_names)
 
-		rightPath = currentBuildPath.copy()
+		rightPath = current_build_path.copy()
 		rightPath.append([falseRule])
-		build_rules_rec(dt, dt.children_right[nodeIndex], rightPath, totalArray, feature_names)
+		build_rules_rec(dt, dt.children_right[node_index], rightPath, total_rule_array, feature_names)
 
-def DT_TO_RULES(dt, feature_names):
-	totalArray = []
-	build_rules_rec(dt, 0, [], totalArray, feature_names)
-	return totalArray
+def dt_to_rules(dt, feature_names):
+	total_rule_array = []
+	build_rules_rec(dt, 0, [], total_rule_array, feature_names)
+	return total_rule_array
 
-def addChild(parent, child):
+def add_child(parent, child):
 	parent.append(child)
 
-def createBehaviorTree():
+def create_behavior_tree():
 	frame = etree.Element("root")
 	tree = etree.ElementTree(frame)
 	frame.set('main_tree_to_execute', 'MainTree')
 
-	mainBehavior = etree.Element("BehaviorTree")
-	mainBehavior.set('ID', 'MainTree')
-	frame.append(mainBehavior)
+	main_behavior = etree.Element("BehaviorTree")
+	main_behavior.set('ID', 'MainTree')
+	frame.append(main_behavior)
 
-	return mainBehavior, tree
+	return main_behavior, tree
 
-def ParallelNode(name, parent):
-	parallelNode = etree.Element("Parallel")
-	parallelNode.set('name', name)
-	addChild(parent, parallelNode)
-	return parallelNode
+def parallel_node(name, parent):
+	parallel_node = etree.Element("Parallel")
+	parallel_node.set('name', name)
+	add_child(parent, parallel_node)
+	return parallel_node
 
-def SequenceNode(name, parent):
-	sequenceNode = etree.Element("Sequence")
-	sequenceNode.set('name', name)
-	addChild(parent, sequenceNode)
-	return sequenceNode
+def sequence_node(name, parent):
+	sequence_node = etree.Element("Sequence")
+	sequence_node.set('name', name)
+	add_child(parent, sequence_node)
+	return sequence_node
 
-def ConditionNode(name, parent):
-	condition = etree.Element("Condition")
-	condition.set('ID', name)
-	condition.set('name', name)
-	condition.set('message', "")
-	addChild(parent, condition)
-	return condition
+def condition_node(name, parent):
+	condition_node = etree.Element("Condition")
+	condition_node.set('ID', name)
+	condition_node.set('name', name)
+	condition_node.set('message', "")
+	add_child(parent, condition_node)
+	return condition_node
 
-def ActionNode(name, parent):
-	action = etree.Element("Action")
-	action.set('ID', name)
-	action.set('name', name)
-	action.set('message', "")
-	addChild(parent, action)
-	return action
+def action_node(name, parent):
+	action_node = etree.Element("Action")
+	action_node.set('ID', name)
+	action_node.set('name', name)
+	action_node.set('message', "")
+	add_child(parent, action_node)
+	return action_node
 
-def FallbackNode(name, parent):
-	fallbackNode = etree.Element("Fallback")
-	fallbackNode.set('name', name)
-	addChild(parent, fallbackNode)
-	return fallbackNode
+def fallback_node(name, parent):
+	fallback_node = etree.Element("Fallback")
+	fallback_node.set('name', name)
+	add_child(parent, fallback_node)
+	return fallback_node
 
 def findMaxIndex(numpyArray):
 	index = 0
@@ -83,29 +82,23 @@ def findMaxIndex(numpyArray):
 		incrementer += 1
 	return index
 
-def BT_ESPRESSO_mod(dt, feature_names, label_names):
-	rules = DT_TO_RULES(dt, feature_names)
-	# print("rules: {}".format(rules))
-	mainBehavior, tree = createBehaviorTree()
-	root = FallbackNode('root', mainBehavior)
+def bt_espresso_mod(dt, feature_names, label_names):
+	rules = dt_to_rules(dt, feature_names)
+	main_behavior, tree = create_behavior_tree()
+	root = fallback_node('root', main_behavior)
 
 	for rule in rules:
 		action = rule[0][0]
 		labelIndex = findMaxIndex(action)
 		label = label_names[labelIndex]
-		newRule = SequenceNode(str(label), root)
-		conditions = SequenceNode("Conditions", newRule)
+		newRule = sequence_node(str(label), root)
+		conditions = sequence_node("Conditions", newRule)
 		for decision in rule[1]:
-			# print("decision[0]: {}".format(decision[0]))
-			conditionPart = ConditionNode(decision[0], conditions)
-		# action = rule[0][0]
-		# labelIndex = findMaxIndex(action)
-		# print("action: {}".format(action))
-		# index = action.index(max(action))
-		addAction = ActionNode(str(label), newRule)
+			conditionPart = condition_node(decision[0], conditions)
+		add_action = action_node(str(label), newRule)
 
 	return tree
 
-def saveTree(tree, fileName):
-	with open (fileName, "wb") as file: tree.write(file, pretty_print = True)
+def save_tree(tree, filename):
+	with open (filename, "wb") as file: tree.write(file, pretty_print = True)
 
