@@ -80,13 +80,13 @@ def main():
 	# if os.path.exists(decisionTreeFile_path): 
 	# 	os.remove(decisionTreeFile_path)
 
-	f = open(report_file_path, "w")
-	f.write("Decision Tree with max_depth: {}, and kFold: {}\n".format(max_depth, kFold))
-	f.write("	Average train error with {} fold: {}\n".format(kFold, sum(trains_accu)/len(trains_accu)))
-	f.write("	Average test error with {} fold: {}\n".format(kFold, sum(test_accu)/len(test_accu)))
-	f.write("	Decision Tree (DOT format) saved to: {}\n".format(dot_pdf_header))
-	f.write("	Decision Tree (PDF format) saved to: {}.pdf\n".format(dot_pdf_header))
-	f.write("Check {} for appropriate pruning.\n\n\n".format(PRUNING_GRAPH_FILENAME))
+	report_file_obj = open(report_file_path, "w")
+	report_file_obj.write("Decision Tree with max_depth: {}, and kFold: {}\n".format(max_depth, kFold))
+	report_file_obj.write("	Average train error with {} fold: {}\n".format(kFold, sum(trains_accu)/len(trains_accu)))
+	report_file_obj.write("	Average test error with {} fold: {}\n".format(kFold, sum(test_accu)/len(test_accu)))
+	report_file_obj.write("	Decision Tree (DOT format) saved to: {}\n".format(dot_pdf_header))
+	report_file_obj.write("	Decision Tree (PDF format) saved to: {}.pdf\n".format(dot_pdf_header))
+	report_file_obj.write("Check {} for appropriate pruning.\n\n\n".format(PRUNING_GRAPH_FILENAME))
 
 	clf = tree.DecisionTreeClassifier(random_state = JSON_MANAGER.get_random_state(), max_depth = max_depth)
 	clf = clf.fit(features_data, labels_data)
@@ -114,15 +114,15 @@ def main():
 		plot_decision_tree(clf, decision_tree_path, features_data.columns)
 
 		decision_tree_obj = clf.tree_
-		behavior_tree_obj = btBuilder.BT_ESPRESSO_mod(decision_tree_obj, features_data.columns, label_encoding)
+		behavior_tree_obj = btBuilder.bt_espresso_mod(decision_tree_obj, features_data.columns, label_encoding)
 		behaviot_tree_full_path = os.fsdecode(os.path.join(newPrunePath, constants.BEHAVIOR_TREE_XML_FILENAME))
-		btBuilder.saveTree(behavior_tree_obj, behaviot_tree_full_path)
+		btBuilder.save_tree(behavior_tree_obj, behaviot_tree_full_path)
 
-		f.write("prune: {} \n".format(i))
-		f.write("	ccp_alpha: {}, train score: {}\n".format(ccp_alpha, train_scores[i]))
-		f.write("	Decision Tree saved to {}\n".format(decision_tree_path))
-		f.write("	Behavior Tree saved to {}\n\n".format(behaviot_tree_full_path))
-		f.write("")
+		report_file_obj.write("prune: {} \n".format(i))
+		report_file_obj.write("	ccp_alpha: {}, train score: {}\n".format(ccp_alpha, train_scores[i]))
+		report_file_obj.write("	Decision Tree saved to {}\n".format(decision_tree_path))
+		report_file_obj.write("	Behavior Tree saved to {}\n\n".format(behaviot_tree_full_path))
+		report_file_obj.write("")
 
 	fig, ax = plt.subplots()
 	ax.set_xlabel("alpha")
@@ -133,7 +133,7 @@ def main():
 	graph_path = os.fsdecode(os.path.join(output_full_path, PRUNING_GRAPH_FILENAME))
 	plt.savefig(graph_path)
 
-	f.close()
+	report_file_obj.close()
 
 if __name__ == '__main__':
 	main()
