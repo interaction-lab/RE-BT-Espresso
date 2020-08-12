@@ -1,4 +1,3 @@
-from collections import Counter
 import pandas as pd
 import argparse
 from imblearn.over_sampling import SVMSMOTE
