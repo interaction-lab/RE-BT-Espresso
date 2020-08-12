@@ -6,8 +6,6 @@
 
 config=$1
 outputFile="output.log"
-errorFile="error.log"
-fmt_format=""
 
 # outputPath=jq .outputPackage_path $config
 # parameter="$outputPath$outputFile"
