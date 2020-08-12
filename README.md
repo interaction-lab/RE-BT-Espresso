@@ -23,8 +23,8 @@ Dependencies (with pip installation commands)
 
 To run:
 
-- Edit `config.json`
-- Navigate to appropirate directory, and execute `./clean_script.sh config.json` in command line
+- Navigate to BehaviorTreeDev, and edit `config.json`
+- Execute `./clean_script.sh config.json` in command line
 
 ---
 
