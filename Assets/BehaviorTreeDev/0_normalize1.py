@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-import ntpath
 import csv
 import pandas as pd
 from json_manager import JsonManager
