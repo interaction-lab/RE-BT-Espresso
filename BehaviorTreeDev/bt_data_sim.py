@@ -3,17 +3,19 @@ import async_btree as bt
 import contextvars
 import csv
 import random
+import copy
 
-world_state = contextvars.ContextVar("world_state", default={"Time":0, "CurExercise": 0, "KC": 0, "SnapTo": None, "ExerciseSubmissionResult": None, "RobotPhysicalAction": None, "RobotDialogue": None})
+world_state = contextvars.ContextVar("world_state", default={"Time":0, "CurExercise": 0, "KC": 0, "SnapTo": None, "ExerciseSubmissionResult": None,\
+    "RobotPhysicalAction": None, "RobotDialogue": None, "SimComplete": False})
 time_step = contextvars.ContextVar("time_step", default=0.02)
 interaction_length = contextvars.ContextVar("interaction_length", default=10)
 filename = contextvars.ContextVar("filename", default="simulated_data.csv")
 sleep_time_scale = contextvars.ContextVar("sleep_time_scale", default=100)
 
-KC_upper_bound = 10 #TODO: I made this up
+KC_upper_bound = 10 #for generating KC values
 
 #probability submitted exercise is correct
-def try_submit_exercise():  
+def try_submit_exercise():
     p_correct = world_state.get()["KC"]/KC_upper_bound
     return p_correct
 
@@ -29,12 +31,13 @@ def choose_snap_action():
 
 async def main():
     print("start")
-    r = Robot()
-    h = Human()
+    m = Master()
+    r = Robot(m)
+    h = Human(m)
     d = DataSimulator()
     async with curio.TaskGroup(wait=all) as g:
         await g.spawn(d.run_simulation)
-        await g.spawn(r.b_tree)
+        await g.spawn(r.listen)
         await g.spawn(h.b_tree)
     print(world_state.get())
     print("done")
@@ -44,10 +47,24 @@ def clear_world_state():
     world_state.get()["RobotAction"] = ""
     world_state.get()["KC"] = ""
 
+class Master():
+    def __init__(self):
+        self.msg = dict([("result", None), ("action", None)])
+
+    def push_message(self, action, result):
+        self.msg["action"] = action
+        self.msg["result"] = result
+
+    def pull_message(self):
+        temp = copy.deepcopy(self.msg)
+        self.msg["action"] = None
+        self.msg["result"] = None
+        return temp
 
 class Human():    
-    def __init__(self):
+    def __init__(self, master):
         self.define_tree()
+        self.master = master
 
     async def decide_submit_answer(self):
         p_choose_submit_answer = choose_submit_exercise()
@@ -67,6 +84,7 @@ class Human():
         world_state.get()["ExerciseSubmissionResult"] = result  #True=correct
         await curio.sleep(1/sleep_time_scale.get())
         world_state.get()["ExerciseSubmissionResult"] = None
+        self.master.push_message("submit", result)
         if(result):
             self.next_exercise()
         return result
@@ -114,51 +132,121 @@ class Human():
 
         #all exercises
         self.sq_all_exercises = bt.sequence(children = [
-            #TODO: add more exercises?
+            #TODO: add more exercises? temp placeholders
             self.r_exercise_1,
-            self.r_exercise_2
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1,
+            self.r_exercise_1
         ])
 
         self.b_tree = self.sq_all_exercises
         print(bt.stringify_analyze(bt.analyze(self.b_tree)))
 
 class Robot():
-    def __init__(self):
-        self.define_tree()
+    def __init__(self, master):
+        self.master = master
 
-    async def say_dialogue(self):
-        if (world_state.get()["ExerciseSubmissionResult"]): #correct submission
-            world_state.get()["RobotDialogue"] = "Well done!"
-        elif (world_state.get()["ExerciseSubmissionResult"] == False):
-            world_state.get()["RobotDialogue"] = "Say hint"
-        await curio.sleep(time_step.get()/sleep_time_scale.get())
-        world_state.get()["RobotDialogue"] = None
-        return False
+    #probability that the robot will react
+    def react_success(self): 
+        p_success = random.random()
+        return p_success
 
-    async def do_physical_action(self):
-        if (world_state.get()["ExerciseSubmissionResult"]): #correct submission
-            world_state.get()["RobotPhysicalAction"] = "Happy"
-        elif (world_state.get()["ExerciseSubmissionResult"] == False):
-            world_state.get()["RobotPhysicalAction"] = "Sad"
-        await curio.sleep(time_step.get()/sleep_time_scale.get())
-        world_state.get()["RobotPhysicalAction"] = None
-        return False
+    async def listen(self):
+        while(world_state.get()["SimComplete"]==False):
+            msg = self.master.pull_message()
+            self.react(msg)
+            await curio.sleep(0.01/sleep_time_scale.get())
+        return None
 
-    def define_tree(self):
-        self.a_say_dialogue = bt.action(target=self.say_dialogue)
-        self.a_do_action = bt.action(target=self.do_physical_action)
+    def react(self, msg):
+        if(msg["action"]!=None):
+            action_success = self.react_success() < random.random()
+            dialogue_success = self.react_success() < random.random()
+            if(action_success):
+                if(msg["result"]==True):
+                    self.do_pos_action()
+                else:
+                    self.do_neg_action()
+            if(dialogue_success):
+                if(msg["result"]==True):
+                    self.do_pos_dialogue()
+                else:
+                    self.do_neg_dialogue()
+        else:
+            world_state.get()["RobotPhysicalAction"] = None
+            world_state.get()["RobotDialogue"] = None
 
-        self.sl_react_to_world = bt.selector(children=[
-            self.a_say_dialogue,
-            self.a_do_action,
-        ])
+    def do_pos_action(self):
+        world_state.get()["RobotPhysicalAction"] = "Action1"
 
-        self.r_react_to_world = bt.retry(child=self.sl_react_to_world, max_retry=500)
+    def do_pos_dialogue(self):
+        world_state.get()["RobotDialogue"] = "Dialogue1"
 
-        self.b_tree = self.r_react_to_world
+    def do_neg_action(self):
+        world_state.get()["RobotPhysicalAction"] = "Action2"
 
-        print(bt.stringify_analyze(bt.analyze(self.b_tree)))
-
+    def do_neg_dialogue(self):
+        world_state.get()["RobotDialogue"] = "Dialogue2"
 
 
 class DataSimulator:
@@ -176,11 +264,12 @@ class DataSimulator:
             
     async def update_state(self):
         self.update_time()
-        world_state.get()["KC"] = random.randint(0,KC_upper_bound) #random KC
+        world_state.get()["KC"] = random.randint(0, KC_upper_bound) #random KC
         await curio.sleep(time_step.get()/sleep_time_scale.get())
     
     async def run_simulation(self):
         print("Running sim")
+        world_state.get()["SimComplete"] = False
         with open(filename.get(), mode='w') as csv_file:
             csv_writer = csv.DictWriter(csv_file,\
                 fieldnames=world_state.get().keys())
@@ -189,6 +278,7 @@ class DataSimulator:
                 csv_writer.writerow(world_state.get())
                 await self.update_state()
                 #clear_world_state()
+        world_state.get()["SimComplete"] = True
         return None
         
 
