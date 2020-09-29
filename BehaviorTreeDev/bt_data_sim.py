@@ -12,11 +12,12 @@ interaction_length = contextvars.ContextVar("interaction_length", default=10)
 filename = contextvars.ContextVar("filename", default="simulated_data.csv")
 sleep_time_scale = contextvars.ContextVar("sleep_time_scale", default=100)
 
-KC_upper_bound = 10 #for generating KC values
+NOISE_LVL = 0.5 #0 to 1, robot reactions occur perfectly when NOISE_LVL=1
+KC_UPPER_BOUND = 10 #for generating KC values
 
 #probability submitted exercise is correct
 def try_submit_exercise():
-    p_correct = world_state.get()["KC"]/KC_upper_bound
+    p_correct = world_state.get()["KC"]/KC_UPPER_BOUND
     return p_correct
 
 #probability person chooses to submit the exercise
@@ -208,7 +209,7 @@ class Robot():
 
     #probability that the robot will react
     def react_success(self): 
-        p_success = random.random()
+        p_success = max(NOISE_LVL, random.random())
         return p_success
 
     async def listen(self):
@@ -220,8 +221,8 @@ class Robot():
 
     def react(self, msg):
         if(msg["action"]!=None):
-            action_success = self.react_success() < random.random()
-            dialogue_success = self.react_success() < random.random()
+            action_success = random.random() < self.react_success()
+            dialogue_success = random.random() < self.react_success()
             if(action_success):
                 if(msg["result"]==True):
                     self.do_pos_action()
@@ -264,7 +265,7 @@ class DataSimulator:
             
     async def update_state(self):
         self.update_time()
-        world_state.get()["KC"] = random.randint(0, KC_upper_bound) #random KC
+        world_state.get()["KC"] = random.randint(0, KC_UPPER_BOUND) #random KC
         await curio.sleep(time_step.get()/sleep_time_scale.get())
     
     async def run_simulation(self):
@@ -281,7 +282,6 @@ class DataSimulator:
         world_state.get()["SimComplete"] = True
         return None
         
-
 if __name__ == '__main__':
     curio.run(main, with_monitor=False)
    
