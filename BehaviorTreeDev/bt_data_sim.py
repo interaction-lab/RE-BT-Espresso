@@ -70,13 +70,13 @@ class Human():
     async def decide_submit_answer(self):
         p_choose_submit_answer = choose_submit_exercise()
         result = random.random() < p_choose_submit_answer
-        await curio.sleep(1/sleep_time_scale.get())
+        await curio.sleep(6/sleep_time_scale.get())
         return result
     
     async def decide_snap_action(self):
         p_choose_snap_action = choose_snap_action()
         result = random.random() < p_choose_snap_action
-        await curio.sleep(1/sleep_time_scale.get())
+        await curio.sleep(6/sleep_time_scale.get())
         return result
 
     async def submit_answer(self):
@@ -170,34 +170,6 @@ class Human():
             self.r_exercise_1,
             self.r_exercise_1,
             self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1
         ])
 
         self.b_tree = self.sq_all_exercises
@@ -234,8 +206,7 @@ class Robot():
                 else:
                     self.do_neg_dialogue()
         else:
-            world_state.get()["RobotPhysicalAction"] = None
-            world_state.get()["RobotDialogue"] = None
+            self.clear_reaction()
 
     def do_pos_action(self):
         world_state.get()["RobotPhysicalAction"] = "Action1"
@@ -248,6 +219,10 @@ class Robot():
 
     def do_neg_dialogue(self):
         world_state.get()["RobotDialogue"] = "Dialogue2"
+
+    def clear_reaction(self):
+        world_state.get()["RobotPhysicalAction"] = None
+        world_state.get()["RobotDialogue"] = None
 
 
 class DataSimulator:
