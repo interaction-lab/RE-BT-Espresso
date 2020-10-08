@@ -8,7 +8,7 @@ import copy
 world_state = contextvars.ContextVar("world_state", default={"Time":0, "CurExercise": 0, "KC": 0, "SnapTo": None, "ExerciseSubmissionResult": None,\
     "RobotPhysicalAction": None, "RobotDialogue": None, "SimComplete": False})
 time_step = contextvars.ContextVar("time_step", default=0.02)
-interaction_length = contextvars.ContextVar("interaction_length", default=10)
+interaction_length = contextvars.ContextVar("interaction_length", default=1200)
 filename = contextvars.ContextVar("filename", default="simulated_data.csv")
 sleep_time_scale = contextvars.ContextVar("sleep_time_scale", default=100)
 
@@ -67,16 +67,21 @@ class Human():
         self.define_tree()
         self.master = master
 
+    async def check_sim_not_complete(self):
+        if(world_state.get()["SimComplete"]==False):
+            return True
+        return False
+
     async def decide_submit_answer(self):
         p_choose_submit_answer = choose_submit_exercise()
         result = random.random() < p_choose_submit_answer
-        await curio.sleep(6/sleep_time_scale.get())
+        await curio.sleep(random.randint(1, 60)/sleep_time_scale.get())
         return result
     
     async def decide_snap_action(self):
         p_choose_snap_action = choose_snap_action()
         result = random.random() < p_choose_snap_action
-        await curio.sleep(6/sleep_time_scale.get())
+        await curio.sleep(random.randint(1, 4)/sleep_time_scale.get())
         return result
 
     async def submit_answer(self):
@@ -105,6 +110,7 @@ class Human():
         #snapping blocks
         self.a_decide_snap_action = bt.action(target=self.decide_snap_action)
         self.a_snap_action = bt.action(target=self.snap_action)
+        self.a_check_sim_not_complete = bt.action(target=self.check_sim_not_complete)
         self.sq_snap_action = bt.sequence(children=[
             self.a_decide_snap_action,
             self.a_snap_action
@@ -135,44 +141,12 @@ class Human():
         self.sq_all_exercises = bt.sequence(children = [
             #TODO: add more exercises? temp placeholders
             self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
-            self.r_exercise_1,
+            self.a_check_sim_not_complete
         ])
 
-        self.b_tree = self.sq_all_exercises
+        self.r_all_exercises = bt.retry_until_failed(child=self.sq_all_exercises)
+
+        self.b_tree = self.r_all_exercises
         print(bt.stringify_analyze(bt.analyze(self.b_tree)))
 
 class Robot():
