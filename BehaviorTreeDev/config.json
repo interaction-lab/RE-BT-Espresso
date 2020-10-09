@@ -9,10 +9,12 @@
   "feature_columns": {
     "feature_name0": 0,
     "feature_name1": 1,
-    "feature_name2": 3
+    "feature_name2": 3,
+    "feature_name4": 6,
   },
 
   "categorical_features": ["feature_name0", "feature_name2"],
+  "true_false_features": ["feature_name4"],
 
   "label_columns": {
     "label_column0": 4,
