@@ -1,6 +1,11 @@
 from lxml import etree
 import numpy as np
 
+import py_trees.decorators
+import py_trees.display
+
+import pipeline_constants as constants
+
 def is_leaf_node(dt, node_index):
 	return (dt.children_left[node_index] == -1 and dt.children_right[node_index] == -1)
 
@@ -22,6 +27,8 @@ def build_rules_rec(dt, node_index, current_build_path, total_rule_array, featur
 def dt_to_rules(dt, feature_names):
 	total_rule_array = []
 	build_rules_rec(dt, 0, [], total_rule_array, feature_names)
+	for i in total_rule_array:
+		print("{}".format(i))
 	return total_rule_array
 
 def add_child(parent, child):
@@ -79,21 +86,37 @@ def find_max_index(numpy_1D_array):
 
 def bt_espresso_mod(dt, feature_names, label_names):
 	rules = dt_to_rules(dt, feature_names)
-	main_behavior, tree = create_behavior_tree()
-	root = fallback_node('root', main_behavior)
+	# main_behavior, tree = create_behavior_tree()
+	# root = fallback_node('root', main_behavior)
+	root = py_trees.composites.Parallel(name = "Root")
 
 	for rule in rules:
 		action = rule[0][0] # will return something like [0. 0. 128. 0. 3. 0.]
 		label_index = find_max_index(action) # would return 2
-		label = label_names[label_index]
-		newRule = sequence_node(str(label), root)
-		conditions = sequence_node("Conditions", newRule)
-		for decision in rule[1]:
-			conditionPart = condition_node(decision[0], conditions)
-		add_action = action_node(str(label), newRule)
+		label = str(label_names[label_index])
 
-	return tree
+		new_rule = py_trees.composites.Sequence(name = label)
+		conditions = py_trees.composites.Sequence(name = "Conditions")
+		# newRule = sequence_node(str(label), root)
+		# conditions = sequence_node("Conditions", newRule)
+		for decision in rule[1]:
+			condition = py_trees.behaviours.Success(name = decision[0])
+			conditions.add_child(condition)
+			# conditionPart = condition_node(decision[0], conditions)
+		new_rule.add_child(conditions)
+
+		action_node = py_trees.behaviours.Success(name = label)
+
+		# add_action = action_node(str(label), newRule)
+
+		new_rule.add_child(action_node)
+
+		root.add_child(new_rule)
+
+	# return tree
+	return root
 
 def save_tree(tree, filename):
-	with open (filename, "wb") as file: tree.write(file, pretty_print = True)
+	py_trees.display.render_dot_tree(tree, name = constants.BEHAVIOR_TREE_XML_FILENAME, target_directory = filename)
+	# with open (filename, "wb") as file: tree.write(file, pretty_print = True)
 
