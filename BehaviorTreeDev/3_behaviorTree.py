@@ -141,7 +141,8 @@ def main():
 		behaviot_tree_full_path = os.fsdecode(os.path.join(\
 			newPrunePath, constants.BEHAVIOR_TREE_XML_FILENAME))
 
-		btBuilder.save_tree(behavior_tree_obj, behaviot_tree_full_path)
+		# btBuilder.save_tree(behavior_tree_obj, behaviot_tree_full_path)
+		btBuilder.save_tree(behavior_tree_obj, newPrunePath)
 
 		report_file_obj.write("prune: {} \n".format(i))
 		report_file_obj.write("	ccp_alpha: {}, train score: {}\n".format(ccp_alpha, train_scores[i]))
