@@ -14,7 +14,6 @@ Encouragement = [
 				"You can do this!", 
 				"Go ahead!", 
 				"Don't give up!", 
-				"Keey trying!",
 				"Keep trying!"
 				]
 
