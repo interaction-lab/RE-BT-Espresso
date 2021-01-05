@@ -24,11 +24,11 @@ def main():
             fieldnames=pt.blackboard.Blackboard.keys())
         csv_writer.writeheader()
 
-        for t in range(5):
+        for t in range(25):
             csv_writer.writerow(pt.blackboard.Blackboard.storage)
-            r.b_tree.tick()
             s.update()
             w.update()
+            r.b_tree.tick()
             print(w.blackboard)
 
     print("done")
@@ -50,13 +50,16 @@ class World():
         self.blackboard.CurExercise = 0
         self.blackboard.ExerciseSubmissionResult = None
         self.blackboard.IsNewExercise = False
+        self.prevSubmission = None #track submission from past turn
 
     def update(self):
+        self.prevSubmission = self.blackboard.ExerciseSubmissionResult
         if self.submission_exists():
             self.evaluate_submission()
         else:
             self.clear_submission_result()
         self.try_next_exercise()
+        self.update_time()
 
     def submission_exists(self):
         return self.blackboard.Submit
@@ -71,11 +74,14 @@ class World():
         self.blackboard.ExerciseSubmissionResult = None
 
     def try_next_exercise(self):
-        if self.blackboard.ExerciseSubmissionResult:
+        if self.prevSubmission:
             self.blackboard.IsNewExercise = True
             self.blackboard.CurExercise += 1
         else:
             self.blackboard.IsNewExercise = False
+
+    def update_time(self):
+        self.blackboard.Time += random.randint(0, 10)
 
 
 class Robot():
@@ -102,11 +108,13 @@ class Robot():
         ])
 
         self.sq_correct_submission_dialogue = pt.composites.Sequence(name="sq_correct_submission_dialogue", children= [
+            Check_ExerciseSubmissionExists(),
             Check_ExerciseSubmissionResult(),
             Correct_submission_dialogue()
         ])
 
         self.sq_incorrect_submission_dialogue = pt.composites.Sequence(name="sq_incorrect_submission_dialogue", children= [
+            Check_ExerciseSubmissionExists(),
             pt.decorators.Inverter(name="invert_ExerciseSubmissionResult", child=Check_ExerciseSubmissionResult()),
             Incorrect_submission_dialogue()
         ])
@@ -119,8 +127,8 @@ class Robot():
 
         self.root = pt.composites.Parallel(name="root", policy=pt.common.ParallelPolicy.SuccessOnOne(), children= [
             Do_nothing(),
-            self.sq_new_exercise_dialogue,
             self.sq_correct_submission_dialogue,
+            self.sq_new_exercise_dialogue,
             self.sq_incorrect_submission_dialogue,
             self.sq_hint_dialogue
         ])

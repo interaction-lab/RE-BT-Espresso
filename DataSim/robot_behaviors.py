@@ -14,12 +14,24 @@ class Check_IsNewExercise(pt.behaviour.Behaviour):
 
 class Check_ExerciseSubmissionResult(pt.behaviour.Behaviour):
     def __init__(self):
-        super().__init__(name="new_exercise_dialogue")
+        super().__init__(name="check_exercise_submission_result")
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="ExerciseSubmissionResult", access=pt.common.Access.READ)
 
     def update(self):
         if self.blackboard.ExerciseSubmissionResult:
+            return pt.common.Status.SUCCESS
+        else:
+            return pt.common.Status.FAILURE
+
+class Check_ExerciseSubmissionExists(pt.behaviour.Behaviour):
+    def __init__(self):
+        super().__init__(name="check_excercise_submission_exists")
+        self.blackboard = self.attach_blackboard_client(name=self.name)
+        self.blackboard.register_key(key="Submit", access=pt.common.Access.READ)
+
+    def update(self):
+        if self.blackboard.Submit:
             return pt.common.Status.SUCCESS
         else:
             return pt.common.Status.FAILURE
@@ -84,5 +96,5 @@ class Do_nothing(pt.behaviour.Behaviour):
         self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
 
     def update(self):
-        self.blackboard.robot_dialogue = "Nothing"
+        self.blackboard.robot_dialogue = None
         return pt.common.Status.SUCCESS
