@@ -7,19 +7,20 @@
   "output_package_path": ".",
 
   "feature_columns": {
-    "/ExerciseSubmissionResult": 1,
-    "/Time": 0,
-    "/CurExercise": 2,
-    "/KC": 3,
-    "/MoveBlock" : 4,
-    "/Submit" : 6
+    "/ExerciseSubmissionResult": 0,
+    "/Time": 1,
+    "/IsNewExercise" : 2,
+    "/CurExercise": 3,
+    "/KC": 4,
+    "/MoveBlock" : 5,
+    "/Submit" : 7
   },
 
-  "categorical_features": ["/CurExercise", "feature_name2"],
+  "categorical_features": ["/CurExercise"],
   "true_false_features": ["/ExerciseSubmissionResult", "/IsNewExercise", "/MoveBlock"],
 
   "label_columns": {
-    "/robot_dialogue": 5
+    "/robot_dialogue": 6
   },
 
   "lag_features": [],
