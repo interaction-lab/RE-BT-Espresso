@@ -12,6 +12,7 @@ DataSim/simulated_data.csv
 *normalized_CSVs*
 *output.log
 *hotEncoded_CSVs/
+*upsampled_CSVs/
 
 # Visual Studio cache directory
 .vs/

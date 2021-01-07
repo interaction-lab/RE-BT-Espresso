@@ -8,19 +8,19 @@
 
   "feature_columns": {
     "/ExerciseSubmissionResult": 0,
-    "/Time": 1,
+    "/Time": 3,
     "/IsNewExercise" : 2,
-    "/CurExercise": 3,
-    "/KC": 4,
+    "/CurExercise": 1,
+    "/KC": 7,
     "/MoveBlock" : 5,
-    "/Submit" : 7
+    "/Submit" : 6
   },
 
   "categorical_features": ["/CurExercise"],
   "true_false_features": ["/ExerciseSubmissionResult", "/IsNewExercise", "/MoveBlock"],
 
   "label_columns": {
-    "/robot_dialogue": 6
+    "/robot_dialogue": 4
   },
 
   "lag_features": [],
