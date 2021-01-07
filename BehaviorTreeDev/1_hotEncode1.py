@@ -67,9 +67,11 @@ def main():
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
 	for binary_variable in binary_features:
-		features_data[binary_variable] = features_data[binary_variable].astype(int)
-	binary_columns = features_data[binary_features]
-	binary_columns_array = binary_columns.to_numpy()
+		features_data[binary_variable] = features_data[binary_variable].fillna(value=-1)
+		features_data[binary_variable] = features_data[binary_variable] * 1
+	true_false_columns = features_data[binary_features]
+	true_false_columns_array = true_false_columns.to_numpy()
+
 		# true_false_features(features_data, true_false_features)
 
 	# hot encoded features
@@ -106,6 +108,7 @@ def main():
 
 	final_header = ','.join(str(i) for i in (hot_encoded_header + binary_features + list(features_data.columns)))
 	final_header += "," + constants.LABEL_COLUMN_NAME # for label
+
 
 	np.savetxt(hot_encoded_file_path, final_csv, \
 		fmt = total_fmt, \

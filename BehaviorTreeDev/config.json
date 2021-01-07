@@ -1,28 +1,32 @@
 {
-  "csv_folder_path": "/complete/path/to/CSVs",
-  "normalized_path": "/save/normalization/process/to",
-  "hotEncoded_path": "/save/hotEncoding/process/to",
-  "upSampled_path": "/save/upsampling/process/to",
+  "csv_folder_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
+  "normalized_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
+  "hotEncoded_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
+  "upSampled_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
 
-  "output_package_path": "/save/ouput/contents/to",
+  "output_package_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
 
   "feature_columns": {
-    "feature_name0": 0,
-    "feature_name1": 1,
-    "feature_name2": 3,
-    "feature_name4": 6,
+    "/ExerciseSubmissionResult": 0,
+    "/Time": 3,
+    "/IsNewExercise" : 2,
+    "/CurExercise": 1,
+    "/KC": 7,
+    "/MoveBlock" : 5,
+    "/Submit" : 6
   },
 
-  "categorical_features": ["feature_name0", "feature_name2"],
-  "binary_features": ["feature_name4"],
+
+  "categorical_features": ["/CurExercise"],
+  "true_false_features": ["/ExerciseSubmissionResult", "/IsNewExercise", "/MoveBlock"],
+
 
   "label_columns": {
-    "label_column0": 4,
-    "label_column1": 5
+    "/robot_dialogue": 4
   },
 
-  "lag_features": ["feature_name2"],
-  "sliding_window_length": 5,
+  "lag_features": [],
+  "sliding_window_length": 1,
   
   "decision_tree_depth": 5,
   "k_fold": 5,

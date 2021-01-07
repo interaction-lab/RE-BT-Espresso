@@ -5,7 +5,15 @@
 [Bb]uilds/
 Assets/AssetStoreTools*
 Assets/CSVs*
-Assets/CleaningScripts/__pycache__*
+
+# Toms fixes
+__pycache__*
+DataSim/simulated_data.csv
+*normalized_CSVs*
+*output.log
+*hotEncoded_CSVs/
+*upsampled_CSVs/
+*pipeline_output/
 
 # Visual Studio cache directory
 .vs/
