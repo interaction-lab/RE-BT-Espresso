@@ -18,7 +18,7 @@
 
 
   "categorical_features": ["/CurExercise"],
-  "true_false_features": ["/ExerciseSubmissionResult", "/IsNewExercise", "/MoveBlock"],
+  "binary_features": ["/ExerciseSubmissionResult", "/IsNewExercise", "/MoveBlock"],
 
 
   "label_columns": {

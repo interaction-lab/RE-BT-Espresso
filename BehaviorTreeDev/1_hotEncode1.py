@@ -69,8 +69,7 @@ def main():
 	for binary_variable in binary_features:
 		features_data[binary_variable] = features_data[binary_variable].fillna(value=-1)
 		features_data[binary_variable] = features_data[binary_variable] * 1
-	true_false_columns = features_data[binary_features]
-	true_false_columns_array = true_false_columns.to_numpy()
+	binary_columns_array = features_data[binary_features].to_numpy()
 
 		# true_false_features(features_data, true_false_features)
 
