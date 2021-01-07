@@ -11,7 +11,7 @@ __pycache__*
 DataSim/simulated_data.csv
 *normalized_CSVs*
 *output.log
-
+*hotEncoded_CSVs/
 
 # Visual Studio cache directory
 .vs/
