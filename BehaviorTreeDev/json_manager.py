@@ -14,7 +14,7 @@ JSON_UPSAMPLE_KEY = "SVMSMOTE_upsampling"
 JSON_KFOLD_KEY = "k_fold"
 JSON_TREE_DEPTH_KEY = "decision_tree_depth"
 JSON_OUTPUT_PATH_KEY = "output_package_path"
-JSON_TRUE_FALSE_FEATURES = "true_false_features"
+JSON_BINARY_FEATURES = "binary_features"
 
 class JsonManager:
 
@@ -65,5 +65,5 @@ class JsonManager:
 	def get_output_path(self):
 		return str(self.v_json_object[JSON_OUTPUT_PATH_KEY])
 
-	def get_true_false_features(self):
-		return list(self.v_json_object[JSON_TRUE_FALSE_FEATURES])
+	def get_binary_features(self):
+		return list(self.v_json_object[JSON_BINARY_FEATURES])

@@ -54,7 +54,7 @@ def main():
 	json_manager = JsonManager(json_file_path)
 	feature_columns = json_manager.get_feature_columns()
 	categorical_features = json_manager.get_categorical_features()
-	true_false_features = json_manager.get_true_false_features()
+	binary_features = json_manager.get_binary_features()
 	hot_encoded_path = json_manager.get_hot_encoded_path()
 
 	normalized_folder = os.fsdecode(os.path.join(\
@@ -66,11 +66,12 @@ def main():
 
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
-	for true_false_feature in true_false_features:
-		features_data[true_false_feature] = features_data[true_false_feature].fillna(value=-1)
-		features_data[true_false_feature] = features_data[true_false_feature] * 1
-	true_false_columns = features_data[true_false_features]
+	for binary_variable in binary_features:
+		features_data[binary_variable] = features_data[binary_variable].fillna(value=-1)
+		features_data[binary_variable] = features_data[binary_variable] * 1
+	true_false_columns = features_data[binary_features]
 	true_false_columns_array = true_false_columns.to_numpy()
+
 		# true_false_features(features_data, true_false_features)
 
 	# hot encoded features
@@ -78,7 +79,7 @@ def main():
 		features_data, categorical_features)
 
 	# remove hot encoded features from features_data dataframe
-	features_data = features_data.drop(columns = categorical_features + true_false_features)
+	features_data = features_data.drop(columns = categorical_features + binary_features)
 	features_data_array = features_data.to_numpy()
 
 	# encode labels
@@ -88,7 +89,7 @@ def main():
 
 	# add hot_encoded columns, than numerical columns, then encoded labels to one array
 	final_csv = np.concatenate(\
-		(hot_encoded_array, true_false_columns_array, \
+		(hot_encoded_array, binary_columns_array, \
 			features_data_array, labels_column_array), \
 		axis = constants.COLUMN_AXIS)
 
@@ -101,11 +102,11 @@ def main():
 		os.remove(hot_encoded_file_path)
 
 	# make_formatter_string(hot_encoded_header, numerical_columns, label_column)
-	hot_encode_fmt = "%i," * len(hot_encoded_header + true_false_features) # format hot encoded columns to ints
+	hot_encode_fmt = "%i," * len(hot_encoded_header + binary_features) # format hot encoded columns to ints
 	feature_data_fmt = "%1.3f," * len(features_data.columns) # format numerical columns to doubles
 	total_fmt = hot_encode_fmt + feature_data_fmt + "%i" # for label
 
-	final_header = ','.join(str(i) for i in (hot_encoded_header + true_false_features + list(features_data.columns)))
+	final_header = ','.join(str(i) for i in (hot_encoded_header + binary_features + list(features_data.columns)))
 	final_header += "," + constants.LABEL_COLUMN_NAME # for label
 
 
