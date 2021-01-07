@@ -5,7 +5,8 @@
 [Bb]uilds/
 Assets/AssetStoreTools*
 Assets/CSVs*
-Assets/CleaningScripts/__pycache__*
+__pycache__*
+DataSim/simulated_data.csv
 
 # Visual Studio cache directory
 .vs/
