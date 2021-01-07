@@ -5,8 +5,13 @@
 [Bb]uilds/
 Assets/AssetStoreTools*
 Assets/CSVs*
+
+# Toms fixes
 __pycache__*
 DataSim/simulated_data.csv
+*normalized_CSVs*
+*output.log
+
 
 # Visual Studio cache directory
 .vs/
