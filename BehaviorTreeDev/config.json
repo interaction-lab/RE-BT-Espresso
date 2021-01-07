@@ -14,7 +14,7 @@
   },
 
   "categorical_features": ["feature_name0", "feature_name2"],
-  "true_false_features": ["feature_name4"],
+  "binary_features": ["feature_name4"],
 
   "label_columns": {
     "label_column0": 4,
