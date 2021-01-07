@@ -4,7 +4,7 @@
   "hotEncoded_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
   "upSampled_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
 
-  "output_package_path": ".",
+  "output_package_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
 
   "feature_columns": {
     "/ExerciseSubmissionResult": 0,

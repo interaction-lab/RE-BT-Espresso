@@ -76,7 +76,10 @@ def main():
 			csv_writer.writerow(header_row)
 
 			label_indices = list(label_columns.values())
+			i = 0
 			for timeseries_row in csv_reader:
+				if i == 0:
+					continue
 				label_values = [timeseries_row[index] for index in label_indices]
 				label_value = next((label_value for label_value in label_values \
 					if label_value), None)

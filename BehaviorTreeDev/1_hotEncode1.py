@@ -108,6 +108,7 @@ def main():
 	final_header = ','.join(str(i) for i in (hot_encoded_header + true_false_features + list(features_data.columns)))
 	final_header += "," + constants.LABEL_COLUMN_NAME # for label
 
+
 	np.savetxt(hot_encoded_file_path, final_csv, \
 		fmt = total_fmt, \
 		header = final_header, \
@@ -120,5 +121,6 @@ def main():
 	f.close()
 
 if __name__ == '__main__':
+	print("start")
 	main()
 
