@@ -13,6 +13,7 @@ DataSim/simulated_data.csv
 *output.log
 *hotEncoded_CSVs/
 *upsampled_CSVs/
+*pipeline_output/
 
 # Visual Studio cache directory
 .vs/
