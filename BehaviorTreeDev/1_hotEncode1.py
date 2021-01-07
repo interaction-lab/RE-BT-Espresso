@@ -67,7 +67,8 @@ def main():
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
 	for true_false_feature in true_false_features:
-		features_data[true_false_feature] = features_data[true_false_feature].astype(int)
+		features_data[true_false_feature] = features_data[true_false_feature].fillna(value=-1)
+		features_data[true_false_feature] = features_data[true_false_feature] * 1
 	true_false_columns = features_data[true_false_features]
 	true_false_columns_array = true_false_columns.to_numpy()
 		# true_false_features(features_data, true_false_features)

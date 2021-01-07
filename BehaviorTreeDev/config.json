@@ -7,8 +7,8 @@
   "output_package_path": ".",
 
   "feature_columns": {
-    "/ExerciseSubmissionResult": 0,
-    "/Time": 1,
+    "/ExerciseSubmissionResult": 1,
+    "/Time": 0,
     "/CurExercise": 2,
     "/KC": 3,
     "/MoveBlock" : 4,

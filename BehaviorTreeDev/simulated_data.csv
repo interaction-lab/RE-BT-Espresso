@@ -1,6 +1,6 @@
 /ExerciseSubmissionResult,/Time,/IsNewExercise,/CurExercise,/KC,/MoveBlock,/robot_dialogue,/Submit
-,0,False,0,0,False,,False
-,5,False,0,0.26710886246376664,True,hint_dialogue,False
+True,0,False,0,0,False,,False
+False,5,False,0,0.26710886246376664,True,hint_dialogue,False
 ,14,False,0,0.28573028415342716,True,hint_dialogue,False
 ,22,False,0,0.8994053995136779,False,,False
 False,24,False,0,0.755347664591373,True,incorrect_exercise_dialogue,True
