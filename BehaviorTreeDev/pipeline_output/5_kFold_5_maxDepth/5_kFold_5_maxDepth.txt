@@ -1,0 +1,8 @@
+Decision Tree with max_depth: 5, and kFold: 5
+	Average train error with 5 fold: 1.0
+	Average test error with 5 fold: 0.9977186311787072
+	Decision Tree (DOT format) saved to: 5_kFold_5_maxDepth
+	Decision Tree (PDF format) saved to: 5_kFold_5_maxDepth.pdf
+Check accuracy_vs_alpha.png for appropriate pruning.
+
+
