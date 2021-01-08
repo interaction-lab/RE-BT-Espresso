@@ -16,6 +16,16 @@ Adam Wathieu, Summer 2020
 4. Fix [graphviz error via package install](#graphviz-pip-error)
 5. Fix [pyeda library error](#pyeda-literal-error)
 
+## To run:
+
+- Navigate to `BehaviorTreeDev/`
+- edit `config.json`
+- You can run in two ways, via `python3` and via `bash`. Bash will be deprecated in the future.
+	a. 'python3': run `python3 run.py`
+	b. `bash`: run`./clean_script.sh config.json` in command line
+
+
+
 ## Dependencies (with pip installation commands)
 
 - [Python 3](https://www.python.org/downloads/)
@@ -38,11 +48,6 @@ For OSX, likely you will need to `brew install` but this is yet to be tested.
 
 ### pyeda literal error
 There is a bug is Pyeda library. See [#17](https://github.com/interaction-lab/BTFromSARDemostration/issues/17) for fix.
-
-## To run:
-
-- Navigate to BehaviorTreeDev, and edit `config.json`
-- Execute `./clean_script.sh config.json` in command line
 
 ---
 
