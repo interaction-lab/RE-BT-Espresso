@@ -10,15 +10,14 @@
     "/ExerciseSubmissionResult": 0,
     "/Time": 3,
     "/IsNewExercise" : 2,
-    "/CurExercise": 1,
     "/KC": 7,
     "/MoveBlock" : 5,
     "/Submit" : 6
   },
 
 
-  "categorical_features": ["/CurExercise"],
-  "binary_features": ["/ExerciseSubmissionResult", "/IsNewExercise", "/MoveBlock"],
+  "categorical_features": ["/ExerciseSubmissionResult", "/IsNewExercise", "/MoveBlock"],
+  "binary_features": [],
 
 
   "label_columns": {

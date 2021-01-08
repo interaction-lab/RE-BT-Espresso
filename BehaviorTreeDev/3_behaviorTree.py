@@ -135,6 +135,8 @@ def run_behaviortree(json_file_path, log_file_path):
 		plot_decision_tree(clf, decision_tree_path, features_data.columns)
 
 		decision_tree_obj = clf.tree_
+
+		# theoretical split to dump decision trees out to files
 		behavior_tree_obj = btBuilder.bt_espresso_mod(\
 			decision_tree_obj, features_data.columns, label_encoding)
 
