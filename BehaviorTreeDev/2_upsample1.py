@@ -19,8 +19,8 @@ def process_command_line_args():
 	args = vars(ap.parse_args())
 	return args["configuration"], args["outputLogFile"]
 
-def main():
-	json_file_path, fmt_file_path = process_command_line_args()
+
+def run_upsample(json_file_path, fmt_file_path):
 	json_manager = JsonManager(json_file_path)
 
 	if json_manager.get_upsample_status() == True:
@@ -62,6 +62,10 @@ def main():
 			delimiter = constants.CSV_DELIMITER, \
 			header = header, \
 			comments='')
+
+def main():
+	json_file_path, fmt_file_path = process_command_line_args()
+	run_upsample(json_file_path, fmt_file_path)
 
 if __name__ == '__main__':
 	main()

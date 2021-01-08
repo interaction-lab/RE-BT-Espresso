@@ -35,8 +35,8 @@ def process_command_line_args():
 	args = vars(ap.parse_args())
 	return args["configuration"], args["outputLogFile"]
 
-def main():
-	json_file_path, log_file_path = process_command_line_args()
+
+def run_behaviortree(json_file_path, log_file_path):
 	json_manager = JsonManager(json_file_path)
 
 	log_file = open(log_file_path, "r")
@@ -160,6 +160,10 @@ def main():
 	plt.savefig(graph_path)
 
 	report_file_obj.close()
+
+def main():
+	json_file_path, log_file_path = process_command_line_args()
+	run_behaviortree(json_file_path, log_file_path)
 
 if __name__ == '__main__':
 	main()

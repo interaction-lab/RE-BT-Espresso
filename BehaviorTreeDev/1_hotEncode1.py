@@ -49,8 +49,8 @@ def process_command_line_args():
 	args = vars(ap.parse_args())
 	return args["configuration"]
 
-def main():
-	json_file_path = process_command_line_args()
+
+def run_hotencode(json_file_path):
 	json_manager = JsonManager(json_file_path)
 	feature_columns = json_manager.get_feature_columns()
 	categorical_features = json_manager.get_categorical_features()
@@ -119,6 +119,10 @@ def main():
 	f.write("{}\n".format(total_fmt))
 	f.write(str((label_encoder.classes_).tolist()))
 	f.close()
+
+def main():
+	json_file_path = process_command_line_args()
+	run_hotencode(json_file_path)
 
 if __name__ == '__main__':
 	main()

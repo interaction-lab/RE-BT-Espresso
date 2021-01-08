@@ -36,10 +36,9 @@ def process_command_line_args():
 	args = vars(ap.parse_args())
 	return args["configuration"]
 
-def main():
-	json_file_path = process_command_line_args()
-	json_manager = JsonManager(json_file_path)
 
+def run_normalize(json_file_path):
+	json_manager = JsonManager(json_file_path)
 	csv_folder = json_manager.get_csv_path()
 	normalized_folder = json_manager.get_normalized_path()
 	feature_columns = json_manager.get_feature_columns()
@@ -115,6 +114,10 @@ def main():
 	combined_csv.to_csv( os.fsdecode(combined_csv_file_path), \
 		index = False, encoding = 'utf-8-sig')
 
+
+def main():
+	json_file_path = process_command_line_args()
+	run_normalize(json_file_path)
 
 if __name__ == '__main__':
 	main()
