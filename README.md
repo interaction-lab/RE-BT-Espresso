@@ -1,4 +1,4 @@
-### Behavior Tree Robot Action Policy from SAR WoZ Interaction Data
+# Behavior Tree Robot Action Policy from SAR WoZ Interaction Data
 
 ---
 
@@ -10,7 +10,7 @@ Adam Wathieu, Summer 2020
 
 ---
 
-Dependencies (with pip installation commands)
+## Dependencies (with pip installation commands)
 
 - [Python 3](https://www.python.org/downloads/)
 - [pandas](https://pandas.pydata.org/pandas-docs/stable/index.html) (`pip install pandas`)
@@ -21,7 +21,19 @@ Dependencies (with pip installation commands)
 - [matplotlib](https://matplotlib.org/) (`pip install matplotlib`)
 - [lxml](https://lxml.de/) (`pip install lxml`)
 
-To run:
+See `requirements.txt` for all python3 packages. There are two other install issues due to issue with `graphiz` and `pyeda` packages. Fixes below.
+
+### graphiz pip error
+graphiz for python is broken. Instead, install via package manager:
+```bash
+sudo apt-get install graphviz
+```
+For OSX, likely you will need to `brew install` but this is yet to be tested.
+
+### pyeda literal error
+There is a bug is Pyeda library. See [#17](https://github.com/interaction-lab/BTFromSARDemostration/issues/17) for fix.
+
+## To run:
 
 - Navigate to BehaviorTreeDev, and edit `config.json`
 - Execute `./clean_script.sh config.json` in command line
