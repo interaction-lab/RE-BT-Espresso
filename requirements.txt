@@ -103,7 +103,7 @@ ssh-import-id==5.10
 systemd-python==234
 testresources==2.0.1
 threadpoolctl==2.1.0
-Twisted==18.9.0
+Twisted==20.3.0
 ubuntu-advantage-tools==20.3
 ubuntu-drivers-common==0.0.0
 ufw==0.36
