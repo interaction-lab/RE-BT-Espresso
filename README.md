@@ -21,8 +21,8 @@ Adam Wathieu, Summer 2020
 - Navigate to `BehaviorTreeDev/`
 - edit `config.json`
 - You can run in two ways, via `python3` and via `bash`. Bash will be deprecated in the future.
-	a. 'python3': run `python3 run.py`
-	b. `bash`: run`./clean_script.sh config.json` in command line
+	- 'python3': run `python3 run.py`
+	- `bash`: run`./clean_script.sh config.json` in command line
 
 
 
