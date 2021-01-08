@@ -6,6 +6,7 @@ Automat==0.8.0
 blinker==1.4
 catfish==1.4.13
 certifi==2019.11.28
+cffi==1.14.4
 chardet==3.0.4
 Click==7.0
 cloud-init==20.3
@@ -13,7 +14,7 @@ colorama==0.4.3
 command-not-found==0.3
 configobj==5.0.6
 constantly==15.1.0
-cryptography==2.8
+cryptography==3.3.1
 cupshelpers==1.0
 cycler==0.10.0
 dataclasses==0.6
@@ -25,7 +26,7 @@ distro-info===0.23ubuntu1
 entrypoints==0.3
 filelock==3.0.12
 graphviz==0.16
-httplib2==0.14.0
+httplib2==0.18.1
 hyperlink==19.0.0
 idna==2.8
 imbalanced-learn==0.7.0
@@ -62,13 +63,14 @@ opencv-python==3.4.11.45
 pandas==1.2.0
 pbr==5.5.1
 pexpect==4.6.0
-Pillow==7.0.0
+Pillow==8.1.0
 protobuf==3.13.0
-psutil==5.5.1
+psutil==5.8.0
 py-trees==2.1.3
 pyasn1==0.4.2
 pyasn1-modules==0.2.1
 pycairo==1.16.2
+pycparser==2.20
 pycups==1.9.73
 pydot==1.4.1
 pyeda==0.28.0
@@ -103,7 +105,7 @@ ssh-import-id==5.10
 systemd-python==234
 testresources==2.0.1
 threadpoolctl==2.1.0
-Twisted==18.9.0
+Twisted==20.3.0
 ubuntu-advantage-tools==20.3
 ubuntu-drivers-common==0.0.0
 ufw==0.36
