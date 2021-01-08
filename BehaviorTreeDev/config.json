@@ -1,10 +1,10 @@
 {
-  "csv_folder_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
-  "normalized_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
-  "hotEncoded_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
-  "upSampled_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
+  "csv_folder_path": "./",
+  "normalized_path": "./output/",
+  "hotEncoded_path": "./output/",
+  "upSampled_path": "./output/",
 
-  "output_package_path": "/home/groechel/scripts/BTFromSARDemostration/BehaviorTreeDev",
+  "output_package_path": "./output/",
 
   "feature_columns": {
     "/ExerciseSubmissionResult": 0,
