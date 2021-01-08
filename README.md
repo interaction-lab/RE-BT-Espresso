@@ -29,7 +29,7 @@ Adam Wathieu, Summer 2020
 
 See `requirements.txt` for all python3 packages. There are two other install issues due to issue with `graphiz` and `pyeda` packages. Fixes below.
 
-### graphiz pip error
+### graphviz pip error
 graphiz for python is broken. Instead, install via package manager:
 ```bash
 sudo apt-get install graphviz
