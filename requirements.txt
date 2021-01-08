@@ -25,7 +25,7 @@ distro-info===0.23ubuntu1
 entrypoints==0.3
 filelock==3.0.12
 graphviz==0.16
-httplib2==0.14.0
+httplib2==0.18.0
 hyperlink==19.0.0
 idna==2.8
 imbalanced-learn==0.7.0
