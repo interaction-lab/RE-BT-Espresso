@@ -37,11 +37,13 @@ def process_command_line_args():
 	return args["configuration"]
 
 
+
+
 def run_normalize(json_file_path):
 	json_manager = JsonManager(json_file_path)
 	csv_folder = json_manager.get_csv_path()
 	normalized_folder = json_manager.get_normalized_path()
-	feature_columns = json_manager.get_feature_columns()
+	feature_list = json_manager.get_feature_columns()
 	label_columns = json_manager.get_label_columns()
 	lag_features = json_manager.get_lag_features()
 	lag_window_length = json_manager.get_sliding_window_length()
@@ -70,16 +72,36 @@ def run_normalize(json_file_path):
 
 			all_lag_queues = [[""] * lag_window_length for lag_feature in lag_features]
 			
-			header_row = list(feature_columns)
+			header_row = list(feature_list)
 			header_row.append(constants.LABEL_COLUMN_NAME)
 			csv_writer.writerow(header_row)
 
 			label_indices = list(label_columns.values())
 			header_row_being_read = True
+
+
+
+
+
 			for timeseries_row in csv_reader:
 				if header_row_being_read:
+					# set up feature columns right here
+					feature_columns = dict()
+					for column_name in feature_list:
+						# loop over header
+						found_column = False
+						for i, header_col in enumerate(timeseries_row):
+							if header_col == column_name:
+								feature_columns[column_name] = i
+								found_column = True
+								break
+						if not found_column:
+							raise Exception("Could not find feature column " + column_name)
+
 					header_row_being_read = False
 					continue
+
+
 				label_values = [timeseries_row[index] for index in label_indices]
 				label_value = next((label_value for label_value in label_values \
 					if label_value), None)
