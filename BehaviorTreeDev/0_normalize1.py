@@ -37,6 +37,19 @@ def process_command_line_args():
 	return args["configuration"]
 
 
+def generate_feature_col_dictionary(header_row, feature_list):
+	feature_columns = dict()
+	for column_name in feature_list:
+		# loop over header
+		found_column = False
+		for i, header_col in enumerate(header_row):
+			if header_col == column_name:
+				feature_columns[column_name] = i
+				found_column = True
+				break
+		if not found_column:
+			raise Exception("Could not find feature column " + column_name)
+	return feature_columns
 
 
 def run_normalize(json_file_path):
@@ -79,28 +92,11 @@ def run_normalize(json_file_path):
 			label_indices = list(label_columns.values())
 			header_row_being_read = True
 
-
-
-
-
 			for timeseries_row in csv_reader:
-				if header_row_being_read:
-					# set up feature columns right here
-					feature_columns = dict()
-					for column_name in feature_list:
-						# loop over header
-						found_column = False
-						for i, header_col in enumerate(timeseries_row):
-							if header_col == column_name:
-								feature_columns[column_name] = i
-								found_column = True
-								break
-						if not found_column:
-							raise Exception("Could not find feature column " + column_name)
-
+				if header_row_being_read:					
+					feature_columns = generate_feature_col_dictionary(timeseries_row, feature_list)
 					header_row_being_read = False
 					continue
-
 
 				label_values = [timeseries_row[index] for index in label_indices]
 				label_value = next((label_value for label_value in label_values \

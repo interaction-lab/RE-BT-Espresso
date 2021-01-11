@@ -5,6 +5,7 @@ import numpy as np
 import argparse
 import os
 import json
+import csv
 import pipeline_constants as constants
 from json_manager import JsonManager
 
@@ -50,9 +51,29 @@ def process_command_line_args():
 	return args["configuration"]
 
 
+def generate_feature_col_dictionary(header_row, feature_list):
+	feature_columns = dict()
+	for column_name in feature_list:
+		# loop over header
+		found_column = False
+		for i, header_col in enumerate(header_row):
+			if header_col == column_name:
+				feature_columns[column_name] = i
+				found_column = True
+				break
+		if not found_column:
+			raise Exception("Could not find feature column " + column_name)
+	return feature_columns
+
+
+def get_header_row(combined_csv_file):
+	with open(combined_csv_file, 'r', encoding='utf-8-sig') as f:
+	    d_reader = csv.DictReader(f)
+	    return d_reader.fieldnames
+
 def run_hotencode(json_file_path):
 	json_manager = JsonManager(json_file_path)
-	feature_columns = json_manager.get_feature_columns()
+	feature_list = json_manager.get_feature_columns()
 	categorical_features = json_manager.get_categorical_features()
 	binary_features = json_manager.get_binary_features()
 	hot_encoded_path = json_manager.get_hot_encoded_path()
@@ -63,6 +84,9 @@ def run_hotencode(json_file_path):
 	combined_csv_file = os.fsdecode(os.path.join(\
 		normalized_folder, \
 		constants.COMBINED_CSV_FILENAME))
+
+	
+	feature_columns = generate_feature_col_dictionary(get_header_row(combined_csv_file), feature_list)
 
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
