@@ -20,9 +20,9 @@
   "binary_features": [],
 
 
-  "label_columns": {
-    "/robot_dialogue": 4
-  },
+  "label_columns": [
+    "/robot_dialogue"
+  ],
 
   "lag_features": [],
   "sliding_window_length": 1,
