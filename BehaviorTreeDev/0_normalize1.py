@@ -51,7 +51,6 @@ def generate_feature_col_dictionary(header_row, feature_list):
 			raise Exception("Could not find feature column " + column_name)
 	return feature_columns
 
-
 def run_normalize(json_file_path):
 	json_manager = JsonManager(json_file_path)
 	csv_folder = json_manager.get_csv_path()
@@ -89,12 +88,12 @@ def run_normalize(json_file_path):
 			header_row.append(constants.LABEL_COLUMN_NAME)
 			csv_writer.writerow(header_row)
 
-			label_indices = list(label_columns.values())
 			header_row_being_read = True
-
 			for timeseries_row in csv_reader:
 				if header_row_being_read:					
 					feature_columns = generate_feature_col_dictionary(timeseries_row, feature_list)
+					label_indices = list(generate_feature_col_dictionary(timeseries_row, label_columns).values())
+
 					header_row_being_read = False
 					continue
 
