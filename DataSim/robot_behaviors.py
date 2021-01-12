@@ -1,4 +1,5 @@
 import py_trees as pt
+from robot_behaviors import*
 
 class Check_IsNewExercise(pt.behaviour.Behaviour):
     def __init__(self):
