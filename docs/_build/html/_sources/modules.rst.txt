@@ -4,3 +4,5 @@ BTFromSARDemostration
 .. toctree::
    :maxdepth: 4
 
+   app1/
+   app2/
