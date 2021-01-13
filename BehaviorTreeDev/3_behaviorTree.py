@@ -1,10 +1,9 @@
-"""Summary
-Creates decision trees, 
-    checks measures, prunes, and converts them to behavior 
-    trees using `behaviorTree_Builder`
+"""Generally runs DTree -> behavior tree, in need of change per #19
+
+Creates decision trees, checks measures, prunes, and converts them to behavior  trees using behaviorTree_Builder
 
 Attributes:
-    PRUNING_GRAPH_FILENAME (str): constant for acurracy vs alpha output graph
+    PRUNING_GRAPH_FILENAME (str): filepath constant for acurracy vs alpha output graph
 """
 from sklearn import tree
 import graphviz
@@ -25,7 +24,7 @@ import pipeline_constants as constants
 PRUNING_GRAPH_FILENAME = "accuracy_vs_alpha.png"
 
 def plot_decision_tree(decision_tree_model, filename, feature_header):
-	"""Summary
+	"""Plots decision tree to output folder
 	
 	Args:
 	    decision_tree_model (sklearn.tree._classes.DecisionTreeClassifier): trained decision tree
@@ -69,7 +68,7 @@ def run_behaviortree(json_file_path, log_file_path):
 
 class Runner:
 
-	"""Summary
+	"""Main runner class for this file
 	
 	Attributes:
 	    json_manager (json_manager.JsonManager): JSON Manager for config.json
@@ -98,28 +97,35 @@ class Runner:
 		self.log_file.close()
 		return fmt, label_encoding
 
+	def get_supervised_data_csv_filepath(self):
+		"""Summary
+		
+		Returns:
+		    string: Description
+		"""
+		data_folder = os.fsdecode(os.path.join(\
+				self.json_manager.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
+		filename = constants.HOT_ENCODED_CSV_FILENAME
+
+		print(data_folder)
+		if self.json_manager.get_upsample_status():
+			data_folder = os.fsdecode(os.path.join(\
+				self.json_manager.get_upsampled_path(), constants.UPSAMPLED_CSV_FOLDER_NAME))
+			filename = constants.UPSAMPLED_CSV_FILENAME
+
+		return os.fsdecode(os.path.join(\
+				data_folder, filename))
+
 	def run(self):
 		"""Summary
 		"""
 		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
-		
-		supervised_learning_data = None
-		if self.json_manager.get_upsample_status() == True:
-			upsampled_folder = os.fsdecode(os.path.join(\
-				self.json_manager.get_upsampled_path(), constants.UPSAMPLED_CSV_FOLDER_NAME))
+		supervised_learning_csv_path = self.get_supervised_data_csv_filepath()
 
-			supervised_learning_data = os.fsdecode(os.path.join(\
-				upsampled_folder, constants.UPSAMPLED_CSV_FILENAME))
-		else:
-			hot_encoded_folder = os.fsdecode(os.path.join(\
-				self.json_manager.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
-			supervised_learning_data = os.fsdecode(os.path.join(\
-				hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
-
-		supervised_learning_dataframe = pd.read_csv(supervised_learning_data)
-		features_data = pd.read_csv(supervised_learning_data, \
+		supervised_learning_dataframe = pd.read_csv(supervised_learning_csv_path)
+		features_data = pd.read_csv(supervised_learning_csv_path, \
 			usecols = list(supervised_learning_dataframe.columns)[:-1])
-		labels_data = pd.read_csv(supervised_learning_data, \
+		labels_data = pd.read_csv(supervised_learning_csv_path, \
 			usecols = [list(supervised_learning_dataframe.columns)[-1]])
 
 		kFold = self.json_manager.get_kfold()
