@@ -1,3 +1,13 @@
+"""Summary
+
+Attributes:
+    behaviortree_3 (TYPE): Description
+    hotencode_1 (TYPE): Description
+    json_file_path (str): Description
+    normalize_0 (TYPE): Description
+    output_file_path (str): Description
+    upsample_2 (TYPE): Description
+"""
 normalize_0 = __import__('0_normalize1')
 hotencode_1 = __import__('1_hotEncode1')
 upsample_2 = __import__('2_upsample1')
@@ -7,6 +17,8 @@ json_file_path = "config.json"
 output_file_path = "output.log"
 
 def main():
+	"""Summary
+	"""
 	print("Start")
 	print("Normalizing")
 	normalize_0.run_normalize(json_file_path)
