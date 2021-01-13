@@ -1,7 +1,9 @@
 """Summary
 
 Attributes:
-    PRUNING_GRAPH_FILENAME (str): Description
+    PRUNING_GRAPH_FILENAME (str): Creates decision trees, 
+    checks measures, prunes, and converts them to behavior 
+    trees using `behaviorTree_Builder.py`
 """
 from sklearn import tree
 import graphviz
