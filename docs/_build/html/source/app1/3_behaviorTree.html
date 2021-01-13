@@ -32,16 +32,12 @@
             
   <div class="section" id="module-3_behaviorTree">
 <span id="behaviortree-module"></span><h1>3_behaviorTree module<a class="headerlink" href="#module-3_behaviorTree" title="Permalink to this headline">¶</a></h1>
-<p>Summary
-Creates decision trees,</p>
-<blockquote>
-<div><p>checks measures, prunes, and converts them to behavior
-trees using <cite>behaviorTree_Builder</cite></p>
-</div></blockquote>
+<p>Generally runs DTree -&gt; behavior tree, in need of change per #19</p>
+<p>Creates decision trees, checks measures, prunes, and converts them to behavior  trees using behaviorTree_Builder</p>
 <dl class="py attribute">
 <dt id="behaviorTree.PRUNING_GRAPH_FILENAME">
 <span id="3_behaviorTree.PRUNING_GRAPH_FILENAME"></span><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">PRUNING_GRAPH_FILENAME</code><a class="headerlink" href="#behaviorTree.PRUNING_GRAPH_FILENAME" title="Permalink to this definition">¶</a></dt>
-<dd><p>constant for acurracy vs alpha output graph</p>
+<dd><p>filepath constant for acurracy vs alpha output graph</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
@@ -53,7 +49,7 @@ trees using <cite>behaviorTree_Builder</cite></p>
 <dt id="behaviorTree.Runner">
 <span id="3_behaviorTree.Runner"></span><em class="property">class </em><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">Runner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">json_file_path</span></em>, <em class="sig-param"><span class="n">log_file_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.Runner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Summary</p>
+<p>Main runner class for this file</p>
 <dl class="py attribute">
 <dt id="behaviorTree.Runner.json_manager">
 <span id="3_behaviorTree.Runner.json_manager"></span><code class="sig-name descname">json_manager</code><a class="headerlink" href="#behaviorTree.Runner.json_manager" title="Permalink to this definition">¶</a></dt>
@@ -91,6 +87,20 @@ trees using <cite>behaviorTree_Builder</cite></p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="behaviorTree.Runner.get_supervised_data_csv_filepath">
+<span id="3_behaviorTree.Runner.get_supervised_data_csv_filepath"></span><code class="sig-name descname">get_supervised_data_csv_filepath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.Runner.get_supervised_data_csv_filepath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns filepath of data, uses one hot encoded if upsample = false in config.json</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>filepath to data csv</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="behaviorTree.Runner.run">
 <span id="3_behaviorTree.Runner.run"></span><code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.Runner.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Summary</p>
@@ -107,7 +117,7 @@ trees using <cite>behaviorTree_Builder</cite></p>
 <dl class="py function">
 <dt id="behaviorTree.plot_decision_tree">
 <span id="3_behaviorTree.plot_decision_tree"></span><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">plot_decision_tree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">decision_tree_model</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">feature_header</span></em><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.plot_decision_tree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summary</p>
+<dd><p>Plots decision tree to output folder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

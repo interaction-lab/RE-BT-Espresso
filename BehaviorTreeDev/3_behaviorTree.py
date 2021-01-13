@@ -98,16 +98,15 @@ class Runner:
 		return fmt, label_encoding
 
 	def get_supervised_data_csv_filepath(self):
-		"""Summary
+		"""Returns filepath of data, uses one hot encoded if upsample = false in config.json
 		
 		Returns:
-		    string: Description
+		    string: filepath to data csv
 		"""
 		data_folder = os.fsdecode(os.path.join(\
 				self.json_manager.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
 		filename = constants.HOT_ENCODED_CSV_FILENAME
 
-		print(data_folder)
 		if self.json_manager.get_upsample_status():
 			data_folder = os.fsdecode(os.path.join(\
 				self.json_manager.get_upsampled_path(), constants.UPSAMPLED_CSV_FOLDER_NAME))
@@ -123,10 +122,9 @@ class Runner:
 		supervised_learning_csv_path = self.get_supervised_data_csv_filepath()
 
 		supervised_learning_dataframe = pd.read_csv(supervised_learning_csv_path)
-		features_data = pd.read_csv(supervised_learning_csv_path, \
-			usecols = list(supervised_learning_dataframe.columns)[:-1])
-		labels_data = pd.read_csv(supervised_learning_csv_path, \
-			usecols = [list(supervised_learning_dataframe.columns)[-1]])
+
+		features_data = supervised_learning_dataframe[list(supervised_learning_dataframe.columns)[:-1]]
+		labels_data = supervised_learning_dataframe[[list(supervised_learning_dataframe.columns)[-1]]]
 
 		kFold = self.json_manager.get_kfold()
 		max_depth = self.json_manager.get_decision_tree_depth()
