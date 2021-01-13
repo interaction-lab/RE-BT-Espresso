@@ -1,9 +1,9 @@
 """Summary
-
-Attributes:
-    PRUNING_GRAPH_FILENAME (str): Creates decision trees, 
+Creates decision trees, 
     checks measures, prunes, and converts them to behavior 
-    trees using `behaviorTree_Builder.py`
+    trees using `behaviorTree_Builder`
+Attributes:
+    PRUNING_GRAPH_FILENAME (str): constant for acurracy vs alpha output graph
 """
 from sklearn import tree
 import graphviz
@@ -27,9 +27,9 @@ def plot_decision_tree(decision_tree_model, filename, feature_header):
 	"""Summary
 	
 	Args:
-	    decision_tree_model (TYPE): Description
-	    filename (TYPE): Description
-	    feature_header (TYPE): Description
+	    decision_tree_model (sklearn.tree._classes.DecisionTreeClassifier): trained decision tree
+	    filename (str): full output file path
+	    feature_header (sklearn.tree._classes.DecisionTreeClassifier): TODO
 	"""
 	dot_data = tree.export_graphviz(decision_tree_model, out_file = None, \
 		feature_names = feature_header) 
@@ -37,10 +37,9 @@ def plot_decision_tree(decision_tree_model, filename, feature_header):
 	graph.render(filename)
 
 def process_command_line_args():
-	"""!
-	
+	"""	
 	Returns:
-	    TYPE: Description
+	   tuple(str,str) : Command line args for (config, output) files
 	
 	"""
 	ap = argparse.ArgumentParser()
@@ -58,7 +57,7 @@ def process_command_line_args():
 
 def run_behaviortree(json_file_path, log_file_path):
 	"""Summary
-	
+	Runs decision tree classifier, TODO: needs to be broken up per #19
 	Args:
 	    json_file_path (TYPE): Description
 	    log_file_path (TYPE): Description

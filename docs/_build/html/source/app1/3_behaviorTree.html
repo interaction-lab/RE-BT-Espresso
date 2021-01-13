@@ -32,27 +32,22 @@
             
   <div class="section" id="module-3_behaviorTree">
 <span id="behaviortree-module"></span><h1>3_behaviorTree module<a class="headerlink" href="#module-3_behaviorTree" title="Permalink to this headline">¶</a></h1>
-<p>Summary</p>
+<p>Summary
+Creates decision trees,</p>
+<blockquote>
+<div><p>checks measures, prunes, and converts them to behavior
+trees using <cite>behaviorTree_Builder</cite></p>
+</div></blockquote>
 <dl class="py attribute">
 <dt id="behaviorTree.PRUNING_GRAPH_FILENAME">
 <span id="3_behaviorTree.PRUNING_GRAPH_FILENAME"></span><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">PRUNING_GRAPH_FILENAME</code><a class="headerlink" href="#behaviorTree.PRUNING_GRAPH_FILENAME" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates decision trees,</p>
+<dd><p>constant for acurracy vs alpha output graph</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py attribute">
-<dt>
-<code class="sig-name descname">checks measures, prunes, and converts them to behavior</code></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt>
-<code class="sig-name descname">trees using `behaviorTree_Builder.py`</code></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt id="behaviorTree.main">
@@ -67,9 +62,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>decision_tree_model</strong> (<em>TYPE</em>) – Description</p></li>
-<li><p><strong>filename</strong> (<em>TYPE</em>) – Description</p></li>
-<li><p><strong>feature_header</strong> (<em>TYPE</em>) – Description</p></li>
+<li><p><strong>decision_tree_model</strong> (<em>sklearn.tree._classes.DecisionTreeClassifier</em>) – trained decision tree</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – full output file path</p></li>
+<li><p><strong>feature_header</strong> (<em>sklearn.tree._classes.DecisionTreeClassifier</em>) – TODO</p></li>
 </ul>
 </dd>
 </dl>
@@ -78,13 +73,12 @@
 <dl class="py function">
 <dt id="behaviorTree.process_command_line_args">
 <span id="3_behaviorTree.process_command_line_args"></span><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">process_command_line_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.process_command_line_args" title="Permalink to this definition">¶</a></dt>
-<dd><p>!</p>
-<dl class="field-list simple">
+<dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Description</p>
+<dd class="field-odd"><p>Command line args for (config, output) files</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>TYPE</p>
+<dd class="field-even"><p>tuple(str,str)</p>
 </dd>
 </dl>
 </dd></dl>
