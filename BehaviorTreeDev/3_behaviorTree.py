@@ -67,27 +67,29 @@ def run_behaviortree(json_file_path, log_file_path):
 
 class Runner:
 	def __init__(self, json_file_path, log_file_path):
-		self.json_file_path = json_file_path
-		self.log_file_path = log_file_path
+		self.json_manager = JsonManager(json_file_path)
+		self.log_file = open(log_file_path, "r")
+		
+	def get_file_fmt_and_label_encoding(self):
+		fmt = self.log_file.readline()
+		label_encoding = eval(self.log_file.readline())
+		self.log_file.close()
+		return fmt, label_encoding
+
 
 	def run(self):
-		json_manager = JsonManager(self.json_file_path)
-
-		log_file = open(self.log_file_path, "r")
-		fmt = log_file.readline()
-		label_encoding = eval(log_file.readline())
-		log_file.close()
-
+		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
+		
 		supervised_learning_data = None
-		if json_manager.get_upsample_status() == True:
+		if self.json_manager.get_upsample_status() == True:
 			upsampled_folder = os.fsdecode(os.path.join(\
-				json_manager.get_upsampled_path(), constants.UPSAMPLED_CSV_FOLDER_NAME))
+				self.json_manager.get_upsampled_path(), constants.UPSAMPLED_CSV_FOLDER_NAME))
 
 			supervised_learning_data = os.fsdecode(os.path.join(\
 				upsampled_folder, constants.UPSAMPLED_CSV_FILENAME))
 		else:
 			hot_encoded_folder = os.fsdecode(os.path.join(\
-				json_manager.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
+				self.json_manager.get_hot_encoded_path(), constants.HOT_ENCODED_CSV_FOLDER_NAME))
 			supervised_learning_data = os.fsdecode(os.path.join(\
 				hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
 
@@ -97,10 +99,10 @@ class Runner:
 		labels_data = pd.read_csv(supervised_learning_data, \
 			usecols = [list(supervised_learning_dataframe.columns)[-1]])
 
-		kFold = json_manager.get_kfold()
-		max_depth = json_manager.get_decision_tree_depth()
+		kFold = self.json_manager.get_kfold()
+		max_depth = self.json_manager.get_decision_tree_depth()
 		output_folder = constants.add_folder_to_directory(\
-			constants.OUTPUT_FOLDER_NAME, json_manager.get_output_path())
+			constants.OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
 		folder_name = "{}_kFold_{}_maxDepth".format(kFold, max_depth)
 		output_full_path = constants.add_folder_to_directory(folder_name, output_folder)
 
@@ -113,7 +115,7 @@ class Runner:
 			X_train, X_test = features_data.iloc[train_index], features_data.iloc[test_index]
 			y_train, y_test = labels_data.iloc[train_index], labels_data.iloc[test_index]
 
-			clf = tree.DecisionTreeClassifier(random_state = json_manager.get_random_state(), \
+			clf = tree.DecisionTreeClassifier(random_state = self.json_manager.get_random_state(), \
 				max_depth = max_depth)
 			clf = clf.fit(X_train, y_train)
 
@@ -139,7 +141,7 @@ class Runner:
 		report_file_obj.write("	Decision Tree (PDF format) saved to: {}.pdf\n".format(dot_pdf_header))
 		report_file_obj.write("Check {} for appropriate pruning.\n\n\n".format(PRUNING_GRAPH_FILENAME))
 
-		clf = tree.DecisionTreeClassifier(random_state = json_manager.get_random_state(), \
+		clf = tree.DecisionTreeClassifier(random_state = self.json_manager.get_random_state(), \
 			max_depth = max_depth)
 		clf = clf.fit(features_data, labels_data)
 		dot_pdf_full_path = os.fsdecode(os.path.join(output_full_path, dot_pdf_header))
@@ -155,7 +157,7 @@ class Runner:
 		clfs = []
 		train_scores = []
 		for i, ccp_alpha in enumerate(ccp_alphas):
-			clf = tree.DecisionTreeClassifier(random_state = json_manager.get_random_state(), \
+			clf = tree.DecisionTreeClassifier(random_state = self.json_manager.get_random_state(), \
 				max_depth = max_depth, ccp_alpha=ccp_alpha)
 			clf.fit(features_data, labels_data)
 			score = clf.score(features_data, labels_data)
