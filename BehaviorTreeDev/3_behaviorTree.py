@@ -2,6 +2,7 @@
 Creates decision trees, 
     checks measures, prunes, and converts them to behavior 
     trees using `behaviorTree_Builder`
+
 Attributes:
     PRUNING_GRAPH_FILENAME (str): constant for acurracy vs alpha output graph
 """
@@ -37,9 +38,9 @@ def plot_decision_tree(decision_tree_model, filename, feature_header):
 	graph.render(filename)
 
 def process_command_line_args():
-	"""	
+	"""
 	Returns:
-	   tuple(str,str) : Command line args for (config, output) files
+	    tuple(str, str): Command line args for (config, output) files
 	
 	"""
 	ap = argparse.ArgumentParser()
@@ -58,26 +59,48 @@ def process_command_line_args():
 def run_behaviortree(json_file_path, log_file_path):
 	"""Summary
 	Runs decision tree classifier, TODO: needs to be broken up per #19
+	
 	Args:
-	    json_file_path (TYPE): Description
-	    log_file_path (TYPE): Description
+	    json_file_path (str): Full filepath to config.json
+	    log_file_path (str): Full filepath to output.log file 
 	"""
 	r = Runner(json_file_path, log_file_path)
 	r.run()
 
 class Runner:
+
+	"""Summary
+	
+	Attributes:
+	    json_manager (json_manager.JsonManager): JSON Manager for config.json
+	    log_file (_io.TextIOWrapper): Log file used for formatting
+	"""
+	
 	def __init__(self, json_file_path, log_file_path):
+		"""Summary
+		
+		Args:
+		    json_file_path (str): Full filepath to config.json
+		    log_file_path (str): Full filepath to output.log file 
+		"""
 		self.json_manager = JsonManager(json_file_path)
 		self.log_file = open(log_file_path, "r")
+
 		
 	def get_file_fmt_and_label_encoding(self):
+		"""Summary
+		
+		Returns:
+		    tuple(str, list<str>): Tuple containg string output file format and list of label encodings
+		"""
 		fmt = self.log_file.readline()
 		label_encoding = eval(self.log_file.readline())
 		self.log_file.close()
 		return fmt, label_encoding
 
-
 	def run(self):
+		"""Summary
+		"""
 		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
 		
 		supervised_learning_data = None

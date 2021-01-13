@@ -49,6 +49,55 @@ trees using <cite>behaviorTree_Builder</cite></p>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt id="behaviorTree.Runner">
+<span id="3_behaviorTree.Runner"></span><em class="property">class </em><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">Runner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">json_file_path</span></em>, <em class="sig-param"><span class="n">log_file_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.Runner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Summary</p>
+<dl class="py attribute">
+<dt id="behaviorTree.Runner.json_manager">
+<span id="3_behaviorTree.Runner.json_manager"></span><code class="sig-name descname">json_manager</code><a class="headerlink" href="#behaviorTree.Runner.json_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>JSON Manager for config.json</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="json_manager.html#json_manager.JsonManager" title="json_manager.JsonManager">json_manager.JsonManager</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="behaviorTree.Runner.log_file">
+<span id="3_behaviorTree.Runner.log_file"></span><code class="sig-name descname">log_file</code><a class="headerlink" href="#behaviorTree.Runner.log_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log file used for formatting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>_io.TextIOWrapper</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="behaviorTree.Runner.get_file_fmt_and_label_encoding">
+<span id="3_behaviorTree.Runner.get_file_fmt_and_label_encoding"></span><code class="sig-name descname">get_file_fmt_and_label_encoding</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.Runner.get_file_fmt_and_label_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Tuple containg string output file format and list of label encodings</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple(str, list&lt;str&gt;)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="behaviorTree.Runner.run">
+<span id="3_behaviorTree.Runner.run"></span><code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.Runner.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt id="behaviorTree.main">
 <span id="3_behaviorTree.main"></span><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.main" title="Permalink to this definition">¶</a></dt>
@@ -78,7 +127,7 @@ trees using <cite>behaviorTree_Builder</cite></p>
 <dd class="field-odd"><p>Command line args for (config, output) files</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tuple(str,str)</p>
+<dd class="field-even"><p>tuple(str, str)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -86,12 +135,13 @@ trees using <cite>behaviorTree_Builder</cite></p>
 <dl class="py function">
 <dt id="behaviorTree.run_behaviortree">
 <span id="3_behaviorTree.run_behaviortree"></span><code class="sig-prename descclassname">3_behaviorTree.</code><code class="sig-name descname">run_behaviortree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">json_file_path</span></em>, <em class="sig-param"><span class="n">log_file_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#behaviorTree.run_behaviortree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summary</p>
+<dd><p>Summary
+Runs decision tree classifier, TODO: needs to be broken up per #19</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>json_file_path</strong> (<em>TYPE</em>) – Description</p></li>
-<li><p><strong>log_file_path</strong> (<em>TYPE</em>) – Description</p></li>
+<li><p><strong>json_file_path</strong> (<em>str</em>) – Full filepath to config.json</p></li>
+<li><p><strong>log_file_path</strong> (<em>str</em>) – Full filepath to output.log file</p></li>
 </ul>
 </dd>
 </dl>
