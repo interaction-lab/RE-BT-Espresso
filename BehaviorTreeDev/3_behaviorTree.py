@@ -1,3 +1,8 @@
+"""Summary
+
+Attributes:
+    PRUNING_GRAPH_FILENAME (str): Description
+"""
 from sklearn import tree
 import graphviz
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
@@ -17,12 +22,25 @@ import pipeline_constants as constants
 PRUNING_GRAPH_FILENAME = "accuracy_vs_alpha.png"
 
 def plot_decision_tree(decision_tree_model, filename, feature_header):
+	"""Summary
+	
+	Args:
+	    decision_tree_model (TYPE): Description
+	    filename (TYPE): Description
+	    feature_header (TYPE): Description
+	"""
 	dot_data = tree.export_graphviz(decision_tree_model, out_file = None, \
 		feature_names = feature_header) 
 	graph = graphviz.Source(dot_data) 
 	graph.render(filename)
 
 def process_command_line_args():
+	"""!
+	
+	Returns:
+	    TYPE: Description
+	
+	"""
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-config", "--configuration", \
 		required = True, \
@@ -37,6 +55,12 @@ def process_command_line_args():
 
 
 def run_behaviortree(json_file_path, log_file_path):
+	"""Summary
+	
+	Args:
+	    json_file_path (TYPE): Description
+	    log_file_path (TYPE): Description
+	"""
 	json_manager = JsonManager(json_file_path)
 
 	log_file = open(log_file_path, "r")
@@ -164,6 +188,8 @@ def run_behaviortree(json_file_path, log_file_path):
 	report_file_obj.close()
 
 def main():
+	"""Runs the behavior tree via command line arguments
+	"""
 	json_file_path, log_file_path = process_command_line_args()
 	run_behaviortree(json_file_path, log_file_path)
 

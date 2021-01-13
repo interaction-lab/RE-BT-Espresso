@@ -1,0 +1,46 @@
+\hypertarget{md_README_autotoc_md1}{}\doxyparagraph{This repository was made to facilitate the investigations in developing behavior tree robot action policy from Socially Assistive Robot (\+S\+A\+R) Wizard of Oz (\+Wo\+Z) Interaction Data. This pipeline processes logged data from a Wo\+Z interaction and generates behavior trees, along with data on the accuracy of the conversion process. These behavior trees are ready to be used alongside the Behavior\+Tree.\+C\+P\+P library, and redeployed back in the robot.}\label{md_README_autotoc_md1}
+\DoxyHorRuler{0}
+ \hypertarget{md_README_autotoc_md3}{}\doxysection{Install}\label{md_README_autotoc_md3}
+
+\begin{DoxyEnumerate}
+\item Clone repo
+\item Create python3 \href{https://docs.python.org/3/library/venv.html}{\texttt{ virtual environment}} and activate it
+\item Install python3 requirements via {\ttfamily pip3 install -\/r requirements.\+txt}
+\begin{DoxyEnumerate}
+\item There are a couple
+\end{DoxyEnumerate}
+\item Fix \href{\#graphviz-pip-error}{\texttt{ graphviz error via package install}}
+\item Fix \href{\#pyeda-literal-error}{\texttt{ pyeda library error}}
+\end{DoxyEnumerate}\hypertarget{md_README_autotoc_md4}{}\doxysection{To run\+:}\label{md_README_autotoc_md4}
+
+\begin{DoxyItemize}
+\item Navigate to {\ttfamily Behavior\+Tree\+Dev/}
+\item edit {\ttfamily config.\+json}
+\item {\ttfamily python3}\+: run {\ttfamily python3 run.\+py}
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md5}{}\doxysection{Dependencies}\label{md_README_autotoc_md5}
+
+\begin{DoxyItemize}
+\item \href{https://www.python.org/downloads/}{\texttt{ Python 3}}
+\item \href{https://pandas.pydata.org/pandas-docs/stable/index.html}{\texttt{ pandas}}
+\item \href{https://scikit-learn.org/stable/index.html}{\texttt{ scikit-\/learn}}
+\item \href{https://imbalanced-learn.readthedocs.io/en/stable/index.html}{\texttt{ imblearn}}
+\item \href{https://graphviz.readthedocs.io/en/stable/index.html}{\texttt{ graphviz}}
+\item \href{https://matplotlib.org/}{\texttt{ matplotlib}}
+\item \href{https://lxml.de/}{\texttt{ lxml}}
+\item \href{https://py-trees.readthedocs.io/en/devel/}{\texttt{ py\+\_\+trees}}
+\end{DoxyItemize}
+
+See {\ttfamily requirements.\+txt} for all python3 packages (currently bugged on W\+SL). There are two other install issues due to issue with {\ttfamily graphiz} and {\ttfamily pyeda} packages. Fixes below.\hypertarget{md_README_autotoc_md6}{}\doxysubsection{graphviz pip error}\label{md_README_autotoc_md6}
+graphiz for python is broken. Instead, install via package manager\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{sudo apt-\/get install graphviz}
+\end{DoxyCode}
+
+
+For O\+SX, likely you will need to {\ttfamily brew install} but this is yet to be tested.\hypertarget{md_README_autotoc_md7}{}\doxysubsection{pyeda literal error}\label{md_README_autotoc_md7}
+There is a bug is Pyeda library. See \href{https://github.com/interaction-lab/BTFromSARDemostration/issues/17}{\texttt{ \#17}} for fix.
+
+\DoxyHorRuler{0}
+
+
+The behavior tree X\+ML file(s) that are generated from the pipeline follow the X\+ML format for behavior trees presented in \href{https://www.behaviortree.dev/}{\texttt{ Behavior\+Tree.\+C\+PP}} and \href{https://github.com/BehaviorTree/Groot}{\texttt{ Groot}}. 

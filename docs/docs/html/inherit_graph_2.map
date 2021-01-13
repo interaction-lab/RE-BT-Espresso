@@ -1,0 +1,12 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,261,93,287"/>
+<area shape="rect" id="node2" href="$classrobot__behaviors_1_1Check__ExerciseSubmissionExists.html" title=" " alt="" coords="142,5,339,47"/>
+<area shape="rect" id="node3" href="$classrobot__behaviors_1_1Check__ExerciseSubmissionResult.html" title=" " alt="" coords="141,71,340,112"/>
+<area shape="rect" id="node4" href="$classrobot__behaviors_1_1Check__IsNewExercise.html" title=" " alt="" coords="155,136,326,177"/>
+<area shape="rect" id="node5" href="$classrobot__behaviors_1_1Check__KC.html" title=" " alt="" coords="143,202,338,229"/>
+<area shape="rect" id="node6" href="$classrobot__behaviors_1_1Correct__submission__dialogue.html" title=" " alt="" coords="151,253,330,295"/>
+<area shape="rect" id="node7" href="$classrobot__behaviors_1_1Do__nothing.html" title=" " alt="" coords="166,319,315,360"/>
+<area shape="rect" id="node8" href="$classrobot__behaviors_1_1Hint__dialogue.html" title=" " alt="" coords="161,384,320,425"/>
+<area shape="rect" id="node9" href="$classrobot__behaviors_1_1Incorrect__submission__dialogue.html" title=" " alt="" coords="147,449,335,491"/>
+<area shape="rect" id="node10" href="$classrobot__behaviors_1_1New__exercise__dialogue.html" title=" " alt="" coords="161,515,321,556"/>
+</map>
