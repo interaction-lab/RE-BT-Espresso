@@ -61,12 +61,13 @@ def dt_to_pstring_recursive(dt, node_index, current_letter, current_pstring, sym
 		if "_" in feature_names[dt.feature[node_index]]:
 			true_rule = feature_names[dt.feature[node_index]] + " == False"
 		else:
-			true_rule = feature_names[dt.feature[node_index]] + " <= " + str(round(dt.threshold[node_index], 3))
+			true_rule = feature_names[dt.feature[node_index]] + " <= " + str(round(dt.threshold[node_index], 3)) #TODO config this threshold
 		false_rule = invert_expression(true_rule)
 
 		true_letter = None
 		false_letter = None
 
+		#TODO: check in on this and vs or for this
 		if (not true_rule in sym_lookup) and (not false_rule in sym_lookup):
 			add_to_dict(sym_lookup, true_rule, current_letter)
 			current_letter = chr(ord(current_letter) + 1)
