@@ -1,5 +1,6 @@
 import py_trees as pt
 from robot_behaviors import*
+from globals import robot_vars, env_vars
 
 class Robot():
     def __init__(self):

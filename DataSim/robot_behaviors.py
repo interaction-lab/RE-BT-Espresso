@@ -1,5 +1,4 @@
 import py_trees as pt
-from robot_behaviors import*
 
 class Check_IsNewExercise(pt.behaviour.Behaviour):
     def __init__(self):
@@ -49,7 +48,6 @@ class Check_KC(pt.behaviour.Behaviour):
         else:
             return pt.common.Status.FAILURE
         
-
 class New_exercise_dialogue(pt.behaviour.Behaviour):
     def __init__(self):
         super().__init__(name="new_exercise_dialogue")
