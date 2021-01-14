@@ -7,8 +7,15 @@ import json
 import cleanPilotHelpers as tools
 import ntpath # work on this
 
+
+# format header
+# [time, visa, currentTKC, row[3], row[4], dialogue, currentExerciseChange, row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[21], ppa, row[23], row[24], KC, tsla, tw, isThereMoreScaff]
+header_row = ["time", "visa", "currentTKC", "row[3]", "row[4]", "dialogue", "currentExerciseChange", "row[7]", "row[8]", "row[9]", "row[10]", "row[11]", "row[12]", "row[13]", "row[14]", "row[15]", "row[16]", "row[17]", "row[18]", "row[19]", "row[20]", "row[21]", "ppa", "row[23]", "row[24]", "KC", "tsla", "tw", "isThereMoreScaff"]
+
+
 folder_name = "clean_data_NEW"
 modified_extension = "_mod"
+
 
 def makeModName(path):
 	filename_root, filename_ext = os.path.splitext(os.path.basename(path))
@@ -38,7 +45,9 @@ for file in os.listdir(directory):
 		with open(absolutePath) as csvfile, open(filenameEdited, mode='w') as csvfileMod:
 			csv_reader = csv.reader(csvfile, delimiter = ',')
 			next(csv_reader, None) # skip headers
+
 			csv_writer = csv.writer(csvfileMod, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+			csv_writer.writerow(header_row)
 
 			# currentExercise = 0
 			startingTime = tools.getTime(next(csv_reader, None))
