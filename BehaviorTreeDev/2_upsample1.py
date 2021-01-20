@@ -3,6 +3,7 @@ import argparse
 from imblearn.over_sampling import SVMSMOTE
 import numpy as np
 import os
+import shutil
 import argparse
 import json
 from json_manager import JsonManager
@@ -22,6 +23,9 @@ def process_command_line_args():
 
 def run_upsample(json_file_path, fmt_file_path):
 	json_manager = JsonManager(json_file_path)
+
+	if os.path.exists(constants.UPSAMPLED_CSV_FOLDER_NAME):
+		shutil.rmtree(constants.UPSAMPLED_CSV_FOLDER_NAME)
 
 	if json_manager.get_upsample_status() == True:
 		upsampled_path = json_manager.get_upsampled_path()

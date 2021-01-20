@@ -16,6 +16,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 import os
+import shutil
 import json
 import behaviorTree_Builder as btBuilder
 from json_manager import JsonManager
@@ -117,7 +118,7 @@ class Runner:
 
 	def get_output_full_path(self, kFold, max_depth):
 		output_folder = constants.add_folder_to_directory(\
-			constants.OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
+			constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
 		folder_name = "{}_kFold_{}_maxDepth".format(kFold, max_depth)
 		return constants.add_folder_to_directory(folder_name, output_folder)
 
@@ -144,6 +145,9 @@ class Runner:
 	def run(self):
 		"""Reads in data, trains, and reports results
 		"""
+		if os.path.exists(constants.PIPELINE_OUTPUT_FOLDER_NAME):
+			shutil.rmtree(constants.PIPELINE_OUTPUT_FOLDER_NAME)
+
 		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
 
 		self.supervised_learning_dataframe = pd.read_csv(self.get_supervised_data_csv_filepath())

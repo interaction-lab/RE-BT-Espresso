@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import shutil
 import csv
 import pandas as pd
 from json_manager import JsonManager
@@ -59,6 +60,9 @@ def run_normalize(json_file_path):
 	label_columns = json_manager.get_label_columns()
 	lag_features = json_manager.get_lag_features()
 	lag_window_length = json_manager.get_sliding_window_length()
+
+	if os.path.exists(constants.NORMALIZED_CSV_FOLDER_NAME):
+		shutil.rmtree(constants.NORMALIZED_CSV_FOLDER_NAME)
 
 	destination_path = constants.add_folder_to_directory(\
 		constants.NORMALIZED_CSV_FOLDER_NAME, normalized_folder)

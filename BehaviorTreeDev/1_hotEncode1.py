@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import argparse
 import os
+import shutil
 import json
 import csv
 import pipeline_constants as constants
@@ -77,6 +78,9 @@ def run_hotencode(json_file_path):
 	categorical_features = json_manager.get_categorical_features()
 	binary_features = json_manager.get_binary_features()
 	hot_encoded_path = json_manager.get_hot_encoded_path()
+
+	if os.path.exists(constants.HOT_ENCODED_CSV_FOLDER_NAME):
+		shutil.rmtree(constants.HOT_ENCODED_CSV_FOLDER_NAME)
 
 	normalized_folder = os.fsdecode(os.path.join(\
 		json_manager.get_normalized_path(), \
