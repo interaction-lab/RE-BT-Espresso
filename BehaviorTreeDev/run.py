@@ -30,8 +30,12 @@ def parse_args():
 		json_file_path = args["path"]
 
 def main():
-	"""Summary
+	"""Runs the full pipeline end to end
+	'-p, --path' - [optional] Path to json config
 	"""
+
+	parse_args()
+
 	print("Start")
 	print("Normalizing")
 	normalize_0.run_normalize(json_file_path)
