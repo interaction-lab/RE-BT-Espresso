@@ -1,0 +1,17 @@
+{
+    "p_SenseCorrect": {
+        "Check_IsNewExercise": 1,
+        "Check_ExerciseSubmissionResult": 1,
+        "Check_ExerciseSubmissionExists": 1,
+        "Check_KC": 1
+    },
+    
+    "p_ActCorrect": {
+        "New_Exercise_Dialogue": 0.5,
+        "Correct_Submission_Dialogue": 0.5,
+        "Incorrect_Submission_Dialogue": 0.5,
+        "Hint_Dialogue": 0.5
+    }
+}
+  
+  

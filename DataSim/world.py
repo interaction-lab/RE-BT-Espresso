@@ -3,7 +3,11 @@ import random
 from globals import*
 
 class World():
-    def __init__(self):
+    def __init__(self, p_SubmissionCorrect):
+        self.p_SubmissionCorrect = p_SubmissionCorrect
+        self.setup()
+        
+    def setup(self):
         self.blackboard = pt.blackboard.Client(name="World")
         self.init_read_write_access()
         self.reset_world_state()
@@ -34,7 +38,7 @@ class World():
         return self.blackboard.Submit
 
     def evaluate_submission(self):
-        if random.random() < 0.5:
+        if random.random() < self.p_SubmissionCorrect:
             self.blackboard.ExerciseSubmissionResult = True
         else:
             self.blackboard.ExerciseSubmissionResult = False
@@ -50,4 +54,4 @@ class World():
             self.blackboard.IsNewExercise = False
 
     def update_time(self):
-        self.blackboard.Time += random.randint(0, 10)
+        self.blackboard.Time += 1
