@@ -5,6 +5,8 @@ import copy
 import py_trees.decorators
 import py_trees.display
 
+import re
+
 from pyeda.inter import *
 from pyeda.boolalg.expr import _LITS
 
@@ -173,7 +175,6 @@ def make_condition_node(sym_lookup_dict, every_operand):
 	return node
 
 def recursive_build(pstring_expr, sym_lookup_dict):
-	# print("pstring_expr: {}".format(pstring_expr))
 	operator = pstring_expr.to_ast()[0]
 	new_branch = None
 	recursive = False
@@ -184,12 +185,10 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 		recursive = True
 		new_branch = py_trees.composites.Selector(name = "Selector")
 	else:
-		# print("making use of new part...")
 		new_branch = make_condition_node(sym_lookup_dict, pstring_expr.to_ast())
 
 	if recursive:
 		for every_operand in pstring_expr.to_ast()[1:]:
-			# print("every_operand: {}".format(every_operand))
 			if every_operand[0] == AND or every_operand[0] == OR:
 				node = recursive_build(ast2expr(every_operand), sym_lookup_dict)
 				new_branch.add_child(node)
@@ -201,9 +200,9 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 
 def pstring_to_btree(action_dict, sym_lookup_dict):
 	root = py_trees.composites.Parallel(name = "Parallel Root")
-	# print(action_dict)
-	for action in action_dict:
-		action_node = py_trees.behaviours.Success(name = action)
+	
+	for i, action in action_dict:
+		action_node = py_trees.behaviours.Success(name = re.sub('[^A-Za-z0-9]+', '', action))
 		top_conditional_seq_node = recursive_build(action_dict[action], sym_lookup_dict)
 		final_behavior_node = None
 		
@@ -211,7 +210,7 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
 			and not isinstance(top_conditional_seq_node, py_trees.composites.Selector)
 
 		if is_single_condition_node: 
-			top_seq_node_addition = py_trees.composites.Sequence(name = "Sequence") #this is likely looping
+			top_seq_node_addition = py_trees.composites.Sequence(name = "Sequence")
 			top_seq_node_addition.add_child(top_conditional_seq_node)
 			final_behavior_node = top_seq_node_addition
 		else:
@@ -236,4 +235,4 @@ def bt_espresso_mod(dt, feature_names, label_names):
 	return btree
 
 def save_tree(tree, filename):
-	py_trees.display.render_dot_tree(tree, name = constants.BEHAVIOR_TREE_XML_FILENAME, target_directory = filename)
+	py_trees.display.render_dot_tree(tree, name = constants.BEHAVIOR_TREE_XML_FILENAME, with_blackboard_variables=False, target_directory = filename)
