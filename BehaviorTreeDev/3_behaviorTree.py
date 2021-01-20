@@ -207,6 +207,8 @@ class Runner:
 			decision_tree_obj = clf.tree_
 
 			# theoretical split to dump decision trees out to files
+			if i == 20:
+				print("idk")
 			behavior_tree_obj = btBuilder.bt_espresso_mod(\
 				decision_tree_obj, self.features_data.columns, label_encoding)
 

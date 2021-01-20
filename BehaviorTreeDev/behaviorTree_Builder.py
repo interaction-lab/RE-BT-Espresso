@@ -1,5 +1,6 @@
 from lxml import etree
 import numpy as np
+import copy
 
 import py_trees.decorators
 import py_trees.display
@@ -202,15 +203,22 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
 	root = py_trees.composites.Parallel(name = "Parallel Root")
 	# print(action_dict)
 	for action in action_dict:
-		behavior_node = recursive_build(action_dict[action], sym_lookup_dict)
 		action_node = py_trees.behaviours.Success(name = action)
-		if isinstance(behavior_node, py_trees.decorators.Inverter):
-			temp_sequence = py_trees.composites.Sequence(name = "Sequence")
-			temp_sequence.add_child(behavior_node)
-			behavior_node = temp_sequence
-		behavior_node.add_child(action_node)
-		root.add_child(behavior_node)
-	# save_tree(root)
+		top_conditional_seq_node = recursive_build(action_dict[action], sym_lookup_dict)
+		final_behavior_node = None
+		
+		is_single_condition_node = not isinstance(top_conditional_seq_node, py_trees.composites.Sequence)\
+			and not isinstance(top_conditional_seq_node, py_trees.composites.Selector)
+
+		if is_single_condition_node: 
+			top_seq_node_addition = py_trees.composites.Sequence(name = "Sequence") #this is likely looping
+			top_seq_node_addition.add_child(top_conditional_seq_node)
+			final_behavior_node = top_seq_node_addition
+		else:
+			final_behavior_node = top_conditional_seq_node
+
+		final_behavior_node.add_child(action_node)
+		root.add_child(final_behavior_node)
 	return root
 
 def max_prune(dt):
