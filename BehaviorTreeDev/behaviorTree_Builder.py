@@ -201,7 +201,7 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 def pstring_to_btree(action_dict, sym_lookup_dict):
 	root = py_trees.composites.Parallel(name = "Parallel Root")
 	
-	for i, action in action_dict:
+	for action in action_dict:
 		action_node = py_trees.behaviours.Success(name = re.sub('[^A-Za-z0-9]+', '', action))
 		top_conditional_seq_node = recursive_build(action_dict[action], sym_lookup_dict)
 		final_behavior_node = None
