@@ -19,11 +19,15 @@ behaviortree_3 = __import__('3_behaviorTree')
 json_file_path = "config.json"
 output_file_path = "output.log"
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--path", required = False, help = "Path to json config")
-args = vars(ap.parse_args())
-json_file_path = args["path"]
 
+
+def parse_args():
+	global json_file_path
+	ap = argparse.ArgumentParser()
+	ap.add_argument("-p", "--path", required = False, help = "Path to json config")
+	args = vars(ap.parse_args())
+	if "path" in args and args["path"] != "":
+		json_file_path = args["path"]
 
 def main():
 	"""Summary
