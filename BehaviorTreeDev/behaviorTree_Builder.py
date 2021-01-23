@@ -170,26 +170,28 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 	# remove lower variable
 	for action, condition_pstring in pstring_dict.items():
 		if condition_pstring.to_ast()[0] == OR:
+			new_pstring = "("
+			new_pstring_list = []
 			for dnf in condition_pstring.to_ast()[1:]:
 				to_remove_set = set()
-				lit_list = dnf[1:]
-				for lit_tuple in lit_list:
+
+				# Build remove set
+				for lit_tuple in dnf[1:]:
 					letter_key = int_to_condition(lit_tuple[1])
 					if letter_key in containing_float_dict:
 						to_remove_set.update(containing_float_dict[letter_key])
 
-				n = len(lit_list)
-				print(type(lit_list))
-				for i in range(n):
-					lit_tuple = lit_list[i]
-					letter_key = int_to_condition(lit_tuple[1])
-					if letter_key in to_remove_set:
-						lit_list.remove(i)
-						i -= 1
+				# Remove all contained floats
+				new_pstring_list.append([int_to_condition(lit_tup[1]) for lit_tup in dnf[1:] if int_to_condition(lit_tup[1]) not in to_remove_set])
+				
+			ors = str(new_pstring_list).replace(',', ' &')\
+											  .replace("[", "(")\
+											  .replace("]", ")")\
+											  .replace(") & (", ") | (")\
+											  .replace("\'", "")
+			new_pstring += ors + ")"
 
-				# make a set on first pass
-				# remove on second pass
-	
+			pstring_dict[action] = expr(new_pstring).to_nnf()
 	return pstring_dict
 
 def factorize_pstring(pstring_dict):
