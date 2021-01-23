@@ -132,6 +132,66 @@ def get_common_conditions(condition_pstring):
 def int_to_condition(int_condition):
 	return str(_LITS[int_condition])
 
+
+def is_float_key(k_in):
+	return "<=" in k_in
+
+def get_key_from_float_expr(k_in):
+	return k_in.split("<=")[0], float(k_in.split("<=")[1][1:])
+
+def generate_all_containing_float_variable_dict(sym_lookup):
+	#all keys are just stripped versions
+	# put both float vars in dict,
+	containing_float_dict = {} # key is lookup of
+	feature_look_up = {}
+	for key, value in sym_lookup.items():
+		if is_float_key(key):
+			f_key, f_val = get_key_from_float_expr(key)
+			if f_key not in feature_look_up:
+				feature_look_up[f_key] = [(f_val, value)]
+			else:
+				feature_look_up[f_key].append((f_val,value))
+	for f in feature_look_up:
+		feature_look_up[f].sort(key = lambda x: x[0])
+		l = feature_look_up[f]
+		for i in range(len(l) - 1):
+			tup = l[i]
+			sym = tup[1]
+			containing_float_dict[sym] = {x[1] for x in l[i+1:]}
+	return containing_float_dict
+
+
+
+def remove_float_contained_variables(sym_lookup, pstring_dict):
+	# get dictionary of all replaceable factors
+	containing_float_dict = generate_all_containing_float_variable_dict(sym_lookup)
+
+	# find all conditions with both variables
+	# remove lower variable
+	for action, condition_pstring in pstring_dict.items():
+		if condition_pstring.to_ast()[0] == OR:
+			for dnf in condition_pstring.to_ast()[1:]:
+				to_remove_set = set()
+				lit_list = dnf[1:]
+				for lit_tuple in lit_list:
+					letter_key = int_to_condition(lit_tuple[1])
+					if letter_key in containing_float_dict:
+						to_remove_set.update(containing_float_dict[letter_key])
+
+				n = len(lit_list)
+				print(type(lit_list))
+				for i in range(n):
+					lit_tuple = lit_list[i]
+					letter_key = int_to_condition(lit_tuple[1])
+					if letter_key in to_remove_set:
+						lit_list.remove(i)
+						i -= 1
+
+				# make a set on first pass
+				# remove on second pass
+	
+	return pstring_dict
+
 def factorize_pstring(pstring_dict):
 	for action, condition_pstring in pstring_dict.items():
 		can_simplify = condition_pstring.to_ast()[0] == OR
@@ -229,6 +289,7 @@ def bt_espresso_mod(dt, feature_names, label_names):
 	action_minimized = {}
 	for action in action_to_pstring:
 		action_minimized[action] = espresso_exprs(expr(action_to_pstring[action]).to_dnf())[0] # logic minimization
+	action_minimized = remove_float_contained_variables(sym_lookup, action_minimized) # remove float conditions within ands e.g., (f1 < .05 & f1 < .5) -> (f1 < .05)
 	action_minimized = factorize_pstring(action_minimized) # factorize pstrings
 	btree = pstring_to_btree(action_minimized, sym_lookup) # convert pstrings to btree
 	return btree
