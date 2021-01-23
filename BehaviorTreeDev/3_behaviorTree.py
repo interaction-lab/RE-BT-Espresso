@@ -180,6 +180,7 @@ class Runner:
 		clf = clf.fit(self.features_data, self.labels_data)
 		dot_pdf_full_path = os.fsdecode(os.path.join(output_full_path, dot_pdf_header))
 		plot_decision_tree(clf, dot_pdf_full_path, self.features_data.columns)
+		potatos = list(self.features_data.columns)
 
 		prune_path = clf.cost_complexity_pruning_path(self.features_data, self.labels_data)
 		ccp_alphas, impurities = prune_path.ccp_alphas, prune_path.impurities

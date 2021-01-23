@@ -49,7 +49,6 @@ def get_key(dictionary, val):
     for key, value in dictionary.items():
          if val == value:
              return key
- 
     return "key doesn't exist"
 
 #in order traversal

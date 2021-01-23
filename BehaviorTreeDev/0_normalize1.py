@@ -10,6 +10,7 @@ import pipeline_constants as constants
 
 CSV_EXTENSIONS = (".csv", ".CSV")
 CSV_NAME_EXTENSION = "_normalized"
+LAST_ACTION_TAKEN_COLUMN_NAME = "last_action_taken"
 
 def is_file_CSV(filename):
 	return filename.endswith(CSV_EXTENSIONS)
@@ -38,7 +39,7 @@ def process_command_line_args():
 	return args["configuration"]
 
 
-def generate_feature_col_dictionary(header_row, feature_list):
+def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
 	feature_columns = dict()
 	for column_name in feature_list:
 		# loop over header
@@ -50,6 +51,8 @@ def generate_feature_col_dictionary(header_row, feature_list):
 				break
 		if not found_column:
 			raise Exception("Could not find feature column " + column_name)
+	if not is_label_indices:
+		feature_columns[LAST_ACTION_TAKEN_COLUMN_NAME] = len(feature_columns)
 	return feature_columns
 
 def run_normalize(json_file_path):
@@ -70,6 +73,8 @@ def run_normalize(json_file_path):
 	for file in os.listdir(csv_folder):
 		complete_file_path = os.fsdecode(os.path.join(csv_folder, file))
 
+		last_action_taken = None
+
 		if is_file_CSV(file):
 			normalized_filename = make_modified_filename(\
 				file, CSV_NAME_EXTENSION)
@@ -89,15 +94,15 @@ def run_normalize(json_file_path):
 			all_lag_queues = [[""] * lag_window_length for lag_feature in lag_features]
 			
 			header_row = list(feature_list)
+			header_row.append(LAST_ACTION_TAKEN_COLUMN_NAME)
 			header_row.append(constants.LABEL_COLUMN_NAME)
 			csv_writer.writerow(header_row)
 
 			header_row_being_read = True
 			for timeseries_row in csv_reader:
 				if header_row_being_read:					
-					feature_columns = generate_feature_col_dictionary(timeseries_row, feature_list)
-					label_indices = list(generate_feature_col_dictionary(timeseries_row, label_columns).values())
-
+					feature_columns = generate_feature_col_dictionary(timeseries_row, feature_list, False)
+					label_indices = list(generate_feature_col_dictionary(timeseries_row, label_columns, True).values())
 					header_row_being_read = False
 					continue
 
@@ -113,10 +118,13 @@ def run_normalize(json_file_path):
 							lagged_feature = update_lag_feature_queue(\
 								all_lag_queues[index], timeseries_row[column_index])
 							new_normalize_row.append(lagged_feature)
+						elif column_name == LAST_ACTION_TAKEN_COLUMN_NAME:
+							new_normalize_row.append(last_action_taken)
 						else:
 							new_normalize_row.append(\
 								timeseries_row[feature_columns[column_name]])
 					new_normalize_row.append(label_value)
+					last_action_taken = label_value
 					csv_writer.writerow(new_normalize_row)
 				else: 
 					for column_index, column_name in enumerate(lag_features):
