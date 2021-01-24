@@ -174,7 +174,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 	# find all conditions with both variables
 	# remove lower variable
 	for action, condition_pstring in pstring_dict.items():
-		if condition_pstring.to_ast()[0] == OR:
+		if condition_pstring.to_ast()[0] == OR: # broken on sing And(a,b) and single literal (a)
 			if action == 'Dialogue: 3':
 				print(condition_pstring)
 			new_pstring = "("
