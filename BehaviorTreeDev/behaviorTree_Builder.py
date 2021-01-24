@@ -174,32 +174,37 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 	# find all conditions with both variables
 	# remove lower variable
 	for action, condition_pstring in pstring_dict.items():
-		if condition_pstring.to_ast()[0] == OR: # broken on sing And(a,b) and single literal (a)
-			if action == 'Dialogue: 3':
-				print(condition_pstring)
-			new_pstring = "("
-			new_pstring_list = []
-			for dnf in condition_pstring.to_ast()[1:]:
-				to_remove_set = set()
+		new_pstring = "("
+		new_pstring_list = []
 
-				# Build remove set
-				for lit_tuple in dnf[1:]:
-					letter_key = int_to_condition(lit_tuple[1])
-					if letter_key in containing_float_dict:
-						to_remove_set.update(containing_float_dict[letter_key])
+		# processes And well
+		expr_to_process = None
+		if condition_pstring.to_ast()[0] == OR:
+			expr_to_process = condition_pstring.to_ast()[1:]
+		elif condition_pstring.to_ast()[0] == AND:
+			expr_to_process = [condition_pstring.to_ast()]
+		else:
+			expr_to_process = [[None,condition_pstring.to_ast()]]
 
-				# Remove all contained floats
-				new_pstring_list.append([int_to_condition(lit_tup[1]) for lit_tup in dnf[1:] if int_to_condition(lit_tup[1]) not in to_remove_set])
+		for dnf in expr_to_process:
+			to_remove_set = set()
 
-			ors = str(new_pstring_list).replace(',', ' &')\
-										.replace("[", "(")\
-										.replace("]", ")")\
-										.replace(") & (", ") | (")\
-										.replace("\'", "")
-			new_pstring += ors + ")"
-			if action == 'Dialogue: 3':
-				print(new_pstring)
-			pstring_dict[action] = expr(new_pstring).to_nnf()
+			# Build remove set
+			for lit_tuple in dnf[1:]:
+				letter_key = int_to_condition(lit_tuple[1])
+				if letter_key in containing_float_dict:
+					to_remove_set.update(containing_float_dict[letter_key])
+
+			# Remove all contained floats
+			new_pstring_list.append([int_to_condition(lit_tup[1]) for lit_tup in dnf[1:] if int_to_condition(lit_tup[1]) not in to_remove_set])
+
+		ors = str(new_pstring_list).replace(',', ' &')\
+									.replace("[", "(")\
+									.replace("]", ")")\
+									.replace(") & (", ") | (")\
+									.replace("\'", "")
+		new_pstring += ors + ")"
+		pstring_dict[action] = expr(new_pstring).to_nnf()
 	return pstring_dict
 
 def factorize_pstring(pstring_dict):
@@ -299,8 +304,6 @@ def bt_espresso_mod(dt, feature_names, label_names):
 		return py_trees.composites.Parallel(name = "Parallel Root")
 	sym_lookup, action_to_pstring = dt_to_pstring(dt, feature_names, label_names)
 	action_minimized = {}
-	if(itercount == 10):
-		print("here")
 	for action in action_to_pstring:
 		action_minimized[action] = espresso_exprs(expr(action_to_pstring[action]).to_dnf())[0] # logic minimization
 	action_minimized = remove_float_contained_variables(sym_lookup, action_minimized) # remove float conditions within ands e.g., (f1 < .05 & f1 < .5) -> (f1 < .05)
