@@ -158,6 +158,11 @@ def generate_all_containing_float_variable_dict(sym_lookup):
 			tup = l[i]
 			sym = tup[1]
 			containing_float_dict[sym] = {x[1] for x in l[i+1:]}
+		feature_look_up[f].sort(key = lambda x: x[0], reverse=True)
+		for i in range(len(l) - 1):
+			tup = l[i]
+			sym = tup[1]
+			containing_float_dict['~' + sym] = {'~' + x[1] for x in l[i+1:]}
 	return containing_float_dict
 
 
@@ -170,6 +175,8 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 	# remove lower variable
 	for action, condition_pstring in pstring_dict.items():
 		if condition_pstring.to_ast()[0] == OR:
+			if action == 'Dialogue: 3':
+				print(condition_pstring)
 			new_pstring = "("
 			new_pstring_list = []
 			for dnf in condition_pstring.to_ast()[1:]:
@@ -183,14 +190,15 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 
 				# Remove all contained floats
 				new_pstring_list.append([int_to_condition(lit_tup[1]) for lit_tup in dnf[1:] if int_to_condition(lit_tup[1]) not in to_remove_set])
-				
-			ors = str(new_pstring_list).replace(',', ' &')\
-											  .replace("[", "(")\
-											  .replace("]", ")")\
-											  .replace(") & (", ") | (")\
-											  .replace("\'", "")
-			new_pstring += ors + ")"
 
+			ors = str(new_pstring_list).replace(',', ' &')\
+										.replace("[", "(")\
+										.replace("]", ")")\
+										.replace(") & (", ") | (")\
+										.replace("\'", "")
+			new_pstring += ors + ")"
+			if action == 'Dialogue: 3':
+				print(new_pstring)
 			pstring_dict[action] = expr(new_pstring).to_nnf()
 	return pstring_dict
 
@@ -284,16 +292,21 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
 def max_prune(dt):
 	return is_leaf_node(dt, 0)
 
+itercount = 0
 def bt_espresso_mod(dt, feature_names, label_names):
+	global itercount
 	if max_prune(dt): 
 		return py_trees.composites.Parallel(name = "Parallel Root")
 	sym_lookup, action_to_pstring = dt_to_pstring(dt, feature_names, label_names)
 	action_minimized = {}
+	if(itercount == 10):
+		print("here")
 	for action in action_to_pstring:
 		action_minimized[action] = espresso_exprs(expr(action_to_pstring[action]).to_dnf())[0] # logic minimization
 	action_minimized = remove_float_contained_variables(sym_lookup, action_minimized) # remove float conditions within ands e.g., (f1 < .05 & f1 < .5) -> (f1 < .05)
 	action_minimized = factorize_pstring(action_minimized) # factorize pstrings
 	btree = pstring_to_btree(action_minimized, sym_lookup) # convert pstrings to btree
+	itercount += 1
 	return btree
 
 def save_tree(tree, filename):
