@@ -22,7 +22,6 @@ class Check_IsNewExercise(Sense):
         super().__init__(name="new_exercise_dialogue", p_correct=p)
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="IsNewExercise", access=pt.common.Access.READ)
-        #self.p_correct = p_correct
         
     def check(self):
         if self.blackboard.IsNewExercise:
@@ -97,7 +96,7 @@ class New_exercise_dialogue(Act):
 
 class Correct_submission_dialogue(Act):
     def __init__(self, p):
-        super().__init__(name="correct_exercise_dialogue", p_correct=p)
+        super().__init__(name="correct_submission_dialogue", p_correct=p)
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
 
@@ -107,7 +106,7 @@ class Correct_submission_dialogue(Act):
 
 class Incorrect_submission_dialogue(Act):
     def __init__(self, p):
-        super().__init__(name="correct_exercise_dialogue", p_correct=p)
+        super().__init__(name="incorrect_submission_dialogue", p_correct=p)
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
 
@@ -127,7 +126,7 @@ class Hint_dialogue(Act):
 
 class Do_nothing(pt.behaviour.Behaviour):
     def __init__(self):
-        super().__init__(name="hint_dialogue")
+        super().__init__(name="")
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
 

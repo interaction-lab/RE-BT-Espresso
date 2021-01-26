@@ -7,6 +7,8 @@ import globals as g
 from robot import Robot
 from world import World
 from student import Student
+from tree_units import*
+
 
 def main():
     print("start")
@@ -17,7 +19,8 @@ def main():
         s = Student(**json.loads(sc.read()))
         
     with open(g.robot_cfg_path) as rc:
-        r = Robot(**json.loads(rc.read()))
+        r = Tree_Basic(**json.loads(rc.read()))
+        r.render_tree()
         
     with open(g.world_cfg_path) as wc:
         w = World(**json.loads(wc.read()))
