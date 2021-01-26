@@ -25,6 +25,10 @@ class Tree():
             "action_2": Correct_submission_dialogue(self.p_ActCorrect["Correct_Submission_Dialogue"]),
             "action_3": Incorrect_submission_dialogue(self.p_ActCorrect["Incorrect_Submission_Dialogue"]),
             "action_4": Hint_dialogue(self.p_ActCorrect["Hint_Dialogue"]),
+            "action_5": Check_KC(self.p_SenseCorrect["Check_KC"]),
+            "action_6": Check_ExerciseSubmissionExists(self.p_SenseCorrect["Check_ExerciseSubmissionExists"]),
+            "action_7": Check_ExerciseSubmissionResult(self.p_SenseCorrect["Check_ExerciseSubmissionResult"]),
+            "action_8": Check_IsNewExercise(self.p_SenseCorrect["Check_IsNewExercise"])
         }
 
     def init_read_write_access(self):
@@ -60,7 +64,6 @@ class Tree_Basic(Tree):
         
         for child in self.child_list:
             if child["inverted"]:
-    
                 self.root.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=self.behavior_dict[child["name"]]))
             else:
                 self.root.add_child(self.behavior_dict[child["name"]])
