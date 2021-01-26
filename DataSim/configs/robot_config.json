@@ -11,7 +11,23 @@
         "Correct_Submission_Dialogue": 0.5,
         "Incorrect_Submission_Dialogue": 0.5,
         "Hint_Dialogue": 0.5
-    }
+    },
+
+    "type": "selector",
+    "child_list": [
+        {
+            "name": "action_1",
+            "inverted": false
+        },
+        {
+            "name": "action_3",
+            "inverted": true
+        },
+        {
+            "name": "action_2",
+            "inverted": false
+        }
+    ]
 }
   
   
