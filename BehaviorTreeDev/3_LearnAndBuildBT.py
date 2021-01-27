@@ -18,7 +18,7 @@ import argparse
 import os
 import shutil
 import json
-import behaviorTree_Builder as btBuilder
+import BehaviorTreeBuilder as btBuilder
 from json_manager import JsonManager
 import pipeline_constants as constants
 
