@@ -123,7 +123,11 @@ def get_common_conditions(condition_pstring):
 	if condition_pstring.to_ast()[0] == OR:
 		all_condition_sets = []
 		for operand in condition_pstring.to_ast()[1:]:
-			list_conditions = [condition[1] for condition in operand[1:]]
+			list_conditions = None
+			if operand[0] == AND:
+				list_conditions = [condition[1] for condition in operand[1:]]
+			else:
+				list_conditions = [operand[1]]
 			all_condition_sets.append(list_conditions)
 		return list(set.intersection(*map(set, all_condition_sets))), all_condition_sets
 	else:
@@ -140,9 +144,7 @@ def get_key_from_float_expr(k_in):
 	return k_in.split("<=")[0], float(k_in.split("<=")[1][1:])
 
 def generate_all_containing_float_variable_dict(sym_lookup):
-	#all keys are just stripped versions
-	# put both float vars in dict,
-	containing_float_dict = {} # key is lookup of
+	containing_float_dict = {}
 	feature_look_up = {}
 	for key, value in sym_lookup.items():
 		if is_float_key(key):
@@ -151,6 +153,7 @@ def generate_all_containing_float_variable_dict(sym_lookup):
 				feature_look_up[f_key] = [(f_val, value)]
 			else:
 				feature_look_up[f_key].append((f_val,value))
+	
 	for f in feature_look_up:
 		feature_look_up[f].sort(key = lambda x: x[0])
 		l = feature_look_up[f]
@@ -181,14 +184,16 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 		expr_to_process = None
 		if condition_pstring.to_ast()[0] == OR:
 			expr_to_process = condition_pstring.to_ast()[1:]
-		elif condition_pstring.to_ast()[0] == AND:
-			expr_to_process = [condition_pstring.to_ast()]
 		else:
-			expr_to_process = [[None,condition_pstring.to_ast()]]
+			expr_to_process = [condition_pstring.to_ast()]
 
 		for dnf in expr_to_process:
 			to_remove_set = set()
 
+			if dnf[0] != AND: # condition is only literal
+				new_pstring_list.append([int_to_condition(dnf[1])])
+				continue
+				
 			# Build remove set
 			for lit_tuple in dnf[1:]:
 				letter_key = int_to_condition(lit_tuple[1])

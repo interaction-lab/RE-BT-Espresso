@@ -34,7 +34,7 @@
     
     "decision_tree_depth": 5,
     "k_fold": 5,
-    "SVMSMOTE_upsampling": true,
+    "SVMSMOTE_upsampling": false,
     "random_state": null
   }
   
