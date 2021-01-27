@@ -1,4 +1,5 @@
 import os
+import shutil
 
 NORMALIZED_CSV_FOLDER_NAME = "normalized_CSVs"
 COMBINED_CSV_FILENAME = "combined_csv.csv"
@@ -30,3 +31,13 @@ def add_folder_to_directory(folder_name, working_directory):
 	if not os.path.isdir(new_directory): 
 		os.makedirs(new_directory)
 	return new_directory
+
+def does_folder_exist_in_directory(folder_name, working_directory):
+	potential_directory = os.fsdecode(os.path.join(working_directory, folder_name))
+	return os.path.isdir(potential_directory), potential_directory
+
+def remove_folder_if_exists(folder_name, working_directory):
+	dir_exists, dir_path = does_folder_exist_in_directory(\
+		NORMALIZED_CSV_FOLDER_NAME, working_directory)
+	if dir_exists:
+		shutil.rmtree(dir_path)
