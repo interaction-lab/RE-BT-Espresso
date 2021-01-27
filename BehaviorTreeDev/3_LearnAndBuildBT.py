@@ -21,6 +21,7 @@ import json
 import BehaviorTreeBuilder as btBuilder
 from json_manager import JsonManager
 import pipeline_constants as constants
+import numpy as np
 
 PRUNING_GRAPH_FILENAME = "accuracy_vs_alpha.png"
 
@@ -118,30 +119,41 @@ class Runner:
 		return os.fsdecode(os.path.join(\
 				data_folder, filename))
 
-	def get_output_full_path(self, kFold, max_depth):
+	def create_output_folder(self, kFold, max_depth):
 		output_folder = constants.add_folder_to_directory(\
 			constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
 		folder_name = "{}_kFold_{}_maxDepth".format(kFold, max_depth)
 		return constants.add_folder_to_directory(folder_name, output_folder)
 
 
-	def train_decision_trees(self, kFold, max_depth, output_full_path):
-		self.clfs = []
-		self.trains_accu = []
-		self.test_accu = []
+	def k_fold_train_decision_tree_w_max_depth(self, num_k_folds, max_depth, output_full_path):
 
-		kf = KFold(shuffle = True, n_splits = kFold)
+		kf = KFold(shuffle = True, n_splits = num_k_folds)
+		# build full tree on all data
+		full_tree = tree.DecisionTreeClassifier(random_state = self.json_manager.get_random_state(), \
+				max_depth = max_depth).fit(self.features_data, self.labels_data)
+
+		# get set of alphas from cost_complexity_pruning
+		prune_path = full_tree.cost_complexity_pruning_path(self.features_data, self.labels_data)
+		ccp_alphas, impurities = prune_path.ccp_alphas, prune_path.impurities
+
+		self.train_scores = [0] * len(ccp_alphas)
+		self.test_scores = [0] * len(ccp_alphas)
+
+		# split data into train/test
 		for train_index, test_index in kf.split(self.features_data):
 			X_train, X_test = self.features_data.iloc[train_index], self.features_data.iloc[test_index]
 			y_train, y_test = self.labels_data.iloc[train_index], self.labels_data.iloc[test_index]
-
-			clf = tree.DecisionTreeClassifier(random_state = self.json_manager.get_random_state(), \
-				max_depth = max_depth)
-			clf = clf.fit(X_train, y_train)
-
-			self.trains_accu.append(clf.score(X_train, y_train))
-			self.test_accu.append(clf.score(X_test, y_test))
-			self.clfs.append(clf)
+			
+			# create tree on each alpha
+			for i, alpha in enumerate(ccp_alphas):
+				clf = tree.DecisionTreeClassifier(\
+					random_state = self.json_manager.get_random_state(), \
+					max_depth = max_depth, \
+					ccp_alpha=alpha)
+				clf = clf.fit(X_train, y_train)
+				self.train_scores[i] += clf.score(X_train, y_train) / num_k_folds
+				self.test_scores[i] += clf.score(X_test, y_test) / num_k_folds
 
 
 	def run(self):
@@ -154,13 +166,13 @@ class Runner:
 		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
 
 		self.supervised_learning_dataframe = pd.read_csv(self.get_supervised_data_csv_filepath())
-		self.features_data = self.supervised_learning_dataframe[list(self.supervised_learning_dataframe.columns)[:-1]]
-		self.labels_data = self.supervised_learning_dataframe[[list(self.supervised_learning_dataframe.columns)[-1]]]
+		self.features_data = self.supervised_learning_dataframe.loc[:, self.supervised_learning_dataframe.columns != constants.LABEL_COLUMN_NAME]
+		self.labels_data = self.supervised_learning_dataframe.loc[:, self.supervised_learning_dataframe.columns == constants.LABEL_COLUMN_NAME]
 
 		kFold = self.json_manager.get_kfold()
 		max_depth = self.json_manager.get_decision_tree_depth()
-		output_full_path = self.get_output_full_path(kFold, max_depth)
-		self.train_decision_trees(kFold, max_depth, output_full_path)
+		output_full_path = self.create_output_folder(kFold, max_depth)
+		self.k_fold_train_decision_tree_w_max_depth(kFold, max_depth, output_full_path)
 
 
 		report_file = "{}_kFold_{}_maxDepth.txt".format(kFold, max_depth)
@@ -170,10 +182,10 @@ class Runner:
 		report_file_obj = open(report_file_path, "w")
 		report_file_obj.write("Decision Tree with max_depth: {}, and kFold: {}\n".format(\
 			max_depth, kFold))
-		report_file_obj.write("	Average train error with {} fold: {}\n".format(\
-			kFold, sum(self.trains_accu)/len(self.trains_accu)))
-		report_file_obj.write("	Average test error with {} fold: {}\n".format(\
-			kFold, sum(self.test_accu)/len(self.test_accu)))
+		# report_file_obj.write("	Average train error with {} fold: {}\n".format(\
+		# 	kFold, sum(self.train_scores)/len(self.train_accu)))
+		# report_file_obj.write("	Average test error with {} fold: {}\n".format(\
+		# 	kFold, sum(self.test_accu)/len(self.test_accu)))
 		report_file_obj.write("	Decision Tree (DOT format) saved to: {}\n".format(dot_pdf_header))
 		report_file_obj.write("	Decision Tree (PDF format) saved to: {}.pdf\n".format(dot_pdf_header))
 		report_file_obj.write("Check {} for appropriate pruning.\n\n\n".format(PRUNING_GRAPH_FILENAME))
@@ -228,11 +240,14 @@ class Runner:
 		fig, ax = plt.subplots()
 		ax.set_xlabel("alpha")
 		ax.set_ylabel("accuracy")
-		ax.set_title("Accuracy vs alpha for training sets")
-		ax.plot(ccp_alphas, train_scores, marker='o', label="train", drawstyle="steps-post")
+		ax.set_title("Accuracy vs alpha for Final Tree Prunes (note: uses all data for final training)")
+		ax.plot(ccp_alphas, self.train_scores, marker='o', label="train", drawstyle="steps-post")
+		ax.plot(ccp_alphas, self.test_scores, marker='x', label="test", drawstyle="steps-post")
 		ax.legend()
 		graph_path = os.fsdecode(os.path.join(output_full_path, PRUNING_GRAPH_FILENAME))
 		plt.savefig(graph_path)
+
+	
 
 		report_file_obj.close()
 		print(f"BehaviorTree buidling finished, results in {output_full_path}")
