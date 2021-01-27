@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import argparse
 import os
-import shutil
 import json
 import csv
 import pipeline_constants as constants
@@ -78,6 +77,8 @@ def get_header_row(combined_csv_file):
 	    return d_reader.fieldnames
 
 def run_hotencode(json_file_path):
+	print(f"Hot encoding started using {json_file_path}")
+	
 	json_manager = JsonManager(json_file_path)
 	feature_list = json_manager.get_feature_columns()
 	categorical_features = json_manager.get_categorical_features()
@@ -85,12 +86,18 @@ def run_hotencode(json_file_path):
 	binary_features = json_manager.get_binary_features()
 	hot_encoded_path = json_manager.get_hot_encoded_path()
 
-	if os.path.exists(constants.HOT_ENCODED_CSV_FOLDER_NAME):
-		shutil.rmtree(constants.HOT_ENCODED_CSV_FOLDER_NAME)
+	constants.remove_folder_if_exists(\
+		constants.HOT_ENCODED_CSV_FOLDER_NAME, hot_encoded_path)
+
+	hot_encoded_folder = constants.add_folder_to_directory(\
+		constants.HOT_ENCODED_CSV_FOLDER_NAME, hot_encoded_path)
+	hot_encoded_file_path = os.fsdecode(os.path.join(\
+		hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
 
 	normalized_folder = os.fsdecode(os.path.join(\
 		json_manager.get_normalized_path(), \
 		constants.NORMALIZED_CSV_FOLDER_NAME))
+
 	combined_csv_file = os.fsdecode(os.path.join(\
 		normalized_folder, \
 		constants.COMBINED_CSV_FILENAME))
@@ -104,8 +111,6 @@ def run_hotencode(json_file_path):
 		features_data[binary_variable] = features_data[binary_variable].fillna(value=-1)
 		features_data[binary_variable] = features_data[binary_variable] * 1
 	binary_columns_array = features_data[binary_features].to_numpy()
-
-		# true_false_features(features_data, true_false_features)
 
 	# hot encoded features
 	hot_encoded_array, hot_encoded_header = hot_encode_features(\
@@ -126,14 +131,6 @@ def run_hotencode(json_file_path):
 			features_data_array, labels_column_array), \
 		axis = constants.COLUMN_AXIS)
 
-	hot_encoded_folder = constants.add_folder_to_directory(\
-		constants.HOT_ENCODED_CSV_FOLDER_NAME, hot_encoded_path)
-	hot_encoded_file_path = os.fsdecode(os.path.join(\
-		hot_encoded_folder, constants.HOT_ENCODED_CSV_FILENAME))
-	
-	if os.path.exists(hot_encoded_file_path): 
-		os.remove(hot_encoded_file_path)
-
 	# make_formatter_string(hot_encoded_header, numerical_columns, label_column)
 	hot_encode_fmt = "%i," * len(hot_encoded_header + binary_features) # format hot encoded columns to ints
 	feature_data_fmt = "%1.3f," * len(features_data.columns) # format numerical columns to doubles
@@ -153,6 +150,7 @@ def run_hotencode(json_file_path):
 	f.write("{}\n".format(total_fmt))
 	f.write(str((label_encoder.classes_).tolist()))
 	f.close()
+	print(f"Hot Encoding finished, results in {hot_encoded_file_path}")
 
 def main():
 	json_file_path = process_command_line_args()

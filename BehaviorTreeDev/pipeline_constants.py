@@ -12,7 +12,6 @@ UPSAMPLED_CSV_FILENAME = "upsampled_combined.csv"
 
 PIPELINE_OUTPUT_FOLDER_NAME = "pipeline_output"
 PRUNE_FOLDER_NAME = "Pruning"
-# BEHAVIOR_TREE_XML_FILENAME = "behaviorTree.xml"
 BEHAVIOR_TREE_XML_FILENAME = "behaviorTree"
 
 CSV_DELIMITER = ','
@@ -32,12 +31,19 @@ def add_folder_to_directory(folder_name, working_directory):
 		os.makedirs(new_directory)
 	return new_directory
 
-def does_folder_exist_in_directory(folder_name, working_directory):
-	potential_directory = os.fsdecode(os.path.join(working_directory, folder_name))
+
+def combine_folder_and_working_dir(folder_name, working_directory):
+	if working_directory:
+		return os.fsdecode(os.path.join(working_directory, folder_name))
+	return folder_name
+
+def does_folder_exist_in_directory(folder_name, working_directory=None):
+	potential_directory = combine_folder_and_working_dir(folder_name, working_directory)
 	return os.path.isdir(potential_directory), potential_directory
 
-def remove_folder_if_exists(folder_name, working_directory):
+def remove_folder_if_exists(folder_name, working_directory=None):
 	dir_exists, dir_path = does_folder_exist_in_directory(\
-		NORMALIZED_CSV_FOLDER_NAME, working_directory)
+		folder_name, working_directory)
 	if dir_exists:
+		print(f"Removing prior directory {dir_path}")
 		shutil.rmtree(dir_path)

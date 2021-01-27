@@ -64,6 +64,7 @@ def run_behaviortree(json_file_path, log_file_path):
 	    json_file_path (str): Full filepath to config.json
 	    log_file_path (str): Full filepath to output.log file 
 	"""
+
 	r = Runner(json_file_path, log_file_path)
 	r.run()
 
@@ -83,6 +84,7 @@ class Runner:
 		    json_file_path (str): Full filepath to config.json
 		    log_file_path (str): Full filepath to output.log file 
 		"""
+		print(f"BehaviorTree building started using {json_file_path} and {log_file_path}")
 		self.json_manager = JsonManager(json_file_path)
 		self.log_file = open(log_file_path, "r")
 
@@ -145,8 +147,9 @@ class Runner:
 	def run(self):
 		"""Reads in data, trains, and reports results
 		"""
-		if os.path.exists(constants.PIPELINE_OUTPUT_FOLDER_NAME):
-			shutil.rmtree(constants.PIPELINE_OUTPUT_FOLDER_NAME)
+		
+		constants.remove_folder_if_exists(\
+			constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
 
 		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
 
@@ -232,7 +235,8 @@ class Runner:
 		plt.savefig(graph_path)
 
 		report_file_obj.close()
-
+		print(f"BehaviorTree buidling finished, results in {output_full_path}")
+		
 def main():
 	"""Runs the behavior tree via command line arguments
 	"""

@@ -22,13 +22,15 @@ def process_command_line_args():
 
 
 def run_upsample(json_file_path, fmt_file_path):
-	json_manager = JsonManager(json_file_path)
+	print(f"Upsampling started using {json_file_path} and {fmt_file_path}")
 
-	if os.path.exists(constants.UPSAMPLED_CSV_FOLDER_NAME):
-		shutil.rmtree(constants.UPSAMPLED_CSV_FOLDER_NAME)
+	json_manager = JsonManager(json_file_path)
 
 	if json_manager.get_upsample_status() == True:
 		upsampled_path = json_manager.get_upsampled_path()
+		constants.remove_folder_if_exists(\
+			constants.UPSAMPLED_CSV_FOLDER_NAME, upsampled_path)
+
 		hot_encoded_folder = os.fsdecode(os.path.join(\
 			json_manager.get_hot_encoded_path(), \
 			constants.HOT_ENCODED_CSV_FOLDER_NAME))
@@ -66,6 +68,7 @@ def run_upsample(json_file_path, fmt_file_path):
 			delimiter = constants.CSV_DELIMITER, \
 			header = header, \
 			comments='')
+	print(f"Upsampling finished, results in {upsampled_file_path}")
 
 def main():
 	json_file_path, fmt_file_path = process_command_line_args()

@@ -55,6 +55,8 @@ def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
 	return feature_columns
 
 def run_normalize(json_file_path):
+	print(f"Normalizing started using {json_file_path}")
+
 	json_manager = JsonManager(json_file_path)
 	csv_folder = json_manager.get_csv_path()
 	normalized_folder = json_manager.get_normalized_path()
@@ -141,7 +143,7 @@ def run_normalize(json_file_path):
 		for f in os.listdir(destination_path)])
 	combined_csv.to_csv( os.fsdecode(combined_csv_file_path), \
 		index = False, encoding = 'utf-8-sig')
-
+	print(f"Normalizing finished, results in {normalized_file_path}")
 
 def main():
 	json_file_path = process_command_line_args()

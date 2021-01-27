@@ -37,21 +37,10 @@ def main():
 	parse_args()
 
 	print("Start")
-	print("Normalizing")
 	normalize_0.run_normalize(json_file_path)
-	print("Data normalized")
-
-	print("Hotencoding")
 	hotencode_1.run_hotencode(json_file_path)
-	print("Hot encoded")
-
-	print("Upsampling")
 	upsample_2.run_upsample(json_file_path, output_file_path)
-	print("Upsampled")
-
-	print("Running BT Creator")
 	behaviortree_3.run_behaviortree(json_file_path, output_file_path)
-	print("DONE, check pipeline_output folder for details")
 
 
 if __name__ == '__main__':
