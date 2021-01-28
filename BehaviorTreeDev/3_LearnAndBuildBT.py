@@ -45,16 +45,10 @@ def process_command_line_args():
 	
 	"""
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-config", "--configuration", \
-		required = True, \
-		help = "Path to the configuration file")
-
-	ap.add_argument("-outputLog", "--outputLogFile", \
-		required = True, \
-		help = "Path to log file")
-
+	ap.add_argument("-c", "--config", required = True, help = "Full path to json config file, relative paths work as well")
+	ap.add_argument("-o", "--outputlog", required = True, help = "Path to log file")
 	args = vars(ap.parse_args())
-	return args["configuration"], args["outputLogFile"]
+	return args["config"], args["outputlog"]
 
 
 def run_behaviortree(json_file_path, log_file_path):

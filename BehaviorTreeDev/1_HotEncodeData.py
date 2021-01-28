@@ -46,11 +46,9 @@ def encode_label_column(label_column):
 
 def process_command_line_args():
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-config", "--configuration", \
-		required = True, \
-		help = "Path to the configuration file")
+	ap.add_argument("-c", "--config", required = True, help = "Full path to json config file, relative paths work as well")
 	args = vars(ap.parse_args())
-	return args["configuration"]
+	return args["config"]
 
 
 def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):

@@ -22,14 +22,14 @@ output_file_path = "output.log"
 def parse_args():
 	global json_file_path
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-p", "--path", required = False, help = "Path to json config")
+	ap.add_argument("-c", "--config", required = False, help = "Full path to json config file, relative paths work as well")
 	args = vars(ap.parse_args())
-	if "path" in args and args["path"] != None:
-		json_file_path = args["path"]
+	if "config" in args and args["config"] != None:
+		json_file_path = args["config"]
 
 def main():
 	"""Runs the full pipeline end to end
-	'-p, --path' - [optional] Path to json config
+	'-c, --config' - [optional] Path to json config
 	"""
 	print("Start")
 	parse_args()

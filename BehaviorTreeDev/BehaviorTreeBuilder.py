@@ -15,7 +15,6 @@ import pipeline_constants as constants
 AND = "and"
 OR = "or"
 
-# 
 def find_max_index(numpy_1D_array):
 	"""Finds and returns first max argument index in numpy array
 
@@ -91,7 +90,7 @@ def dt_to_pstring_recursive(dt, node_index, current_letter, current_pstring, sym
 	if is_leaf_node(dt, node_index):
 		# dt.value[node_index]: [[  0.   0. 194.   0.   0.   0.]] -> action = 'Dialogue: 3'
 		action = str(label_names[find_max_index(dt.value[node_index])])
-		add_to_dict(action_to_pstring, action, current_pstring)
+		add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)
 		return current_letter
 	else:
 		true_rule = None
@@ -106,7 +105,7 @@ def dt_to_pstring_recursive(dt, node_index, current_letter, current_pstring, sym
 
 		#TODO: check in on this and vs or for this
 		if (not true_rule in sym_lookup) and (not false_rule in sym_lookup):
-			add_to_dict(sym_lookup, true_rule, current_letter)
+			add_condition_to_action_dictionary(sym_lookup, true_rule, current_letter)
 			current_letter = chr(ord(current_letter) + 1)
 
 		if true_rule in sym_lookup:
