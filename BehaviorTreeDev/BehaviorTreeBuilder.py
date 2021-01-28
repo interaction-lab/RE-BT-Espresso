@@ -20,23 +20,39 @@ def find_max_index(numpy_1D_array):
 	"""Finds and returns first max argument index in numpy array
 
 	Args:
-		numpy_1D_array {integer}: numpy array to find max of
+		numpy_1D_array (int): numpy array to find max of
 		ex: [[  0.   100.  194.   194.   0.   0.]] -> 2
 
 	Returns:
-	integer	: index of max element in array
+	int	: index of max element in array
 	"""
 	max_element = np.amax(numpy_1D_array)
 	index = np.where(numpy_1D_array == max_element)
 	return index[1][0]
 
-def add_to_dict(dictionary, key, value):
+def add_condition_to_action_dictionary(dictionary, key, value):
+	"""Adds condition to [action] -> condition string dictionary
+
+	Args:
+		dictionary (dict[str,str]): action dictionary from action -> condition string
+		key (str): action string
+		value (str): condition string
+	"""
 	if not key in dictionary:
 		dictionary[key] = value
 	else:
 		dictionary[key] = dictionary[key] + " | " + value
 
 def invert_expression(exp):
+	"""Inverts and returns logical operator expressions
+	   ex. "<" -> ">="
+
+	Args:
+		exp (str): original conditional expression
+
+	Returns:
+		str: inverted string representation of original conditional expression
+	"""
 	if ">=" in exp:
 		return exp.replace(">=", "<")
 	elif "<=" in exp:
@@ -52,7 +68,17 @@ def invert_expression(exp):
 	else: return exp
 
 def is_leaf_node(dt, node_index):
-	return (dt.children_left[node_index] == -1 and dt.children_right[node_index] == -1)
+	"""Checks if node at node_index is a leaf node to a DecisionTree
+
+	Args:
+		dt (sklearn.DecisionTree): decision tree to be examined
+		node_index (int): index of node in dt
+
+	Returns:
+		bool : whether node at index is a leaf node in dt
+	"""
+	return (dt.children_left[node_index] == -1 \
+	 and dt.children_right[node_index] == -1)
 
 def get_key(dictionary, val):
     for key, value in dictionary.items():
@@ -180,6 +206,17 @@ def generate_all_containing_float_variable_dict(sym_lookup):
 
 
 def remove_float_contained_variables(sym_lookup, pstring_dict):
+	"""Removes float variables that "consume" the others
+	   ex.: a = (f1 < 5); b = (f1 < 2); condition = (a & b)
+	   -> condition = (b) due to b "consuming" a
+
+	Args:
+		sym_lookup (dict[str,str]): dictionary from symbol to condition string (e.g., {"a" : "f1 < 5"})
+		pstring_dict (dict[str,str]): dictionary from action symbol to set of conditions (e.g., {"ACTION1" : "(a & b) | c"})
+
+	Returns:
+		dict[str,str]: reduced/consumed dictionary of actions to condition strings
+	"""
 	# get dictionary of all replaceable factors
 	containing_float_dict = generate_all_containing_float_variable_dict(sym_lookup)
 
@@ -311,9 +348,17 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
 def max_prune(dt):
 	return is_leaf_node(dt, 0)
 
-itercount = 0
 def bt_espresso_mod(dt, feature_names, label_names):
-	global itercount
+	"""Runs modified BT-Espresso algorithm with new reductions
+
+	Args:
+		dt (sklearn.DecisionTree): DecisionTree to be turned into BehaviorTree
+		feature_names (list[str]): List of features
+		label_names (list[str]): List of actions
+
+	Returns:
+		py_trees.trees.BehaviourTree: Built BehaviorTree
+	"""
 	if max_prune(dt): 
 		return py_trees.composites.Parallel(name = "Parallel Root")
 	sym_lookup, action_to_pstring = dt_to_pstring(dt, feature_names, label_names)
@@ -323,8 +368,13 @@ def bt_espresso_mod(dt, feature_names, label_names):
 	action_minimized = remove_float_contained_variables(sym_lookup, action_minimized) # remove float conditions within ands e.g., (f1 < .05 & f1 < .5) -> (f1 < .05)
 	action_minimized = factorize_pstring(action_minimized) # factorize pstrings
 	btree = pstring_to_btree(action_minimized, sym_lookup) # convert pstrings to btree
-	itercount += 1
 	return btree
 
 def save_tree(tree, filename):
+	"""Saves generated BehaviorTree to dot, svg, and png files
+
+	Args:
+		tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
+		filename (str): full filename with path for tree to be saved to
+	"""
 	py_trees.display.render_dot_tree(tree, name = constants.BEHAVIOR_TREE_XML_FILENAME, with_blackboard_variables=False, target_directory = filename)

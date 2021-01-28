@@ -155,14 +155,40 @@
   <div class="section" id="module-BehaviorTreeBuilder">
 <span id="behaviortreebuilder-module"></span><h1>BehaviorTreeBuilder module<a class="headerlink" href="#module-BehaviorTreeBuilder" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt id="BehaviorTreeBuilder.add_to_dict">
-<code class="sig-prename descclassname">BehaviorTreeBuilder.</code><code class="sig-name descname">add_to_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dictionary</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#BehaviorTreeBuilder.add_to_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="BehaviorTreeBuilder.add_condition_to_action_dictionary">
+<code class="sig-prename descclassname">BehaviorTreeBuilder.</code><code class="sig-name descname">add_condition_to_action_dictionary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dictionary</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#BehaviorTreeBuilder.add_condition_to_action_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds condition to [action] -&gt; condition string dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dictionary</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>str</em><em>]</em>) – action dictionary from action -&gt; condition string</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – action string</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – condition string</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.bt_espresso_mod">
 <code class="sig-prename descclassname">BehaviorTreeBuilder.</code><code class="sig-name descname">bt_espresso_mod</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">feature_names</span></em>, <em class="sig-param"><span class="n">label_names</span></em><span class="sig-paren">)</span><a class="headerlink" href="#BehaviorTreeBuilder.bt_espresso_mod" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Runs modified BT-Espresso algorithm with new reductions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dt</strong> (<em>sklearn.DecisionTree</em>) – DecisionTree to be turned into BehaviorTree</p></li>
+<li><p><strong>feature_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of features</p></li>
+<li><p><strong>label_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of actions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Built BehaviorTree</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>py_trees.trees.BehaviourTree</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.dt_to_pstring">
@@ -186,13 +212,13 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>{integer}</strong> (<em>numpy_1D_array</em>) – numpy array to find max of</p></li>
+<li><p><strong>numpy_1D_array</strong> (<em>int</em>) – numpy array to find max of</p></li>
 <li><p><strong>ex</strong> – [[  0.   100.  194.   194.   0.   0.]] -&gt; 2</p></li>
 </ul>
 </dd>
 </dl>
 <p>Returns:
-integer : index of max element in array</p>
+int     : index of max element in array</p>
 </dd></dl>
 
 <dl class="py function">
@@ -223,7 +249,22 @@ integer : index of max element in array</p>
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.invert_expression">
 <code class="sig-prename descclassname">BehaviorTreeBuilder.</code><code class="sig-name descname">invert_expression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">exp</span></em><span class="sig-paren">)</span><a class="headerlink" href="#BehaviorTreeBuilder.invert_expression" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="simple">
+<dt>Inverts and returns logical operator expressions</dt><dd><p>ex. “&lt;” -&gt; “&gt;=”</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>exp</strong> (<em>str</em>) – original conditional expression</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>inverted string representation of original conditional expression</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.is_float_key">
@@ -233,7 +274,22 @@ integer : index of max element in array</p>
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.is_leaf_node">
 <code class="sig-prename descclassname">BehaviorTreeBuilder.</code><code class="sig-name descname">is_leaf_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">node_index</span></em><span class="sig-paren">)</span><a class="headerlink" href="#BehaviorTreeBuilder.is_leaf_node" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Checks if node at node_index is a leaf node to a DecisionTree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dt</strong> (<em>sklearn.DecisionTree</em>) – decision tree to be examined</p></li>
+<li><p><strong>node_index</strong> (<em>int</em>) – index of node in dt</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>whether node at index is a leaf node in dt</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.make_condition_node">
@@ -258,12 +314,40 @@ integer : index of max element in array</p>
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.remove_float_contained_variables">
 <code class="sig-prename descclassname">BehaviorTreeBuilder.</code><code class="sig-name descname">remove_float_contained_variables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sym_lookup</span></em>, <em class="sig-param"><span class="n">pstring_dict</span></em><span class="sig-paren">)</span><a class="headerlink" href="#BehaviorTreeBuilder.remove_float_contained_variables" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="simple">
+<dt>Removes float variables that “consume” the others</dt><dd><p>ex.: a = (f1 &lt; 5); b = (f1 &lt; 2); condition = (a &amp; b)
+-&gt; condition = (b) due to b “consuming” a</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sym_lookup</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>str</em><em>]</em>) – dictionary from symbol to condition string (e.g., {“a” : “f1 &lt; 5”})</p></li>
+<li><p><strong>pstring_dict</strong> (<em>dict</em><em>[</em><em>str</em><em>,</em><em>str</em><em>]</em>) – dictionary from action symbol to set of conditions (e.g., {“ACTION1” : “(a &amp; b) | c”})</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>reduced/consumed dictionary of actions to condition strings</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict[str,str]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt id="BehaviorTreeBuilder.save_tree">
 <code class="sig-prename descclassname">BehaviorTreeBuilder.</code><code class="sig-name descname">save_tree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree</span></em>, <em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#BehaviorTreeBuilder.save_tree" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Saves generated BehaviorTree to dot, svg, and png files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree</strong> (<em>py_trees.trees.BehaviourTree</em>) – BehaviorTree to be saved</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – full filename with path for tree to be saved to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 
