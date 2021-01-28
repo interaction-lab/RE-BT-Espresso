@@ -1,7 +1,7 @@
-global module
-=============
+globals module
+==============
 
-.. automodule:: global
+.. automodule:: globals
    :members:
    :undoc-members:
    :show-inheritance:

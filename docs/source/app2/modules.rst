@@ -5,8 +5,9 @@ DataSim
    :maxdepth: 4
 
    bt_sim
-   global
+   globals
    robot
    robot_behaviors
    student
+   tree_units
    world

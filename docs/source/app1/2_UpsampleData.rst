@@ -1,7 +1,7 @@
-3\_behaviorTree module
+2\_UpsampleData module
 ======================
 
-.. automodule:: 3_behaviorTree
+.. automodule:: 2_UpsampleData
    :members:
    :undoc-members:
    :show-inheritance:

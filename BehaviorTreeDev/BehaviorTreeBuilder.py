@@ -15,8 +15,17 @@ import pipeline_constants as constants
 AND = "and"
 OR = "or"
 
-# [[  0.   0. 194.   0.   0.   0.]] -> 2
+# 
 def find_max_index(numpy_1D_array):
+	"""Finds and returns first max argument index in numpy array
+
+	Args:
+		numpy_1D_array {integer}: numpy array to find max of
+		ex: [[  0.   100.  194.   194.   0.   0.]] -> 2
+
+	Returns:
+	integer	: index of max element in array
+	"""
 	max_element = np.amax(numpy_1D_array)
 	index = np.where(numpy_1D_array == max_element)
 	return index[1][0]

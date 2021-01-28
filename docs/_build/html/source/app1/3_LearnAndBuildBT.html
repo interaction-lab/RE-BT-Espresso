@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>3_LearnAndBuildBT module &mdash; BehaviorTreeFromDemonstration  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> BehaviorTreeFromDemonstration
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">3_LearnAndBuildBT module</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BehaviorTreeFromDemonstration</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>3_LearnAndBuildBT module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/source/app1/3_LearnAndBuildBT.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-3_LearnAndBuildBT">
+<span id="learnandbuildbt-module"></span><h1>3_LearnAndBuildBT module<a class="headerlink" href="#module-3_LearnAndBuildBT" title="Permalink to this headline">¶</a></h1>
+<p>Generally runs DTree -&gt; behavior tree, in need of change per #19</p>
+<p>Creates decision trees, checks measures, prunes, and converts them to behavior  trees using behaviorTree_Builder</p>
+<dl class="py attribute">
+<dt id="LearnAndBuildBT.PRUNING_GRAPH_FILENAME">
+<span id="3_LearnAndBuildBT.PRUNING_GRAPH_FILENAME"></span><code class="sig-prename descclassname">3_LearnAndBuildBT.</code><code class="sig-name descname">PRUNING_GRAPH_FILENAME</code><a class="headerlink" href="#LearnAndBuildBT.PRUNING_GRAPH_FILENAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>filepath constant for acurracy vs alpha output graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="LearnAndBuildBT.Runner">
+<span id="3_LearnAndBuildBT.Runner"></span><em class="property">class </em><code class="sig-prename descclassname">3_LearnAndBuildBT.</code><code class="sig-name descname">Runner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">json_file_path</span></em>, <em class="sig-param"><span class="n">log_file_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.Runner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Main runner class for this file</p>
+<dl class="py attribute">
+<dt id="LearnAndBuildBT.Runner.json_manager">
+<span id="3_LearnAndBuildBT.Runner.json_manager"></span><code class="sig-name descname">json_manager</code><a class="headerlink" href="#LearnAndBuildBT.Runner.json_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>JSON Manager for config.json</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="json_manager.html#json_manager.JsonManager" title="json_manager.JsonManager">json_manager.JsonManager</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="LearnAndBuildBT.Runner.log_file">
+<span id="3_LearnAndBuildBT.Runner.log_file"></span><code class="sig-name descname">log_file</code><a class="headerlink" href="#LearnAndBuildBT.Runner.log_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log file used for formatting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>_io.TextIOWrapper</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="LearnAndBuildBT.Runner.create_output_folder">
+<span id="3_LearnAndBuildBT.Runner.create_output_folder"></span><code class="sig-name descname">create_output_folder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kFold</span></em>, <em class="sig-param"><span class="n">max_depth</span></em><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.Runner.create_output_folder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="LearnAndBuildBT.Runner.get_file_fmt_and_label_encoding">
+<span id="3_LearnAndBuildBT.Runner.get_file_fmt_and_label_encoding"></span><code class="sig-name descname">get_file_fmt_and_label_encoding</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.Runner.get_file_fmt_and_label_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Tuple containg string output file format and list of label encodings</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple(str, list&lt;str&gt;)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="LearnAndBuildBT.Runner.get_supervised_data_csv_filepath">
+<span id="3_LearnAndBuildBT.Runner.get_supervised_data_csv_filepath"></span><code class="sig-name descname">get_supervised_data_csv_filepath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.Runner.get_supervised_data_csv_filepath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns filepath of data, uses one hot encoded if upsample = false in config.json</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>filepath to data csv</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="LearnAndBuildBT.Runner.k_fold_train_decision_tree_w_max_depth">
+<span id="3_LearnAndBuildBT.Runner.k_fold_train_decision_tree_w_max_depth"></span><code class="sig-name descname">k_fold_train_decision_tree_w_max_depth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_k_folds</span></em>, <em class="sig-param"><span class="n">max_depth</span></em>, <em class="sig-param"><span class="n">output_full_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.Runner.k_fold_train_decision_tree_w_max_depth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="LearnAndBuildBT.Runner.run">
+<span id="3_LearnAndBuildBT.Runner.run"></span><code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.Runner.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in data, trains, and reports results</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="LearnAndBuildBT.main">
+<span id="3_LearnAndBuildBT.main"></span><code class="sig-prename descclassname">3_LearnAndBuildBT.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the behavior tree via command line arguments</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="LearnAndBuildBT.plot_decision_tree">
+<span id="3_LearnAndBuildBT.plot_decision_tree"></span><code class="sig-prename descclassname">3_LearnAndBuildBT.</code><code class="sig-name descname">plot_decision_tree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">decision_tree_model</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">feature_header</span></em><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.plot_decision_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots decision tree to output folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decision_tree_model</strong> (<em>sklearn.tree._classes.DecisionTreeClassifier</em>) – trained decision tree</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – full output file path</p></li>
+<li><p><strong>feature_header</strong> (<em>sklearn.tree._classes.DecisionTreeClassifier</em>) – TODO</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="LearnAndBuildBT.process_command_line_args">
+<span id="3_LearnAndBuildBT.process_command_line_args"></span><code class="sig-prename descclassname">3_LearnAndBuildBT.</code><code class="sig-name descname">process_command_line_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.process_command_line_args" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Command line args for (config, output) files</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple(str, str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="LearnAndBuildBT.run_behaviortree">
+<span id="3_LearnAndBuildBT.run_behaviortree"></span><code class="sig-prename descclassname">3_LearnAndBuildBT.</code><code class="sig-name descname">run_behaviortree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">json_file_path</span></em>, <em class="sig-param"><span class="n">log_file_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#LearnAndBuildBT.run_behaviortree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary
+Runs decision tree classifier, TODO: needs to be broken up per #19</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_file_path</strong> (<em>str</em>) – Full filepath to config.json</p></li>
+<li><p><strong>log_file_path</strong> (<em>str</em>) – Full filepath to output.log file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, tgroechel adamwathieu cmkuo12 roddurd haemin-lee.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
