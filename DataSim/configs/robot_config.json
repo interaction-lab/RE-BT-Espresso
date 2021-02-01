@@ -28,19 +28,31 @@
         {
             "name": "sequence",
             "inverted": false,
+            "type": "composite",
             "child_list": [
                 {
-                    "name": "action_5",
+                    "name": "parallel",
                     "inverted": false,
-                    "type": "action"
+                    "type": "composite",
+                    "child_list": [
+                        {
+                            "name": "action_7",
+                            "inverted": false,
+                            "type": "action"
+                        },
+                        {
+                            "name": "action_2",
+                            "inverted": true,
+                            "type": "action"
+                        }
+                    ]
                 },
                 {
                     "name": "action_6",
                     "inverted": true,
                     "type": "action"
                 }
-            ],
-            "type": "composite"
+            ]
         }
     ]
 }
