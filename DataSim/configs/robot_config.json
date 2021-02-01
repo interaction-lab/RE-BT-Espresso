@@ -17,15 +17,30 @@
     "child_list": [
         {
             "name": "action_1",
-            "inverted": false
+            "inverted": false,
+            "type": "action"
         },
         {
             "name": "action_3",
-            "inverted": true
+            "inverted": true,
+            "type": "action"
         },
         {
-            "name": "action_2",
-            "inverted": false
+            "name": "sequence",
+            "inverted": false,
+            "child_list": [
+                {
+                    "name": "action_5",
+                    "inverted": false,
+                    "type": "action"
+                },
+                {
+                    "name": "action_6",
+                    "inverted": true,
+                    "type": "action"
+                }
+            ],
+            "type": "composite"
         }
     ]
 }
