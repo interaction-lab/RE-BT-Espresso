@@ -208,9 +208,9 @@ class Runner:
 			clfs.append(clf)
 			train_scores.append(score)
 
-			newPrunePath = constants.add_folder_to_directory("Pruning_{}".format(i), pruning_folder)
+			newPrunePath = constants.add_folder_to_directory("Pruning_{0}_{1:.6g}".format(i, ccp_alpha), pruning_folder)
 			decision_tree_path = os.fsdecode(os.path.join(\
-				newPrunePath, "{}_kFold_{}_maxDepth_{}_prune".format(kFold, max_depth, i)))
+				newPrunePath, "{0}_kFold_{1}_maxDepth_{2}_{2:.6g}_prune".format(kFold, max_depth,i, ccp_alpha)))
 			plot_decision_tree(clf, decision_tree_path, self.features_data.columns)
 
 			decision_tree_obj = clf.tree_
