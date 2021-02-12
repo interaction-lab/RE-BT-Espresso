@@ -25,6 +25,7 @@ import pipeline_constants as constants
 import numpy as np
 
 PRUNING_GRAPH_FILENAME = "accuracy_vs_alpha.png"
+RESULTS_TEXT_FILENAME = "results.txt"
 
 def plot_decision_tree(decision_tree_model, filename, feature_header):
 	"""Plots decision tree to output folder
@@ -63,6 +64,7 @@ def run_behaviortree(json_file_path, log_file_path):
 
 	r = Runner(json_file_path, log_file_path)
 	r.run()
+
 
 class Runner:
 
@@ -124,6 +126,10 @@ class Runner:
 			constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
 		folder_name = "{}_kFold_{}_maxDepth".format(kFold, max_depth)
 		return constants.add_folder_to_directory(folder_name, output_folder)
+	
+	def format_float_list_to_precision(self, list_in, precision):
+		prec_str = "{0:0." + str(precision) + "f}"
+		return [prec_str.format(i) for i in list_in]
 
 
 	def k_fold_train_decision_tree_w_max_depth(self, num_k_folds, max_depth, output_full_path):
@@ -247,7 +253,16 @@ class Runner:
 		graph_path = os.fsdecode(os.path.join(output_full_path, PRUNING_GRAPH_FILENAME))
 		plt.savefig(graph_path)
 
-	
+		
+		results_txt_file = open(os.fsdecode(os.path.join(output_full_path, RESULTS_TEXT_FILENAME)), "w")
+		alist = ccp_alphas.flatten().tolist()
+		acc_diffs = [a_i - b_i for a_i, b_i in zip(self.train_scores, self.test_scores)]
+		float_precision = 6
+		results_txt_file.write(f"alphas:\t\t{self.format_float_list_to_precision(alist, float_precision)}\n")
+		results_txt_file.write(f"train acc:\t{self.format_float_list_to_precision(self.train_scores, float_precision)}\n")
+		results_txt_file.write(f"test acc:\t{self.format_float_list_to_precision(self.test_scores, float_precision)}\n")
+		results_txt_file.write(f"acc diff:\t{self.format_float_list_to_precision(acc_diffs, float_precision)}\n")
+		results_txt_file.close()
 
 		report_file_obj.close()
 		print(f"BehaviorTree buidling finished, results in {output_full_path}")

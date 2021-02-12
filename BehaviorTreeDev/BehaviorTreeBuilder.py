@@ -283,6 +283,15 @@ def factorize_pstring(pstring_dict):
 
 	return pstring_dict
 
+
+# Used to give unique names to selector/sequence/inverter nodes to avoid stars
+node_name_counter = 0
+def get_node_name_counter():
+	global node_name_counter
+	_ = f"({node_name_counter})"
+	node_name_counter += 1
+	return _
+
 def make_condition_node(sym_lookup_dict, every_operand):
 	need_inverter = False
 	value = str(ast2expr(every_operand))
@@ -294,7 +303,7 @@ def make_condition_node(sym_lookup_dict, every_operand):
 
 	node = py_trees.behaviours.Success(name = condition)
 	if need_inverter:
-		node = py_trees.decorators.Inverter(node, name = "Inverter")
+		node = py_trees.decorators.Inverter(node, name = "Inverter" + get_node_name_counter())
 
 	return node
 
@@ -304,10 +313,10 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 	recursive = False
 	if operator == AND:
 		recursive = True
-		new_branch = py_trees.composites.Sequence(name = "Sequence")
+		new_branch = py_trees.composites.Sequence(name = "Sequence" + get_node_name_counter())
 	elif operator == OR:
 		recursive = True
-		new_branch = py_trees.composites.Selector(name = "Selector")
+		new_branch = py_trees.composites.Selector(name = "Selector" + get_node_name_counter())
 	else:
 		new_branch = make_condition_node(sym_lookup_dict, pstring_expr.to_ast())
 
