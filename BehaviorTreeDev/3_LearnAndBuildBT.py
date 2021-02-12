@@ -12,6 +12,7 @@ from sklearn.compose import make_column_transformer
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
 import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
@@ -113,6 +114,11 @@ class Runner:
 		return os.fsdecode(os.path.join(\
 				data_folder, filename))
 
+	def get_output_folder(self, kFold, max_depth):
+		path = constants.combine_folder_and_working_dir(constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
+		return constants.combine_folder_and_working_dir("{}_kFold_{}_maxDepth".format(kFold, max_depth),path)
+
+
 	def create_output_folder(self, kFold, max_depth):
 		output_folder = constants.add_folder_to_directory(\
 			constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
@@ -153,9 +159,10 @@ class Runner:
 	def run(self):
 		"""Reads in data, trains, and reports results
 		"""
-		
-		constants.remove_folder_if_exists(\
-			constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
+		kFold = self.json_manager.get_kfold()
+		max_depth = self.json_manager.get_decision_tree_depth()
+
+		constants.remove_folder_if_exists(self.get_output_folder(kFold,max_depth))
 
 		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
 
@@ -163,8 +170,7 @@ class Runner:
 		self.features_data = self.supervised_learning_dataframe.loc[:, self.supervised_learning_dataframe.columns != constants.LABEL_COLUMN_NAME]
 		self.labels_data = self.supervised_learning_dataframe.loc[:, self.supervised_learning_dataframe.columns == constants.LABEL_COLUMN_NAME]
 
-		kFold = self.json_manager.get_kfold()
-		max_depth = self.json_manager.get_decision_tree_depth()
+
 		output_full_path = self.create_output_folder(kFold, max_depth)
 		self.k_fold_train_decision_tree_w_max_depth(kFold, max_depth, output_full_path)
 
