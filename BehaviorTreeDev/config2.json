@@ -1,5 +1,5 @@
 {
-    "csv_folder_path": "./output/data/clean/",
+    "csv_folder_path": "./output/output/output",
     "normalized_path": "./output/",
     "hotEncoded_path": "./output/",
     "upSampled_path": "./output/",
@@ -7,34 +7,35 @@
     "output_package_path": "./output/",
   
     "feature_columns": [
-      "currentTKC", 
-      "currentExerciseChange", 
-      "KC",
-      "tsla",
-      "tw",
-      "isThereMoreScaff"
+      "left",
+      "center",
+      "right",
+      "speechStart",
+      "speechEnd"
     ],
   
   
-    "categorical_features": [],
+    "categorical_features": [
+      "left",
+      "center",
+      "right",
+      "speechStart",
+      "speechEnd"
+    ],
 
     "binary_features": [
-        "isThereMoreScaff",
-        "currentExerciseChange"
     ],
   
     "label_columns": [
-      "visa",
-      "ppa",
-      "dialogue"
+      "question difficulty"
     ],
   
-    "lag_features": ["currentExerciseChange"],
-    "sliding_window_length": 5,
+    "lag_features": ["speechStart", "speechEnd"],
+    "sliding_window_length": 10,
     
     "decision_tree_depth": 5,
     "k_fold": 5,
-    "SVMSMOTE_upsampling": false,
+    "SVMSMOTE_upsampling": true,
     "random_state": null
   }
   
