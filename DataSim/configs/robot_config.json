@@ -1,29 +1,17 @@
 {
-    "p_SenseCorrect": {
-        "Check_IsNewExercise": 1,
-        "Check_ExerciseSubmissionResult": 1,
-        "Check_ExerciseSubmissionExists": 1,
-        "Check_KC": 1
-    },
-    
-    "p_ActCorrect": {
-        "New_Exercise_Dialogue": 0.5,
-        "Correct_Submission_Dialogue": 0.5,
-        "Incorrect_Submission_Dialogue": 0.5,
-        "Hint_Dialogue": 0.5
-    },
-
     "type": "selector",
     "child_list": [
         {
             "name": "action_1",
             "inverted": false,
-            "type": "action"
+            "type": "action",
+            "p_success": 0.5
         },
         {
             "name": "action_3",
             "inverted": true,
-            "type": "action"
+            "type": "action",
+            "p_success": 0.5
         },
         {
             "name": "sequence",
@@ -38,19 +26,23 @@
                         {
                             "name": "action_7",
                             "inverted": false,
-                            "type": "action"
+                            "type": "action",
+                            "p_success": 0.5
                         },
                         {
                             "name": "action_2",
                             "inverted": true,
-                            "type": "action"
+                            "type": "action",
+                            "p_success": 0.5
                         }
                     ]
                 },
                 {
-                    "name": "action_6",
-                    "inverted": true,
-                    "type": "action"
+                    "name": "condition_1",
+                    "inverted": false,
+                    "type": "condition",
+                    "p_success": 0.5,
+                    "target_state": "env_state_var_1"
                 }
             ]
         }

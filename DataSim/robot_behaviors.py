@@ -1,11 +1,14 @@
 import py_trees as pt
 import random
 
-'''Sense parent class'''
-class Sense(pt.behaviour.Behaviour):
-    def __init__(self, name, p_correct):
+class Condition(pt.behaviour.Behaviour):
+    def __init__(self, name, p_correct, target_state):
+        super().__init__(name=name)
         self.p_correct = p_correct
-        super().__init__(name="")
+        self.target_state = target_state
+        self.blackboard = self.attach_blackboard_client(name=self.name)
+        self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)
+        self.blackboard.register_key(key=target_state, access=pt.common.Access.READ)
             
     def update(self):
         if random.random() <= self.p_correct:
@@ -14,62 +17,17 @@ class Sense(pt.behaviour.Behaviour):
             return not self.check()
     
     def check(self):
-        pass
-    
-'''Sense child classes'''
-class Check_IsNewExercise(Sense):
-    def __init__(self, p):
-        super().__init__(name="new_exercise_dialogue", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="IsNewExercise", access=pt.common.Access.READ)
-        
-    def check(self):
-        if self.blackboard.IsNewExercise:
+        if self.blackboard.get(self.target_state) < 0.5:
             return pt.common.Status.SUCCESS
         else:
             return pt.common.Status.FAILURE
 
-class Check_ExerciseSubmissionResult(Sense):
-    def __init__(self, p):
-        super().__init__(name="check_exercise_submission_result", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="ExerciseSubmissionResult", access=pt.common.Access.READ)
-
-    def check(self):
-        if self.blackboard.ExerciseSubmissionResult:
-            return pt.common.Status.SUCCESS
-        else:
-            return pt.common.Status.FAILURE
-
-class Check_ExerciseSubmissionExists(Sense):
-    def __init__(self, p):
-        super().__init__(name="check_excercise_submission_exists", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="Submit", access=pt.common.Access.READ)
-
-    def check(self):
-        if self.blackboard.Submit:
-            return pt.common.Status.SUCCESS
-        else:
-            return pt.common.Status.FAILURE
-
-class Check_KC(Sense):
-    def __init__(self, p):
-        super().__init__(name="check_KC", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="KC", access=pt.common.Access.READ)
-
-    def check(self):
-        if self.blackboard.KC < 0.5:
-            return pt.common.Status.SUCCESS
-        else:
-            return pt.common.Status.FAILURE
-
-'''Action parent class'''
-class Act(pt.behaviour.Behaviour):
+class Action(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct):
+        super().__init__(name=name)
         self.p_correct = p_correct
-        super().__init__(name="")
+        self.blackboard = self.attach_blackboard_client(name=self.name)
+        self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)
             
     def update(self):
         if random.random() <= self.p_correct:
@@ -78,58 +36,8 @@ class Act(pt.behaviour.Behaviour):
             return self.fail_act()
     
     def do_act(self):
-        pass
+        self.blackboard.robot_action = self.name
+        return pt.common.Status.SUCCESS
     
     def fail_act(self):
         return pt.common.Status.FAILURE
-
-'''Action child classes'''
-class New_exercise_dialogue(Act):
-    def __init__(self, p):
-        super().__init__(name="new_exercise_dialogue", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
-
-    def do_act(self):
-        self.blackboard.robot_dialogue = "new_exercise_dialogue"
-        return pt.common.Status.SUCCESS
-
-class Correct_submission_dialogue(Act):
-    def __init__(self, p):
-        super().__init__(name="correct_submission_dialogue", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
-
-    def do_act(self):
-        self.blackboard.robot_dialogue = "correct_exercise_dialogue"
-        return pt.common.Status.SUCCESS
-
-class Incorrect_submission_dialogue(Act):
-    def __init__(self, p):
-        super().__init__(name="incorrect_submission_dialogue", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
-
-    def do_act(self):
-        self.blackboard.robot_dialogue = "incorrect_exercise_dialogue"
-        return pt.common.Status.SUCCESS
-
-class Hint_dialogue(Act):
-    def __init__(self, p):
-        super().__init__(name="hint_dialogue", p_correct=p)
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
-
-    def do_act(self):
-        self.blackboard.robot_dialogue = "hint_dialogue"
-        return pt.common.Status.SUCCESS
-
-class Do_nothing(pt.behaviour.Behaviour):
-    def __init__(self):
-        super().__init__(name="")
-        self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="robot_dialogue", access=pt.common.Access.WRITE)
-
-    def update(self):
-        self.blackboard.robot_dialogue = None
-        return pt.common.Status.SUCCESS

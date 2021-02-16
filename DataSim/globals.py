@@ -7,13 +7,19 @@ env_vars = [
     "Time",
     "env_state_var_1",
     "env_state_var_2",
-    "env_state_var_3"
+    "env_state_var_3",
+    "env_state_var_4",
+    "env_state_var_5",
+    "env_state_var_6"
 ]
 
 student_vars = [
     "stu_state_var_1",
     "stu_state_var_2",
-    "stu_state_var_3"
+    "stu_state_var_3",
+    "stu_state_var_4",
+    "stu_state_var_5",
+    "stu_state_var_6"
 ]
     
 robot_vars = [

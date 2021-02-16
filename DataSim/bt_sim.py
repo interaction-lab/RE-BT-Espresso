@@ -1,10 +1,7 @@
 import py_trees as pt
 import csv
-import random
-import copy
 import json
 import globals as g
-from robot import Robot
 from world import World
 from student import Student
 from tree_units import*
@@ -23,7 +20,8 @@ def main():
         r.render_tree()
         
     with open(g.world_cfg_path) as wc:
-        w = World(**json.loads(wc.read()))
+        #w = World(**json.loads(wc.read()))
+        w = World()
 
     with open(g.output_filename, mode='w') as csv_file:
         csv_writer = csv.DictWriter(csv_file,\

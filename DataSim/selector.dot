@@ -20,8 +20,6 @@ inverted_action_2 [fillcolor=ghostwhite, fontcolor=black, fontsize=9, label=inve
 parallel -> inverted_action_2;
 action_2 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_2, shape=ellipse, style=filled];
 inverted_action_2 -> action_2;
-inverted_action_6 [fillcolor=ghostwhite, fontcolor=black, fontsize=9, label=inverted_action_6, shape=ellipse, style=filled];
-sequence -> inverted_action_6;
-action_6 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_6, shape=ellipse, style=filled];
-inverted_action_6 -> action_6;
+condition_1 [fillcolor=gray, fontcolor=black, fontsize=9, label=condition_1, shape=ellipse, style=filled];
+sequence -> condition_1;
 }
