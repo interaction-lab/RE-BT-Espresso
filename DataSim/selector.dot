@@ -1,0 +1,27 @@
+digraph pastafarianism {
+ordering=out;
+graph [fontname="times-roman"];
+node [fontname="times-roman"];
+edge [fontname="times-roman"];
+selector [fillcolor=cyan, fontcolor=black, fontsize=9, label=selector, shape=octagon, style=filled];
+action_1 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_1, shape=ellipse, style=filled];
+selector -> action_1;
+inverted_action_3 [fillcolor=ghostwhite, fontcolor=black, fontsize=9, label=inverted_action_3, shape=ellipse, style=filled];
+selector -> inverted_action_3;
+action_3 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_3, shape=ellipse, style=filled];
+inverted_action_3 -> action_3;
+sequence [fillcolor=orange, fontcolor=black, fontsize=9, label=sequence, shape=box, style=filled];
+selector -> sequence;
+parallel [fillcolor=gold, fontcolor=black, fontsize=9, label="parallel\n--SuccessOnAll(⚡)--", shape=parallelogram, style=filled];
+sequence -> parallel;
+action_7 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_7, shape=ellipse, style=filled];
+parallel -> action_7;
+inverted_action_2 [fillcolor=ghostwhite, fontcolor=black, fontsize=9, label=inverted_action_2, shape=ellipse, style=filled];
+parallel -> inverted_action_2;
+action_2 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_2, shape=ellipse, style=filled];
+inverted_action_2 -> action_2;
+inverted_action_6 [fillcolor=ghostwhite, fontcolor=black, fontsize=9, label=inverted_action_6, shape=ellipse, style=filled];
+sequence -> inverted_action_6;
+action_6 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_6, shape=ellipse, style=filled];
+inverted_action_6 -> action_6;
+}
