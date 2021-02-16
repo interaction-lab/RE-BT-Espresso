@@ -2,10 +2,11 @@ import py_trees as pt
 import random
 
 class Condition(pt.behaviour.Behaviour):
-    def __init__(self, name, p_correct, target_state):
+    def __init__(self, name, p_correct, target_state, threshold):
         super().__init__(name=name)
         self.p_correct = p_correct
         self.target_state = target_state
+        self.threshold = threshold
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)
         self.blackboard.register_key(key=target_state, access=pt.common.Access.READ)
@@ -14,13 +15,19 @@ class Condition(pt.behaviour.Behaviour):
         if random.random() <= self.p_correct:
             return self.check()
         else:
-            return not self.check()
+            return self.fail_check()
     
     def check(self):
-        if self.blackboard.get(self.target_state) < 0.5:
+        if self.blackboard.get(self.target_state) < self.threshold:
             return pt.common.Status.SUCCESS
         else:
             return pt.common.Status.FAILURE
+        
+    def fail_check(self):
+        if self.blackboard.get(self.target_state) < self.threshold:
+            return pt.common.Status.FAILURE
+        else:
+            return pt.common.Status.SUCCESS
 
 class Action(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct):

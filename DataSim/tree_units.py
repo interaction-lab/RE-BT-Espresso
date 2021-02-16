@@ -57,7 +57,7 @@ class Tree_Basic(Tree):
                 if child["type"] == "action":
                     composite.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=Action(child["name"], child["p_success"])))
                 elif child["type"] == "condition":
-                    composite.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=Condition(child["name"], child["p_success"], child['target_state'])))
+                    composite.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=Condition(child["name"], child["p_success"], child['target_state'], child["threshold"])))
                 elif child["type"] == "composite":
                     composite.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=self.recursive_tree_build(child["name"], child["child_list"])))
             elif child["type"] == "composite":
@@ -65,6 +65,6 @@ class Tree_Basic(Tree):
             elif child["type"] == "action":
                 composite.add_child(Action(child["name"], child["p_success"]))
             elif child["type"] == "condition":
-                composite.add_child(Condition(child["name"], child["p_success"], child['target_state']))
+                composite.add_child(Condition(child["name"], child["p_success"], child['target_state'], child["threshold"]))
         return composite
             
