@@ -1,0 +1,21 @@
+digraph pastafarianism {
+ordering=out;
+graph [fontname="times-roman"];
+node [fontname="times-roman"];
+edge [fontname="times-roman"];
+selector [fillcolor=cyan, fontcolor=black, fontsize=9, label=selector, shape=octagon, style=filled];
+sequence [fillcolor=orange, fontcolor=black, fontsize=9, label=sequence, shape=box, style=filled];
+selector -> sequence;
+condition_1 [fillcolor=gray, fontcolor=black, fontsize=9, label=condition_1, shape=ellipse, style=filled];
+sequence -> condition_1;
+action_1 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_1, shape=ellipse, style=filled];
+sequence -> action_1;
+"sequence*" [fillcolor=orange, fontcolor=black, fontsize=9, label="sequence*", shape=box, style=filled];
+selector -> "sequence*";
+inverted_condition_1 [fillcolor=ghostwhite, fontcolor=black, fontsize=9, label=inverted_condition_1, shape=ellipse, style=filled];
+"sequence*" -> inverted_condition_1;
+"condition_1*" [fillcolor=gray, fontcolor=black, fontsize=9, label="condition_1*", shape=ellipse, style=filled];
+inverted_condition_1 -> "condition_1*";
+action_2 [fillcolor=gray, fontcolor=black, fontsize=9, label=action_2, shape=ellipse, style=filled];
+"sequence*" -> action_2;
+}

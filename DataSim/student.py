@@ -3,9 +3,7 @@ import random
 from globals import student_vars, env_vars
 
 class Student():
-    def __init__(self, p_Submit, p_MoveBlock):
-        self.p_Submit = p_Submit
-        self.p_MoveBlock = p_MoveBlock
+    def __init__(self):
         self.setup()
         
     def setup(self):
@@ -20,17 +18,12 @@ class Student():
             self.blackboard.register_key(key=key, access=pt.common.Access.READ)
 
     def reset_state(self):
-        self.blackboard.KC = 0
-        self.blackboard.Submit = False
-        self.blackboard.MoveBlock = False
+        for key in student_vars:
+            self.blackboard.set(key, 0, True)
 
     def update(self):
-        self.blackboard.KC = random.random()
-        if random.random() <= self.p_Submit:
-            self.blackboard.Submit = True
-        else:
-            self.blackboard.Submit = False
-        if random.random() <= self.p_MoveBlock:
-            self.blackboard.MoveBlock = True
-        else:
-            self.blackboard.MoveBlock = False
+        #update random state variable
+        key = random.randint(0, len(student_vars)-1)
+        state_var = student_vars[key]
+        new_value = random.random()
+        self.blackboard.set(state_var, new_value, True)

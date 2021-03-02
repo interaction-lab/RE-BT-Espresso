@@ -1,29 +1,28 @@
 import py_trees as pt
 import csv
-import random
-import copy
 import json
 import globals as g
-from robot import Robot
 from world import World
 from student import Student
 from tree_units import*
 
+# def csv_write():
+#     csv_file = open(g.output_filename, mode='a')
+#     csv_writer = csv.DictWriter(csv_file,\
+#         fieldnames=pt.blackboard.Blackboard.keys())
+#     csv_writer.writerow(pt.blackboard.Blackboard.storage)
 
 def main():
     print("start")
     pt.logging.level = pt.logging.Level.DEBUG
     pt.blackboard.Blackboard.enable_activity_stream(100)
-    
-    with open(g.student_cfg_path) as sc:
-        s = Student(**json.loads(sc.read()))
-        
-    with open(g.robot_cfg_path) as rc:
+          
+    with open(sys.argv[1]) as rc:
         r = Tree_Basic(**json.loads(rc.read()))
         r.render_tree()
-        
-    with open(g.world_cfg_path) as wc:
-        w = World(**json.loads(wc.read()))
+
+    s = Student()
+    w = World()
 
     with open(g.output_filename, mode='w') as csv_file:
         csv_writer = csv.DictWriter(csv_file,\
