@@ -24,4 +24,5 @@ student_vars = [
     
 robot_vars = [
     "robot_action",
+    "success"
 ]

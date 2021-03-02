@@ -6,6 +6,11 @@ from world import World
 from student import Student
 from tree_units import*
 
+# def csv_write():
+#     csv_file = open(g.output_filename, mode='a')
+#     csv_writer = csv.DictWriter(csv_file,\
+#         fieldnames=pt.blackboard.Blackboard.keys())
+#     csv_writer.writerow(pt.blackboard.Blackboard.storage)
 
 def main():
     print("start")
@@ -24,7 +29,7 @@ def main():
             fieldnames=pt.blackboard.Blackboard.keys())
         csv_writer.writeheader()
 
-        for t in range(1000):
+        for t in range(25):
             csv_writer.writerow(pt.blackboard.Blackboard.storage)
             s.update()
             w.update()
