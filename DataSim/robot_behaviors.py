@@ -1,5 +1,6 @@
 from os import stat
-import py_trees as pt
+#import py_trees as pt
+from bt_sim import pt
 import random
 import csv
 import globals as g
@@ -47,11 +48,11 @@ class Action(pt.behaviour.Behaviour):
     def update(self):
         if random.random() <= self.p_correct:
             status = self.do_act()
-            #b.csv_write()
+            g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
             return status
         else:
             status = self.fail_act()
-            #b.csv_write()
+            g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
             return status
     
     def do_act(self):
