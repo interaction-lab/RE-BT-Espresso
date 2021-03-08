@@ -55,9 +55,9 @@ sysinfo.txt
 Assets/StreamingAssets/crashlytics-build.properties
 
 # Datasim generated images
-.dot
-.png
-.svg
+*.dot
+*.png
+*.svg
 
 UWP/
 
