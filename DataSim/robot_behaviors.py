@@ -1,10 +1,7 @@
 from os import stat
-#import py_trees as pt
 from bt_sim import pt
 import random
-import csv
 import globals as g
-#import bt_sim as b
 
 class Condition(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct, target_state, threshold):

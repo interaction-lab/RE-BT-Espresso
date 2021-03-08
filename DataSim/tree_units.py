@@ -33,8 +33,6 @@ class Tree():
     def render_tree(self):
         pt.display.render_dot_tree(self.root)
         
-       
-        
 class Tree_Basic(Tree):
     def __init__(self, type, child_list):
         self.child_list = child_list

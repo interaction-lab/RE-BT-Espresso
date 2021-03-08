@@ -6,28 +6,6 @@ from world import World
 from student import Student
 from tree_units import*
 
-# def csv_write():
-#     csv_file = open(g.output_filename, mode='a')
-#     csv_writer = csv.DictWriter(csv_file,\
-#         fieldnames=pt.blackboard.Blackboard.keys())
-#     csv_writer.writerow(pt.blackboard.Blackboard.storage)
-
-# b = BT_Sim()
-
-# class BT_Sim():
-#     def __init__(self, csv_file):
-#         self.csv_writer = csv.DictWriter(csv_file,\
-#     fieldnames=pt.blackboard.Blackboard.keys())
-
-
-
-# def set_csv_writer(csv_file):
-#     csv_writer = csv.DictWriter(csv_file,\
-#     fieldnames=pt.blackboard.Blackboard.keys())
-
-# def get_csv_writer():
-#     return csv_writer;
-
 def main():
     print("start")
     pt.logging.level = pt.logging.Level.DEBUG
