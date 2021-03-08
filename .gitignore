@@ -54,6 +54,11 @@ sysinfo.txt
 # Crashlytics generated file
 Assets/StreamingAssets/crashlytics-build.properties
 
+# Datasim generated images
+.dot
+.png
+.svg
+
 UWP/
 
 **/.DS_Store
