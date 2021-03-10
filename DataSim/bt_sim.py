@@ -6,12 +6,6 @@ from world import World
 from student import Student
 from tree_units import*
 
-# def csv_write():
-#     csv_file = open(g.output_filename, mode='a')
-#     csv_writer = csv.DictWriter(csv_file,\
-#         fieldnames=pt.blackboard.Blackboard.keys())
-#     csv_writer.writerow(pt.blackboard.Blackboard.storage)
-
 def main():
     print("start")
     pt.logging.level = pt.logging.Level.DEBUG
@@ -25,12 +19,12 @@ def main():
     w = World()
 
     with open(g.output_filename, mode='w') as csv_file:
-        csv_writer = csv.DictWriter(csv_file,\
+        g.csv_writer = csv.DictWriter(csv_file,\
             fieldnames=pt.blackboard.Blackboard.keys())
-        csv_writer.writeheader()
+        g.csv_writer.writeheader()
 
         for t in range(25):
-            csv_writer.writerow(pt.blackboard.Blackboard.storage)
+            g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
             s.update()
             w.update()
             r.b_tree.tick()

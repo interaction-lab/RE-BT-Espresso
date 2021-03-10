@@ -1,7 +1,5 @@
 import py_trees as pt
 import random
-
-from py_trees import blackboard
 from globals import*
 
 class World():

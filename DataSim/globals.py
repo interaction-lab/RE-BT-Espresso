@@ -3,6 +3,8 @@ robot_cfg_path = 'configs/robot_config.json'
 world_cfg_path = 'configs/world_config.json'
 output_filename = "simulated_data.csv"
 
+csv_writer = None
+
 env_vars = [
     "Time",
     "env_state_var_1",
