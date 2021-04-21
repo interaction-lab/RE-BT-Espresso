@@ -28,8 +28,14 @@
 - [matplotlib](https://matplotlib.org/) 
 - [lxml](https://lxml.de/)
 - [py_trees](https://py-trees.readthedocs.io/en/devel/)
+- [pyeda](https://pypi.org/project/pyeda/)
 
-See `requirements.txt` for all python3 packages (currently bugged on WSL). There are two other install issues due to issue with `graphiz` and `pyeda` packages. Fixes below.
+Easy copy paste:
+```
+pip3 install pandas sklearn graphviz imblearn matplotlib lxml py_trees pyeda
+sudo apt-get install graphviz
+```
+There are two other install issues due to issue with `graphiz` and `pyeda` packages. You will need to do the fixes below.
 
 ### graphviz pip error
 graphiz for python is broken. Instead, install via package manager:
@@ -41,7 +47,5 @@ For OSX, likely you will need to `brew install` but this is yet to be tested.
 ### pyeda literal error
 There is a bug is Pyeda library. See [#17](https://github.com/interaction-lab/BTFromSARDemostration/issues/17) for fix.
 
----
 
-The behavior tree XML file(s) that are generated from the pipeline follow the XML format for behavior trees presented in [BehaviorTree.CPP](https://www.behaviortree.dev/) and [Groot](https://github.com/BehaviorTree/Groot).
 
