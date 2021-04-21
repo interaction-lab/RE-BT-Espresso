@@ -339,10 +339,7 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
 		top_conditional_seq_node = recursive_build(action_dict[action], sym_lookup_dict)
 		final_behavior_node = None
 		
-		is_single_condition_node = not isinstance(top_conditional_seq_node, py_trees.composites.Sequence)\
-			and not isinstance(top_conditional_seq_node, py_trees.composites.Selector)
-
-		if is_single_condition_node: 
+		if not isinstance(top_conditional_seq_node, py_trees.composites.Sequence): 
 			top_seq_node_addition = py_trees.composites.Sequence(name = "Sequence")
 			top_seq_node_addition.add_child(top_conditional_seq_node)
 			final_behavior_node = top_seq_node_addition
