@@ -89,13 +89,14 @@ def get_key(dictionary, val):
 def dt_to_pstring_recursive(dt, node_index, current_letter, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
 	if is_leaf_node(dt, node_index):
 		# dt.value[node_index]: [[  0.   0. 194.   0.   0.   0.]] -> action = 'Dialogue: 3'
+		# TODO allow for ties
 		action = str(label_names[find_max_index(dt.value[node_index])])
 		add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)
 		return current_letter
 	else:
 		true_rule = None
 		if "_" in feature_names[dt.feature[node_index]]:
-			true_rule = feature_names[dt.feature[node_index]] + " == False"
+			true_rule = feature_names[dt.feature[node_index]] + " == False" #TODO this should really be the opposite, also this is the most flimsy thing ever
 		else:
 			true_rule = feature_names[dt.feature[node_index]] + " <= " + str(round(dt.threshold[node_index], 3)) #TODO config this threshold
 		false_rule = invert_expression(true_rule)
