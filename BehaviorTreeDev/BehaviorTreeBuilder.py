@@ -29,6 +29,14 @@ def find_max_index(numpy_1D_array):
 	index = np.where(numpy_1D_array == max_element)
 	return index[1][0]
 
+def find_max_indices_given_percent(numpy_1D_array, percent_diff):
+	assert percent_diff >= 0 and percent_diff <= 1.0
+	tmp_arr = numpy_1D_array[0]
+	min_val = tmp_arr[find_max_index(numpy_1D_array)] * (1.0 - percent_diff)
+	indices = np.where(tmp_arr >= min_val)[0]
+	return indices
+
+
 def add_condition_to_action_dictionary(dictionary, key, value):
 	"""Adds condition to [action] -> condition string dictionary
 
@@ -88,10 +96,12 @@ def get_key(dictionary, val):
 #in order traversal
 def dt_to_pstring_recursive(dt, node_index, current_letter, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
 	if is_leaf_node(dt, node_index):
-		# dt.value[node_index]: [[  0.   0. 194.   0.   0.   0.]] -> action = 'Dialogue: 3'
 		# TODO allow for ties
-		action = str(label_names[find_max_index(dt.value[node_index])])
-		add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)
+		percent_diff = 0.1
+		for i in find_max_indices_given_percent(dt.value[node_index], percent_diff):
+			# dt.value[node_index]: [[  0.   0. 194.   0.   0.   0.]] -> action = 'Dialogue: 3'
+			action = str(label_names[i])
+			add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)		
 		return current_letter
 	else:
 		true_rule = None
