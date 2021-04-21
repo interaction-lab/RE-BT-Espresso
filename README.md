@@ -11,11 +11,10 @@
 4. Fix [graphviz error via package install](#graphviz-pip-error)
 5. Fix [pyeda library error](#pyeda-literal-error)
 
-## To run:
+## To run an example:
 
 - Navigate to `BehaviorTreeDev/`
-- edit `config.json`
-- `python3`: run `python3 run.py`
+- `python3`: run `python3 run.py -c example/config.json`
 
 
 ## Dependencies

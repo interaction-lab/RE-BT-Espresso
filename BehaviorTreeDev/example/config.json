@@ -1,5 +1,5 @@
 {
-  "csv_folder_path": "./",
+  "csv_folder_path": "./example",
   "normalized_path": "./output/",
   "hotEncoded_path": "./output/",
   "upSampled_path": "./output/",

@@ -71,10 +71,10 @@ def run_normalize(json_file_path):
 
 	for file in os.listdir(csv_folder):
 		complete_file_path = os.fsdecode(os.path.join(csv_folder, file))
-
 		last_action_taken = None
 
 		if is_file_CSV(file):
+			print(f"Reading in csv: {complete_file_path}")
 			normalized_filename = make_modified_filename(\
 				file, CSV_NAME_EXTENSION)
 			normalized_file_path = os.fsdecode(os.path.join(\
