@@ -5,11 +5,9 @@
 ---
 ## Install
 1. Clone repo
-2. Create python3 [virtual environment](https://docs.python.org/3/library/venv.html) and activate it
-3. Install python3 requirements via `pip3 install -r requirements.txt`
-	1. There are a couple
-4. Fix [graphviz error via package install](#graphviz-pip-error)
-5. Fix [pyeda library error](#pyeda-literal-error)
+2. Install python3 dependencies below (you can create a  python3 [virtual environment](https://docs.python.org/3/library/venv.html) and activate it if you would like first)
+3. Fix [graphviz error via package install](#graphviz-pip-error)
+4. Fix [pyeda library error](#pyeda-literal-error)
 
 ## To run an example:
 
