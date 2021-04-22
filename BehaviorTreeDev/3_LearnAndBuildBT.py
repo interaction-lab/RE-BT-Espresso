@@ -229,7 +229,10 @@ class Runner:
 
 			# theoretical split to dump decision trees out to files
 			behavior_tree_obj = btBuilder.bt_espresso_mod(\
-				decision_tree_obj, self.features_data.columns, label_encoding)
+				decision_tree_obj, 
+				self.features_data.columns, 
+				label_encoding,
+				self.json_manager.get_binary_features())
 
 			behaviot_tree_full_path = os.fsdecode(os.path.join(\
 				newPrunePath, constants.BEHAVIOR_TREE_XML_FILENAME))

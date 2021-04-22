@@ -14,6 +14,7 @@ import pipeline_constants as constants
 
 AND = "and"
 OR = "or"
+binary_feature_set = set()
 
 def find_max_index(numpy_1D_array):
     """Finds and returns first max argument index in numpy array
@@ -164,7 +165,8 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
     return current_letter
 
 def is_bool_feature(dt, node_index, feature_names):
-    return "_True" in feature_names[dt.feature[node_index]]
+    global binary_feature_set
+    return feature_names[dt.feature[node_index]] in binary_feature_set
 
 # sym_lookup format:
 # {'tsla <= 19.14': 'a', 
@@ -384,7 +386,7 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
 def max_prune(dt):
     return is_leaf_node(dt, 0)
 
-def bt_espresso_mod(dt, feature_names, label_names):
+def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     """Runs modified BT-Espresso algorithm with new reductions
 
     Args:
@@ -395,6 +397,8 @@ def bt_espresso_mod(dt, feature_names, label_names):
     Returns:
         py_trees.trees.BehaviourTree: Built BehaviorTree
     """
+    global binary_feature_set
+    binary_feature_set = _binary_features
     if max_prune(dt): 
         return py_trees.composites.Parallel(name = "Parallel Root")
     sym_lookup, action_to_pstring = dt_to_pstring(dt, feature_names, label_names)
