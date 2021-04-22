@@ -155,13 +155,22 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_let
                                                                                     label_names)
     return current_letter
 
+ # dt.value[node_index]: [[  0.   0. 194.   0.   0.   0.]] -> action = 'Dialogue: 3'
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring, current_letter):
-    # TODO allow for ties
-    percent_diff = 0.1
-    for i in find_max_indices_given_percent(dt.value[node_index], percent_diff):
-            # dt.value[node_index]: [[  0.   0. 194.   0.   0.   0.]] -> action = 'Dialogue: 3'
-            action = str(label_names[i])
-            add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)		
+    percent_diff = 0.5 #TODO: make this configurable
+    max_indices = find_max_indices_given_percent(dt.value[node_index], percent_diff)
+    if(max_indices.size == 1):
+        action = str(label_names[max_indices[0]])
+        add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)
+    else: #TODO: this should include action pairs as a new action I think
+        action = ""
+        par_separator = " || "
+        for index in max_indices:
+            new_action = label_names[index]
+            action = action + par_separator + new_action
+        add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)
+           
+          		
     return current_letter
 
 def is_bool_feature(dt, node_index, feature_names):
@@ -406,7 +415,9 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     for action in action_to_pstring:
         action_minimized[action] = espresso_exprs(expr(action_to_pstring[action]).to_dnf())[0] # logic minimization
     action_minimized = remove_float_contained_variables(sym_lookup, action_minimized) # remove float conditions within ands e.g., (f1 < .05 & f1 < .5) -> (f1 < .05)
-    #TODO: factorize out actions with || or selectors
+    #TODO: add in action pairing here
+    #TODO: factorize out actions with || or selectors as new action sets?
+    #TODO: factor in last action taken as an action pair as well
     action_minimized = factorize_pstring(action_minimized) # factorize pstrings
     btree = pstring_to_btree(action_minimized, sym_lookup) # convert pstrings to btree
     return btree
