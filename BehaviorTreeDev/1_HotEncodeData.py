@@ -105,9 +105,9 @@ def run_hotencode(json_file_path):
 
 	features_data = pd.read_csv(combined_csv_file, usecols = feature_columns)
 
-	for binary_variable in binary_features:
-		features_data[binary_variable] = features_data[binary_variable].fillna(value=-1)
-		features_data[binary_variable] = features_data[binary_variable] * 1
+
+	features_data[binary_features] = features_data[binary_features].fillna(0)
+	features_data[binary_features] = features_data[binary_features].astype(bool)
 	binary_columns_array = features_data[binary_features].to_numpy()
 
 	# hot encoded features

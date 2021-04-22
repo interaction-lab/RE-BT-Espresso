@@ -16,12 +16,13 @@
   ],
 
 
-  "categorical_features": [
-    "/ExerciseSubmissionResult", 
-    "/IsNewExercise", 
+  "categorical_features": [ 
     "/MoveBlock"
   ],
-  "binary_features": [],
+  "binary_features": [
+    "/ExerciseSubmissionResult",
+    "/IsNewExercise"
+  ],
 
 
   "label_columns": [
