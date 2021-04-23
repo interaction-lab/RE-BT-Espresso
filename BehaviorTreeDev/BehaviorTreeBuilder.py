@@ -14,6 +14,7 @@ import pipeline_constants as constants
 
 AND = "and"
 OR = "or"
+MULTI_ACTION_PAR_SEL_SEPERATOR = "SEPPPARSEL"
 binary_feature_set = set()
 
 
@@ -170,13 +171,20 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_let
 
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring, current_letter):
-    # TODO allow for ties
-    percent_diff = 0.1
-    for i in find_max_indices_given_percent(dt.value[node_index], percent_diff):
-        # dt.value[node_index]: [[  0.   0. 194.   0.   0.   0.]] -> action = 'Dialogue: 3'
-        action = str(label_names[i])
-        add_condition_to_action_dictionary(
-            action_to_pstring, action, current_pstring)
+    percent_diff = 0.5
+    max_indices = find_max_indices_given_percent(
+        dt.value[node_index],
+        percent_diff)
+    action = ""
+    for i in max_indices:
+        if action != "":
+            action += MULTI_ACTION_PAR_SEL_SEPERATOR
+        else:
+            print(action)
+        action += str(label_names[i])
+
+    add_condition_to_action_dictionary(
+        action_to_pstring, action, current_pstring)
     return current_letter
 
 
@@ -402,12 +410,27 @@ def recursive_build(pstring_expr, sym_lookup_dict):
     return new_branch
 
 
+def cleaned_action_behavior(action):
+    return py_trees.behaviours.Success(
+        name=re.sub('[^A-Za-z0-9]+', '', action))
+
+
+def generate_action_nodes(action):
+    if MULTI_ACTION_PAR_SEL_SEPERATOR not in action:
+        return cleaned_action_behavior(action)
+
+    action_list = action.split(MULTI_ACTION_PAR_SEL_SEPERATOR)
+    top_level_node = py_trees.composites.Selector(
+        name="Selector" + get_node_name_counter())
+    for a in action_list:
+        top_level_node.add_child(cleaned_action_behavior(a))
+    return top_level_node
+
+
 def pstring_to_btree(action_dict, sym_lookup_dict):
     root = py_trees.composites.Parallel(name="Parallel Root")
 
     for action in action_dict:
-        action_node = py_trees.behaviours.Success(
-            name=re.sub('[^A-Za-z0-9]+', '', action))
         top_conditional_seq_node = recursive_build(
             action_dict[action], sym_lookup_dict)
         final_behavior_node = None
@@ -420,7 +443,7 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
         else:
             final_behavior_node = top_conditional_seq_node
 
-        final_behavior_node.add_child(action_node)
+        final_behavior_node.add_child(generate_action_nodes(action))
         root.add_child(final_behavior_node)
     return root
 
