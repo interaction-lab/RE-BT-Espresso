@@ -14,7 +14,7 @@ import pipeline_constants as constants
 
 AND = "and"
 OR = "or"
-MULTI_ACTION_PAR_SEL_SEPERATOR = "SEPPPARSEL"
+MULTI_ACTION_PAR_SEL_SEPERATOR = "~||~"
 binary_feature_set = set()
 
 
