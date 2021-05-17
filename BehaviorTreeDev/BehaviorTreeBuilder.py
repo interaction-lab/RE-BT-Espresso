@@ -415,7 +415,7 @@ def generate_action_nodes(action):
 
     action_list = action.split(constants.MULTI_ACTION_PAR_SEL_SEPERATOR)
     top_level_node = py_trees.composites.Selector(
-        name="Selector" + get_node_name_counter())
+        name="Either Or Selector / Parallel Replaceable" + get_node_name_counter())
     for a in action_list:
         top_level_node.add_child(cleaned_action_behavior(a))
     return top_level_node
