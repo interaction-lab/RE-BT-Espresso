@@ -465,8 +465,11 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     """
     global binary_feature_set
     binary_feature_set = _binary_features
+
+
     if max_prune(dt):
-        return py_trees.composites.Parallel(name="Parallel Root")
+        return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, No Behavior Tree to be Made")
+    
     sym_lookup, action_to_pstring = dt_to_pstring(
         dt, feature_names, label_names)
     action_minimized = {}
