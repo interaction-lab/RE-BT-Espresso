@@ -12,11 +12,8 @@ from pyeda.boolalg.expr import _LITS
 
 import pipeline_constants as constants
 
-AND = "and"
-OR = "or"
-MULTI_ACTION_PAR_SEL_SEPERATOR = "~||~"
-binary_feature_set = set()
 
+binary_feature_set = set()
 
 def find_max_index(numpy_1D_array):
     """Finds and returns first max argument index in numpy array
@@ -33,20 +30,20 @@ def find_max_index(numpy_1D_array):
     return index[1][0]
 
 
-def find_max_indices_given_percent(numpy_1D_array, percent_diff):
+def find_max_indices_given_percent(numpy_1D_array):
     """Finds array of max indices within a given percent
        ex. [[10, 0, 9.5, 7]], 0.1 -> [0,2]
 
     Args:
         numpy_1D_array (np.arr[int]): numpy array to find max of
-        percent_diff (float): percent [0.0-1.0] to take values of
+        action_diff_tolerance (float): percent [0.0-1.0] to take values of
 
     Returns:
         np.arr(int) : indices of array falling within percdiff 
     """
-    assert percent_diff >= 0 and percent_diff <= 1.0
+    assert constants.ACTION_DIFF_TOLERANCE >= 0 and constants.ACTION_DIFF_TOLERANCE <= 1.0
     tmp_arr = numpy_1D_array[0]
-    min_val = np.amax(numpy_1D_array) * (1.0 - percent_diff)
+    min_val = np.amax(numpy_1D_array) * (1.0 - constants.ACTION_DIFF_TOLERANCE)
     indices = np.where(tmp_arr >= min_val)[0]
     return indices
 
@@ -171,14 +168,11 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_let
 
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring, current_letter):
-    percent_diff = 0.5
-    max_indices = find_max_indices_given_percent(
-        dt.value[node_index],
-        percent_diff)
+    max_indices = find_max_indices_given_percent(dt.value[node_index])
     action = ""
     for i in max_indices:
         if action != "":
-            action += MULTI_ACTION_PAR_SEL_SEPERATOR
+            action += constants.MULTI_ACTION_PAR_SEL_SEPERATOR
         else:
             print(action)
         action += str(label_names[i])
@@ -214,11 +208,11 @@ def dt_to_pstring(dt, feature_names, label_names):
 
 
 def get_common_conditions(condition_pstring):
-    if condition_pstring.to_ast()[0] == OR:
+    if condition_pstring.to_ast()[0] == constants.OR:
         all_condition_sets = []
         for operand in condition_pstring.to_ast()[1:]:
             list_conditions = None
-            if operand[0] == AND:
+            if operand[0] == constants.AND:
                 list_conditions = [condition[1] for condition in operand[1:]]
             else:
                 list_conditions = [operand[1]]
@@ -290,7 +284,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 
         # processes And well
         expr_to_process = None
-        if condition_pstring.to_ast()[0] == OR:
+        if condition_pstring.to_ast()[0] == constants.OR:
             expr_to_process = condition_pstring.to_ast()[1:]
         else:
             expr_to_process = [condition_pstring.to_ast()]
@@ -298,7 +292,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
         for dnf in expr_to_process:
             to_remove_set = set()
 
-            if dnf[0] != AND:  # condition is only literal
+            if dnf[0] != constants.AND:  # condition is only literal
                 new_pstring_list.append([int_to_condition(dnf[1])])
                 continue
 
@@ -324,7 +318,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 
 def factorize_pstring(pstring_dict):
     for action, condition_pstring in pstring_dict.items():
-        can_simplify = condition_pstring.to_ast()[0] == OR
+        can_simplify = condition_pstring.to_ast()[0] == constants.OR
         conditions_in_all, all_condition_sets = get_common_conditions(
             condition_pstring)
         if can_simplify and conditions_in_all:
@@ -384,11 +378,11 @@ def recursive_build(pstring_expr, sym_lookup_dict):
     operator = pstring_expr.to_ast()[0]
     new_branch = None
     recursive = False
-    if operator == AND:
+    if operator == constants.AND:
         recursive = True
         new_branch = py_trees.composites.Sequence(
             name="Sequence" + get_node_name_counter())
-    elif operator == OR:
+    elif operator == constants.OR:
         recursive = True
         new_branch = py_trees.composites.Selector(
             name="Selector" + get_node_name_counter())
@@ -398,7 +392,7 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 
     if recursive:
         for every_operand in pstring_expr.to_ast()[1:]:
-            if every_operand[0] == AND or every_operand[0] == OR:
+            if every_operand[0] == constants.AND or every_operand[0] == constants.OR:
                 node = recursive_build(
                     ast2expr(every_operand), sym_lookup_dict)
                 new_branch.add_child(node)
@@ -416,10 +410,10 @@ def cleaned_action_behavior(action):
 
 
 def generate_action_nodes(action):
-    if MULTI_ACTION_PAR_SEL_SEPERATOR not in action:
+    if constants.MULTI_ACTION_PAR_SEL_SEPERATOR not in action:
         return cleaned_action_behavior(action)
 
-    action_list = action.split(MULTI_ACTION_PAR_SEL_SEPERATOR)
+    action_list = action.split(constants.MULTI_ACTION_PAR_SEL_SEPERATOR)
     top_level_node = py_trees.composites.Selector(
         name="Selector" + get_node_name_counter())
     for a in action_list:

@@ -21,6 +21,13 @@ LABEL_COLUMN_NAME = "Label"
 
 COLUMN_AXIS = 1
 
+MULTI_ACTION_PAR_SEL_SEPERATOR = "~||~"
+
+AND = "and"
+OR = "or"
+
+ACTION_DIFF_TOLERANCE = 0.1
+
 # Description: creates and adds folder called folder_name to directory: working_directory,
 #			   returns path to folder
 # ex: folder_name = "normalizedCSVs", working_directory = /path/to/directory
