@@ -164,6 +164,7 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         add_condition_to_action_dictionary(action_to_pstring, action, current_pstring)
     else: #TODO: this should include action pairs as a new action I think
         action = ""
+        # TODO adam removed spaces
         par_separator = " || "
         for index in max_indices:
             new_action = label_names[index]
