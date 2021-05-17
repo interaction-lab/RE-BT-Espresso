@@ -4,6 +4,8 @@ import shutil
 NORMALIZED_CSV_FOLDER_NAME = "normalized_CSVs"
 COMBINED_CSV_FILENAME = "combined_csv.csv"
 
+LAST_ACTION_TAKEN_COLUMN_NAME = "LAST_ACTION_TAKEN"
+
 HOT_ENCODED_CSV_FOLDER_NAME = "hotEncoded_CSVs"
 HOT_ENCODED_CSV_FILENAME = "hotEncoded_combined.csv"
 

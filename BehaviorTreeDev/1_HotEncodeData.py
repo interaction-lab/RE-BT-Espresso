@@ -12,8 +12,6 @@ from json_manager import JsonManager
 OUTPUT_LOG_FILE = "output.log"
 CATEGORICAL_NULL_VALUE = "No Entry"
 
-LAST_ACTION_TAKEN_COLUMN_NAME = "last_action_taken"
-
 def get_hot_encoded_header(hot_encoder, categorical_features):
 	header_list = []
 	for index, category in enumerate(hot_encoder.categories_):
@@ -64,7 +62,7 @@ def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
 		if not found_column:
 			raise Exception("Could not find feature column " + column_name)
 	if not is_label_indices:
-		feature_columns[LAST_ACTION_TAKEN_COLUMN_NAME] = len(feature_columns)
+		feature_columns[constants.LAST_ACTION_TAKEN_COLUMN_NAME] = len(feature_columns)
 	return feature_columns
 
 
@@ -80,7 +78,7 @@ def run_hotencode(json_file_path):
 	json_manager = JsonManager(json_file_path)
 	feature_list = json_manager.get_feature_columns()
 	categorical_features = json_manager.get_categorical_features()
-	categorical_features.append(LAST_ACTION_TAKEN_COLUMN_NAME)
+	categorical_features.append(constants.LAST_ACTION_TAKEN_COLUMN_NAME)
 	binary_features = json_manager.get_binary_features()
 	hot_encoded_path = json_manager.get_hot_encoded_path()
 

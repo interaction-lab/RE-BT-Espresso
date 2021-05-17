@@ -9,7 +9,7 @@ import pipeline_constants as constants
 
 CSV_EXTENSIONS = (".csv", ".CSV")
 CSV_NAME_EXTENSION = "_normalized"
-LAST_ACTION_TAKEN_COLUMN_NAME = "last_action_taken"
+
 
 def is_file_CSV(filename):
 	return filename.endswith(CSV_EXTENSIONS)
@@ -49,7 +49,7 @@ def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
 		if not found_column:
 			raise Exception("Could not find feature column " + column_name)
 	if not is_label_indices:
-		feature_columns[LAST_ACTION_TAKEN_COLUMN_NAME] = len(feature_columns)
+		feature_columns[constants.LAST_ACTION_TAKEN_COLUMN_NAME] = len(feature_columns)
 	return feature_columns
 
 def run_normalize(json_file_path):
@@ -93,7 +93,7 @@ def run_normalize(json_file_path):
 			all_lag_queues = [[""] * lag_window_length for lag_feature in lag_features]
 			
 			header_row = list(feature_list)
-			header_row.append(LAST_ACTION_TAKEN_COLUMN_NAME)
+			header_row.append(constants.LAST_ACTION_TAKEN_COLUMN_NAME)
 			header_row.append(constants.LABEL_COLUMN_NAME)
 			csv_writer.writerow(header_row)
 
@@ -117,7 +117,7 @@ def run_normalize(json_file_path):
 							lagged_feature = update_lag_feature_queue(\
 								all_lag_queues[index], timeseries_row[column_index])
 							new_normalize_row.append(lagged_feature)
-						elif column_name == LAST_ACTION_TAKEN_COLUMN_NAME:
+						elif column_name == constants.LAST_ACTION_TAKEN_COLUMN_NAME:
 							new_normalize_row.append(last_action_taken)
 						else:
 							new_normalize_row.append(\
