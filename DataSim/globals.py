@@ -8,7 +8,7 @@ output_filename = "simulated_data.csv"
 global_output_folder = "sim_data/"
 config_folder_name = ""
 
-num_rows = 50
+num_rows = 5000
 
 csv_writer = None
 
