@@ -5,12 +5,17 @@ import globals as g
 from world import World
 from student import Student
 from tree_units import*
+import os
 
 def main():
     print("start")
     pt.logging.level = pt.logging.Level.DEBUG
     pt.blackboard.Blackboard.enable_activity_stream(100)
-          
+    
+    g.config_folder_name = sys.argv[1].replace(".json", "") + "/"
+    path = os.getcwd() + "/" + g.global_output_folder + g.config_folder_name
+    os.makedirs(path)
+
     with open(sys.argv[1]) as rc:
         r = Tree_Basic(**json.loads(rc.read()))
         r.render_tree()
@@ -18,7 +23,7 @@ def main():
     s = Student()
     w = World()
 
-    with open(g.output_filename, mode='w') as csv_file:
+    with open(g.global_output_folder + g.config_folder_name + g.output_filename, mode='w') as csv_file:
         g.csv_writer = csv.DictWriter(csv_file,\
             fieldnames=pt.blackboard.Blackboard.keys())
         g.csv_writer.writeheader()
@@ -28,7 +33,6 @@ def main():
             s.update()
             w.update()
             r.b_tree.tick()
-            print(w.blackboard)
 
     print("done")
         

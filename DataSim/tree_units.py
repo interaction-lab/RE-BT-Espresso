@@ -31,7 +31,7 @@ class Tree():
         pass
         
     def render_tree(self):
-        pt.display.render_dot_tree(self.root)
+        pt.display.render_dot_tree(self.root, target_directory=g.global_output_folder + g.config_folder_name)
         
 class Tree_Basic(Tree):
     def __init__(self, type, child_list):
