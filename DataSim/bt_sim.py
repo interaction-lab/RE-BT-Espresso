@@ -14,6 +14,7 @@ def main():
     
     g.config_folder_name = sys.argv[1].replace(".json", "") + "/"
     path = os.getcwd() + "/" + g.global_output_folder + g.config_folder_name
+    g.remove_folder_if_exists(path)
     os.makedirs(path)
 
     with open(sys.argv[1]) as rc:
@@ -28,7 +29,7 @@ def main():
             fieldnames=pt.blackboard.Blackboard.keys())
         g.csv_writer.writeheader()
 
-        for t in range(25):
+        for t in range(g.num_rows):
             g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
             s.update()
             w.update()
