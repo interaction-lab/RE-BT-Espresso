@@ -7,7 +7,7 @@ import py_trees.decorators
 import py_trees.display
 
 import re
-
+import pyeda
 from pyeda.inter import *
 from pyeda.boolalg.expr import _LITS
 
@@ -494,10 +494,11 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
 def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
     for action in action_to_pstring:
+        expression = expr(action_to_pstring[action])
         # happens in case of VARX | ~VARX
-        if(not expr(action_to_pstring[action]).is_dnf()):
+        if(not expression.is_dnf() or type(expression) == pyeda.boolalg.expr._Zero):
             continue
-        dnf = expr(action_to_pstring[action]).to_dnf()
+        dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
