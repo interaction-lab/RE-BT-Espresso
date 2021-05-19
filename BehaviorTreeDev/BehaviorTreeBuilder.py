@@ -181,10 +181,18 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         action_to_pstring, action, current_pstring)
     return current_letter
 
+# TODO: this is where can see last action taken or not
+
+def is_last_action_taken_condition(condition):
+    return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition
+
+def is_last_action_taken_no_entry(condition):
+    return condition == constants.LAST_ACTION_TAKEN_COLUMN_NAME_NO_ENTRY
 
 def is_bool_feature(dt, node_index, feature_names):
     global binary_feature_set
-    return feature_names[dt.feature[node_index]] in binary_feature_set
+    name = feature_names[dt.feature[node_index]]
+    return name in binary_feature_set or is_last_action_taken_condition(name) or ("True" in name)
 
 # sym_lookup format:
 # {'tsla <= 19.14': 'a',
@@ -465,20 +473,27 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, No Behavior Tree to be Made")
     
     sym_lookup, action_to_pstring = dt_to_pstring(
-        dt, feature_names, label_names)
+        dt, 
+        feature_names, 
+        label_names)
+
+    action_minimized = minimize_bool_expression(
+        sym_lookup, 
+        action_to_pstring)
+
+    btree = pstring_to_btree(action_minimized, sym_lookup)
+    return btree
+
+def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
     for action in action_to_pstring:
         action_minimized[action] = espresso_exprs(
-            expr(action_to_pstring[action]).to_dnf())[0]  # logic minimization
-    # remove float conditions within ands e.g., (f1 < .05 & f1 < .5) -> (f1 < .05)
+            expr(action_to_pstring[action]).to_dnf())[0]
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
-    # TODO: factorize out actions with || or selectors
     action_minimized = factorize_pstring(
-        action_minimized)  # factorize pstrings
-    # convert pstrings to btree
-    btree = pstring_to_btree(action_minimized, sym_lookup)
-    return btree
+        action_minimized)
+    return action_minimized
 
 
 def save_tree(tree, filename):
