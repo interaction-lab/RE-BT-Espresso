@@ -29,7 +29,7 @@ MULTI_ACTION_PAR_SEL_SEPERATOR = "~||~"
 AND = "and"
 OR = "or"
 
-ACTION_DIFF_TOLERANCE = 0.1
+ACTION_DIFF_TOLERANCE = 0.3
 
 # Description: creates and adds folder called folder_name to directory: working_directory,
 #			   returns path to folder

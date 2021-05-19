@@ -1,0 +1,70 @@
+{
+    "type": "parallel",
+    "child_list": [
+        {
+            "name" : "sequence",
+            "inverted" : false,
+            "type": "composite",
+            "child_list" : [
+                {
+                    "name": "selector",
+                    "inverted": false,
+                    "type": "composite",
+                    "child_list": [
+                        {
+                            "name": "condition_1",
+                            "inverted": false,
+                            "type": "condition",
+                            "p_success": 1.0,
+                            "target_state": "env_state_var_1",
+                            "threshold": 1.0
+                        },
+                        {
+                            "name": "condition_2",
+                            "inverted": false,
+                            "type": "condition",
+                            "p_success": 1.0,
+                            "target_state": "env_state_var_2",
+                            "threshold": 1.0
+                        }
+                    ]
+                },
+                {
+                    "name": "action_1",
+                    "inverted": false,
+                    "type": "action",
+                    "p_success": 1.0
+                },
+                {
+                    "name": "action_2",
+                    "inverted": false,
+                    "type": "action",
+                    "p_success": 1.0
+                }
+            ]
+        },
+        {
+            "name": "selector",
+            "inverted": false,
+            "type": "composite",
+            "child_list": [
+                {
+                    "name": "condition_3",
+                    "inverted": false,
+                    "type": "condition",
+                    "p_success": 1.0,
+                    "target_state": "env_state_var_1",
+                    "threshold": 1.0
+                },
+                {
+                    "name": "action_3",
+                    "inverted": false,
+                    "type": "action",
+                    "p_success": 1.0
+                }
+            ]
+        }
+    ]
+}
+  
+  

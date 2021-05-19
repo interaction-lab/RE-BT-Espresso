@@ -1,6 +1,7 @@
 from lxml import etree
 import numpy as np
 import copy
+from numpy.core.arrayprint import _void_scalar_repr
 
 import py_trees.decorators
 import py_trees.display
@@ -111,14 +112,14 @@ def get_key(dictionary, val):
 # in order traversal
 
 
-def dt_to_pstring_recursive(dt, node_index, current_letter, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
+def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
     if is_leaf_node(dt, node_index):
-        return process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring, current_letter)
+        process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring)
     else:
-        return process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_letter, current_pstring, action_to_pstring, label_names)
+        process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names)
 
 
-def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_letter, current_pstring, action_to_pstring, label_names):
+def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names):
     true_rule = None
     if is_bool_feature(dt, node_index, feature_names):
         # the == False exists because the tree denotes it as "IsNewExercise_True <= 0.5" which, when true, is actually Is_NewExercise_False
@@ -134,8 +135,9 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_let
     # Note: this is very jank, we invert the rules of the dt for true letters to be ~ because of set up of dtree
     if (not true_rule in sym_lookup) and (not false_rule in sym_lookup):
         add_condition_to_action_dictionary(
-            sym_lookup, false_rule, current_letter)
-        current_letter = chr(ord(current_letter) + 1)
+            sym_lookup, 
+            false_rule,
+            get_current_var_name())
 
     if false_rule in sym_lookup:
         false_letter = sym_lookup.get(false_rule)
@@ -146,28 +148,32 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_let
     right_pstring = false_letter if current_pstring == "" else current_pstring + \
         " & " + false_letter
     # traverse left side of tree (true condition)
-    current_letter = dt_to_pstring_recursive(dt,
-                                             dt.children_left[node_index],
-                                             current_letter,
-                                             left_pstring,
-                                             sym_lookup,
-                                             action_to_pstring,
-                                             feature_names,
-                                             label_names)
+    dt_to_pstring_recursive(dt,
+                            dt.children_left[node_index],
+                            left_pstring,
+                            sym_lookup,
+                            action_to_pstring,
+                            feature_names,
+                            label_names)
 
     # traverse right side of tree (false condition)
-    current_letter = dt_to_pstring_recursive(dt,
-                                             dt.children_right[node_index],
-                                             current_letter,
-                                             right_pstring,
-                                             sym_lookup,
-                                             action_to_pstring,
-                                             feature_names,
-                                             label_names)
-    return current_letter
+    dt_to_pstring_recursive(dt,
+                            dt.children_right[node_index],
+                            right_pstring,
+                            sym_lookup,
+                            action_to_pstring,
+                            feature_names,
+                            label_names)
+
+var_cycle_count = 0
+def get_current_var_name():
+    global var_cycle_count    
+    tmp = "VAR" + str(var_cycle_count)
+    var_cycle_count += 1
+    return tmp
 
 
-def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring, current_letter):
+def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
     action = ""
     for i in max_indices:
@@ -178,8 +184,9 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         action += str(label_names[i])
 
     add_condition_to_action_dictionary(
-        action_to_pstring, action, current_pstring)
-    return current_letter
+        action_to_pstring, 
+        action, 
+        current_pstring)
 
 # TODO: this is where can see last action taken or not
 
@@ -210,7 +217,7 @@ def is_bool_feature(dt, node_index, feature_names):
 def dt_to_pstring(dt, feature_names, label_names):
     sym_lookup = {}
     action_to_pstring = {}
-    dt_to_pstring_recursive(dt, 0, 'a', "", sym_lookup,
+    dt_to_pstring_recursive(dt, 0, "", sym_lookup,
                             action_to_pstring, feature_names, label_names)
     return sym_lookup, action_to_pstring
 
@@ -370,7 +377,7 @@ def make_condition_node(sym_lookup_dict, every_operand):
     value = str(ast2expr(every_operand))
     if value[0] == "~":
         need_inverter = True
-        value = value[1]
+        value = value[1:]
 
     condition = get_key(sym_lookup_dict, value)
 
@@ -423,7 +430,7 @@ def generate_action_nodes(action):
 
     action_list = action.split(constants.MULTI_ACTION_PAR_SEL_SEPERATOR)
     top_level_node = py_trees.composites.Selector(
-        name="Either Or Selector / Parallel Replaceable" + get_node_name_counter())
+        name="Selector / Parallel Replaceable" + get_node_name_counter())
     for a in action_list:
         top_level_node.add_child(cleaned_action_behavior(a))
     return top_level_node
