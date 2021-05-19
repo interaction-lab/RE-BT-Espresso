@@ -37,6 +37,7 @@ def process_command_line_args():
 
 
 def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
+	global add_last_action_taken
 	feature_columns = dict()
 	for column_name in feature_list:
 		# loop over header
@@ -48,11 +49,13 @@ def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
 				break
 		if not found_column:
 			raise Exception("Could not find feature column " + column_name)
-	if not is_label_indices:
+	if not is_label_indices and add_last_action_taken:
 		feature_columns[constants.LAST_ACTION_TAKEN_COLUMN_NAME] = len(feature_columns)
 	return feature_columns
 
+add_last_action_taken = False
 def run_normalize(json_file_path):
+	global add_last_action_taken
 	print(f"Normalizing started using {json_file_path}")
 
 	json_manager = JsonManager(json_file_path)
@@ -62,6 +65,7 @@ def run_normalize(json_file_path):
 	label_columns = json_manager.get_label_columns()
 	lag_features = json_manager.get_lag_features()
 	lag_window_length = json_manager.get_sliding_window_length()
+	add_last_action_taken = json_manager.get_add_last_action_taken()
 
 	constants.remove_folder_if_exists(\
 		constants.NORMALIZED_CSV_FOLDER_NAME, normalized_folder)
@@ -93,7 +97,8 @@ def run_normalize(json_file_path):
 			all_lag_queues = [[""] * lag_window_length for lag_feature in lag_features]
 			
 			header_row = list(feature_list)
-			header_row.append(constants.LAST_ACTION_TAKEN_COLUMN_NAME)
+			if(add_last_action_taken):
+				header_row.append(constants.LAST_ACTION_TAKEN_COLUMN_NAME)
 			header_row.append(constants.LABEL_COLUMN_NAME)
 			csv_writer.writerow(header_row)
 

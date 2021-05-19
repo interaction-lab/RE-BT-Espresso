@@ -50,6 +50,7 @@ def process_command_line_args():
 
 
 def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
+	global add_last_action_taken
 	feature_columns = dict()
 	for column_name in feature_list:
 		# loop over header
@@ -61,7 +62,7 @@ def generate_feature_col_dictionary(header_row, feature_list, is_label_indices):
 				break
 		if not found_column:
 			raise Exception("Could not find feature column " + column_name)
-	if not is_label_indices:
+	if not is_label_indices and add_last_action_taken:
 		feature_columns[constants.LAST_ACTION_TAKEN_COLUMN_NAME] = len(feature_columns)
 	return feature_columns
 
@@ -72,13 +73,18 @@ def get_header_row(combined_csv_file):
 	    d_reader = csv.DictReader(f)
 	    return d_reader.fieldnames
 
+add_last_action_taken = False
 def run_hotencode(json_file_path):
+	global add_last_action_taken
 	print(f"Hot encoding started using {json_file_path}")
 	
 	json_manager = JsonManager(json_file_path)
 	feature_list = json_manager.get_feature_columns()
 	categorical_features = json_manager.get_categorical_features()
-	categorical_features.append(constants.LAST_ACTION_TAKEN_COLUMN_NAME)
+	add_last_action_taken = json_manager.get_add_last_action_taken()
+
+	if add_last_action_taken:
+		categorical_features.append(constants.LAST_ACTION_TAKEN_COLUMN_NAME)
 	binary_features = json_manager.get_binary_features()
 	hot_encoded_path = json_manager.get_hot_encoded_path()
 

@@ -15,6 +15,7 @@ JSON_KFOLD_KEY = "k_fold"
 JSON_TREE_DEPTH_KEY = "decision_tree_depth"
 JSON_OUTPUT_PATH_KEY = "output_package_path"
 JSON_BINARY_FEATURES = "binary_features"
+ADD_LAST_ACTION_TAKEN = "add_last_action_taken"
 
 class JsonManager:
 
@@ -67,3 +68,6 @@ class JsonManager:
 
 	def get_binary_features(self):
 		return list(self.v_json_object[JSON_BINARY_FEATURES])
+	
+	def get_add_last_action_taken(self):
+		return bool(self.v_json_object[ADD_LAST_ACTION_TAKEN])
