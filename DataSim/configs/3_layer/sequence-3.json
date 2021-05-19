@@ -33,13 +33,13 @@
                     "name": "action_1",
                     "inverted": false,
                     "type": "action",
-                    "p_success": 1.0
+                    "p_success": 0.8
                 },
                 {
                     "name": "action_2",
                     "inverted": false,
                     "type": "action",
-                    "p_success": 1.0
+                    "p_success": 0.8
                 }
             ]
         },

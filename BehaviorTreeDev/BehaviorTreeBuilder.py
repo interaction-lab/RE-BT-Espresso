@@ -494,8 +494,11 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
 def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
     for action in action_to_pstring:
-        action_minimized[action] = espresso_exprs(
-            expr(action_to_pstring[action]).to_dnf())[0]
+        # happens in case of VARX | ~VARX
+        if(not expr(action_to_pstring[action]).is_dnf()):
+            continue
+        dnf = expr(action_to_pstring[action]).to_dnf()
+        action_minimized[action] = espresso_exprs(dnf)[0]
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
     action_minimized = factorize_pstring(
