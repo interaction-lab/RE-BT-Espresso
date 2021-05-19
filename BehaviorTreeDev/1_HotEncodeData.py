@@ -29,7 +29,7 @@ def hot_encode_features(features_data, categorical_features):
 	hot_encoder = OneHotEncoder()
 	hot_encoder.fit(features_data[categorical_features])
 	hot_encoded_array = hot_encoder.transform(\
-		features_data[categorical_features]).toarray()
+		features_data[categorical_features]).toarray().astype(bool)
 	hot_encoded_header = get_hot_encoded_header(\
 		hot_encoder, categorical_features)
 	return hot_encoded_array, hot_encoded_header
@@ -128,7 +128,7 @@ def run_hotencode(json_file_path):
 		axis = constants.COLUMN_AXIS)
 
 	# make_formatter_string(hot_encoded_header, numerical_columns, label_column)
-	hot_encode_fmt = "%i," * len(hot_encoded_header + binary_features) # format hot encoded columns to ints
+	hot_encode_fmt = "%s," * len(hot_encoded_header + binary_features) # format hot encoded columns to binary features
 	feature_data_fmt = "%1.3f," * len(features_data.columns) # format numerical columns to doubles
 	total_fmt = hot_encode_fmt + feature_data_fmt + "%i" # for label
 

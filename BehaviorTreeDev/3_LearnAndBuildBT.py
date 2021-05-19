@@ -162,6 +162,13 @@ class Runner:
 				self.test_scores[i] += clf.score(X_test, y_test) / num_k_folds
 
 
+	def generate_full_binary_set(self):
+		bin_set = self.json_manager.get_binary_features()
+		# categrorical
+		cat_set = self.json_manager.get_categorical_features()
+		
+		# LAT
+
 	def run(self):
 		"""Reads in data, trains, and reports results
 		"""
@@ -228,6 +235,8 @@ class Runner:
 			decision_tree_obj = clf.tree_
 
 			# theoretical split to dump decision trees out to files
+			# TODO: should we include categorical features as binary?
+			full_binary_set = self.generate_full_binary_set()
 			behavior_tree_obj = btBuilder.bt_espresso_mod(\
 				decision_tree_obj, 
 				self.features_data.columns, 
