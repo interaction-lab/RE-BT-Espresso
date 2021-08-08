@@ -9,7 +9,7 @@ import os
 
 def main():
     print("start")
-    pt.logging.level = pt.logging.Level.DEBUG
+    pt.logging.level = pt.logging.Level.WARN
     pt.blackboard.Blackboard.enable_activity_stream(100)
     
     g.config_folder_name = sys.argv[1].replace(".json", "") + "/"
