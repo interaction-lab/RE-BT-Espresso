@@ -436,15 +436,31 @@ def cleaned_action_behavior(action):
 
 def generate_action_nodes(action):
     # TODO: deal with LAT
-    if constants.MULTI_ACTION_PAR_SEL_SEPERATOR not in action:
-        return cleaned_action_behavior(action)
+    # TODO: deal with recurssive LAT
+    la_node = None
+    if constants.LAST_ACTION_TAKEN_SEPERATOR in action:
+        split_list = action.split(constants.LAST_ACTION_TAKEN_SEPERATOR)
+        last_action_taken = split_list[0]
+        action = split_list[1]
+        la_node = cleaned_action_behavior(last_action_taken)
 
+    # TODO: rename these terribly named nodes
     action_list = action.split(constants.MULTI_ACTION_PAR_SEL_SEPERATOR)
-    top_level_node = py_trees.composites.Selector(
+    top_level_node = None
+    if len(action_list) > 1:
+        top_level_node = py_trees.composites.Selector(
         name="Selector / Parallel Replaceable" + get_node_name_counter())
-    for a in action_list:
-        top_level_node.add_child(cleaned_action_behavior(a))
-    return top_level_node
+        for a in action_list:
+            top_level_node.add_child(cleaned_action_behavior(a))
+    else:
+        top_level_node = cleaned_action_behavior(action)
+    final_node = top_level_node
+    if la_node != None:
+        seq = py_trees.composites.Sequence(name="Sequence" + get_node_name_counter())
+        seq.add_child(la_node)
+        seq.add_child(top_level_node)
+        final_node = seq
+    return final_node
 
 def pstring_to_btree(action_dict, sym_lookup_dict):
     root = py_trees.composites.Parallel(name="Parallel Root")
