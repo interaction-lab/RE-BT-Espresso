@@ -140,13 +140,13 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
             sym_lookup, 
             false_rule,
             get_current_var_name())
-        false_letter = sym_lookup.get(false_rule)
-        build_last_action_taken_dict(false_rule, false_letter) # uses jank from above
 
     # bug with adding vars multiple times maybe here, likely needs to be moved up, maybe not
     if false_rule in sym_lookup:
         false_letter = sym_lookup.get(false_rule)
         true_letter = "~" + false_letter
+    
+    build_last_action_taken_dict(false_rule, false_letter) # uses jank from above
 
     left_pstring = true_letter if current_pstring == "" else current_pstring + \
         " & " + true_letter
@@ -192,7 +192,8 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
     # TODO: deal with multiple LATs better
     # TODO: identify self loops? e.g. LAT == action itself -> do this when generating nodes
     for clean_cond in singular_conditions:
-        if clean_cond in last_action_taken_cond_dict:
+        # skip over inversions as !LAT could mean do any other of the N-1 actions
+        if '~' not in clean_cond and clean_cond in last_action_taken_cond_dict:
             new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
             # remove lat condition, introduces empty set of conditions tho in some cases
             cond_set_removed_lat = conditions_list.remove(clean_cond)
@@ -532,19 +533,22 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
         if action_to_pstring[action] == "":
             action_minimized[action] = ""
             continue # no conditions, likely a LAT, continue
-        print("~~~~~~~~")
-        print(action_to_pstring[action])
-        print(action)
         expression = expr(action_to_pstring[action])
         # happens in case of VARX | ~VARX
         if(not expression.is_dnf() or type(expression) == pyeda.boolalg.expr._Zero):
             continue
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
+    print("~~~~~~~~~~~~~~~~~")
+    print(action_minimized)
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
     action_minimized = factorize_pstring(
         action_minimized)
+
+    print(action_minimized)
+    print("__!!!______!!!!!!")
+
     return action_minimized
 
 def save_tree(tree, filename):
