@@ -52,7 +52,6 @@ def process_command_line_args():
 	args = vars(ap.parse_args())
 	return args["config"], args["outputlog"]
 
-
 def run_behaviortree(json_file_path, log_file_path):
 	"""Summary
 	Runs decision tree classifier, TODO: needs to be broken up per #19
@@ -64,7 +63,6 @@ def run_behaviortree(json_file_path, log_file_path):
 
 	r = Runner(json_file_path, log_file_path)
 	r.run()
-
 
 class Runner:
 
@@ -85,8 +83,7 @@ class Runner:
 		print(f"BehaviorTree building started using {json_file_path} and {log_file_path}")
 		self.json_manager = JsonManager(json_file_path)
 		self.log_file = open(log_file_path, "r")
-
-		
+	
 	def get_file_fmt_and_label_encoding(self):
 		"""Summary
 		
@@ -120,7 +117,6 @@ class Runner:
 		path = constants.combine_folder_and_working_dir(constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
 		return constants.combine_folder_and_working_dir("{}_kFold_{}_maxDepth".format(kFold, max_depth),path)
 
-
 	def create_output_folder(self, kFold, max_depth):
 		output_folder = constants.add_folder_to_directory(\
 			constants.PIPELINE_OUTPUT_FOLDER_NAME, self.json_manager.get_output_path())
@@ -130,7 +126,6 @@ class Runner:
 	def format_float_list_to_precision(self, list_in, precision):
 		prec_str = "{0:0." + str(precision) + "f}"
 		return [prec_str.format(i) for i in list_in]
-
 
 	def k_fold_train_decision_tree_w_max_depth(self, num_k_folds, max_depth, output_full_path):
 
@@ -160,7 +155,6 @@ class Runner:
 				clf = clf.fit(X_train, y_train)
 				self.train_scores[i] += clf.score(X_train, y_train) / num_k_folds
 				self.test_scores[i] += clf.score(X_test, y_test) / num_k_folds
-
 
 	def generate_full_binary_set(self):
 		bin_set = self.json_manager.get_binary_features()
@@ -195,10 +189,6 @@ class Runner:
 		report_file_obj = open(report_file_path, "w")
 		report_file_obj.write("Decision Tree with max_depth: {}, and kFold: {}\n".format(\
 			max_depth, kFold))
-		# report_file_obj.write("	Average train error with {} fold: {}\n".format(\
-		# 	kFold, sum(self.train_scores)/len(self.train_accu)))
-		# report_file_obj.write("	Average test error with {} fold: {}\n".format(\
-		# 	kFold, sum(self.test_accu)/len(self.test_accu)))
 		report_file_obj.write("	Decision Tree (DOT format) saved to: {}\n".format(dot_pdf_header))
 		report_file_obj.write("	Decision Tree (PDF format) saved to: {}.pdf\n".format(dot_pdf_header))
 		report_file_obj.write("Check {} for appropriate pruning.\n\n\n".format(PRUNING_GRAPH_FILENAME))
@@ -211,7 +201,6 @@ class Runner:
 
 		prune_path = clf.cost_complexity_pruning_path(self.features_data, self.labels_data)
 		ccp_alphas, impurities = prune_path.ccp_alphas, prune_path.impurities
-
 
 		pruning_folder = constants.add_folder_to_directory(\
 			constants.PRUNE_FOLDER_NAME, output_full_path)
@@ -265,7 +254,6 @@ class Runner:
 		graph_path = os.fsdecode(os.path.join(output_full_path, PRUNING_GRAPH_FILENAME))
 		plt.savefig(graph_path)
 
-		
 		results_txt_file = open(os.fsdecode(os.path.join(output_full_path, RESULTS_TEXT_FILENAME)), "w")
 		alist = ccp_alphas.flatten().tolist()
 		acc_diffs = [a_i - b_i for a_i, b_i in zip(self.train_scores, self.test_scores)]
@@ -287,4 +275,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-

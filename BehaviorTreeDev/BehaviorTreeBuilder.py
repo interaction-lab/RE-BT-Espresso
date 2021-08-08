@@ -30,7 +30,6 @@ def find_max_index(numpy_1D_array):
     index = np.where(numpy_1D_array == max_element)
     return index[1][0]
 
-
 def find_max_indices_given_percent(numpy_1D_array):
     """Finds array of max indices within a given percent
        ex. [[10, 0, 9.5, 7]], 0.1 -> [0,2]
@@ -48,7 +47,6 @@ def find_max_indices_given_percent(numpy_1D_array):
     indices = np.where(tmp_arr >= min_val)[0]
     return indices
 
-
 def add_condition_to_action_dictionary(dictionary, key, value):
     """Adds condition to [action] -> condition string dictionary
 
@@ -61,7 +59,6 @@ def add_condition_to_action_dictionary(dictionary, key, value):
         dictionary[key] = value
     else:
         dictionary[key] = dictionary[key] + " | " + value
-
 
 def invert_expression(exp):
     """Inverts and returns logical operator expressions
@@ -88,7 +85,6 @@ def invert_expression(exp):
     else:
         return exp
 
-
 def is_leaf_node(dt, node_index):
     """Checks if node at node_index is a leaf node to a DecisionTree
 
@@ -102,22 +98,29 @@ def is_leaf_node(dt, node_index):
     return (dt.children_left[node_index] == -1
             and dt.children_right[node_index] == -1)
 
-
 def get_key(dictionary, val):
     for key, value in dictionary.items():
         if val == value:
             return key
     return "key doesn't exist"
 
-# in order traversal
+# TODO: this is where can see last action taken or not
+def is_last_action_taken_condition(condition):
+    return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition
 
+# [variable_symbol] -> LAST_ACTION_TAKEN_condition
+last_action_taken_cond_dict = dict()
+def build_last_action_taken_dict(condition, cond_symbol):
+    global last_action_taken_cond_dict
+    if is_last_action_taken_condition(condition) and cond_symbol not in last_action_taken_cond_dict:
+        last_action_taken_cond_dict[cond_symbol] = condition
+        print(last_action_taken_cond_dict)
 
 def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
     if is_leaf_node(dt, node_index):
         process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring)
     else:
         process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names)
-
 
 def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names):
     true_rule = None
@@ -138,7 +141,10 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
             sym_lookup, 
             false_rule,
             get_current_var_name())
+        false_letter = sym_lookup.get(false_rule)
+        build_last_action_taken_dict(false_rule, false_letter) # uses jank from above
 
+    # bug with adding vars multiple times maybe here, likely needs to be moved up, maybe not
     if false_rule in sym_lookup:
         false_letter = sym_lookup.get(false_rule)
         true_letter = "~" + false_letter
@@ -147,6 +153,7 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
         " & " + true_letter
     right_pstring = false_letter if current_pstring == "" else current_pstring + \
         " & " + false_letter
+    
     # traverse left side of tree (true condition)
     dt_to_pstring_recursive(dt,
                             dt.children_left[node_index],
@@ -172,6 +179,8 @@ def get_current_var_name():
     var_cycle_count += 1
     return tmp
 
+def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
+    print(conditions)
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -182,16 +191,14 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         else:
             print(action)
         action += str(label_names[i])
-
+    # process last action taken here?
     add_condition_to_action_dictionary(
         action_to_pstring, 
         action, 
         current_pstring)
 
-# TODO: this is where can see last action taken or not
+    check_for_last_action_taken(action_to_pstring, action, current_pstring)
 
-def is_last_action_taken_condition(condition):
-    return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition
 
 def is_last_action_taken_no_entry(condition):
     return condition == constants.LAST_ACTION_TAKEN_COLUMN_NAME_NO_ENTRY
@@ -215,12 +222,13 @@ def is_bool_feature(dt, node_index, feature_names):
 
 
 def dt_to_pstring(dt, feature_names, label_names):
+    global last_action_taken_cond_dict
+    last_action_taken_cond_dict = {} # reset from last run
     sym_lookup = {}
     action_to_pstring = {}
     dt_to_pstring_recursive(dt, 0, "", sym_lookup,
                             action_to_pstring, feature_names, label_names)
     return sym_lookup, action_to_pstring
-
 
 def get_common_conditions(condition_pstring):
     if condition_pstring.to_ast()[0] == constants.OR:
@@ -236,18 +244,14 @@ def get_common_conditions(condition_pstring):
     else:
         return [], []
 
-
 def int_to_condition(int_condition):
     return str(_LITS[int_condition])
-
 
 def is_float_key(k_in):
     return "<=" in k_in
 
-
 def get_key_from_float_expr(k_in):
     return k_in.split("<=")[0], float(k_in.split("<=")[1][1:])
-
 
 def generate_all_containing_float_variable_dict(sym_lookup):
     containing_float_dict = {}
@@ -273,7 +277,6 @@ def generate_all_containing_float_variable_dict(sym_lookup):
             sym = tup[1]
             containing_float_dict['~' + sym] = {'~' + x[1] for x in l[i+1:]}
     return containing_float_dict
-
 
 def remove_float_contained_variables(sym_lookup, pstring_dict):
     """Removes float variables that "consume" the others
@@ -330,7 +333,6 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
         pstring_dict[action] = expr(new_pstring).to_nnf()
     return pstring_dict
 
-
 def factorize_pstring(pstring_dict):
     for action, condition_pstring in pstring_dict.items():
         can_simplify = condition_pstring.to_ast()[0] == constants.OR
@@ -359,18 +361,14 @@ def factorize_pstring(pstring_dict):
             pstring_dict[action] = expr(new_pstring).to_nnf()
 
     return pstring_dict
-
-
 # Used to give unique names to selector/sequence/inverter nodes to avoid stars
 node_name_counter = 0
-
 
 def get_node_name_counter():
     global node_name_counter
     _ = f"({node_name_counter})"
     node_name_counter += 1
     return _
-
 
 def make_condition_node(sym_lookup_dict, every_operand):
     need_inverter = False
@@ -387,7 +385,6 @@ def make_condition_node(sym_lookup_dict, every_operand):
             node, name="Inverter" + get_node_name_counter())
 
     return node
-
 
 def recursive_build(pstring_expr, sym_lookup_dict):
     operator = pstring_expr.to_ast()[0]
@@ -418,11 +415,9 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 
     return new_branch
 
-
 def cleaned_action_behavior(action):
     return py_trees.behaviours.Success(
         name=re.sub('[^A-Za-z0-9]+', '', action))
-
 
 def generate_action_nodes(action):
     if constants.MULTI_ACTION_PAR_SEL_SEPERATOR not in action:
@@ -434,7 +429,6 @@ def generate_action_nodes(action):
     for a in action_list:
         top_level_node.add_child(cleaned_action_behavior(a))
     return top_level_node
-
 
 def pstring_to_btree(action_dict, sym_lookup_dict):
     root = py_trees.composites.Parallel(name="Parallel Root")
@@ -456,10 +450,8 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
         root.add_child(final_behavior_node)
     return root
 
-
 def max_prune(dt):
     return is_leaf_node(dt, 0)
-
 
 def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     """Runs modified BT-Espresso algorithm with new reductions
@@ -505,7 +497,6 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = factorize_pstring(
         action_minimized)
     return action_minimized
-
 
 def save_tree(tree, filename):
     """Saves generated BehaviorTree to dot, svg, and png files
