@@ -108,12 +108,12 @@ def get_key(dictionary, val):
 def is_last_action_taken_condition(condition):
     return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition
 
-# [variable_symbol] -> LAST_ACTION_TAKEN_condition
+# [variable_symbol] -> condition
 last_action_taken_cond_dict = dict()
 def build_last_action_taken_dict(condition, cond_symbol):
     global last_action_taken_cond_dict
     if is_last_action_taken_condition(condition) and cond_symbol not in last_action_taken_cond_dict:
-        last_action_taken_cond_dict[cond_symbol] = condition
+        last_action_taken_cond_dict[cond_symbol] = condition.replace(constants.LAST_ACTION_TAKEN_COLUMN_NAME + "_", "")
         print(last_action_taken_cond_dict)
 
 def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
@@ -180,7 +180,22 @@ def get_current_var_name():
     return tmp
 
 def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
-    print(conditions)
+    global last_action_taken_cond_dict # [variable#] -> condition_srting
+    # check if conditions have a last action taken
+    # conditions is a string split by & and ~
+    singular_conditions = set()
+    conditions_list = []
+    for condition in conditions.split('&'):
+        condition_clean = condition.replace(' ', "")
+        singular_conditions.add(condition_clean)
+        conditions_list.append(condition_clean)
+    # TODO: remove the LAT condition when adding to dict
+    # TODO: deal with multiple LATs better
+    # TODO: identify self loops? e.g. LAT == action itself
+    for clean_cond in singular_conditions:
+        if clean_cond in last_action_taken_cond_dict:
+            new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
+            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, conditions)
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -188,8 +203,8 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
     for i in max_indices:
         if action != "":
             action += constants.MULTI_ACTION_PAR_SEL_SEPERATOR
-        else:
-            print(action)
+        # else: -> I think this is an old bug, may or may not be fixed, likely from physical data issue
+        #     print(action)
         action += str(label_names[i])
     # process last action taken here?
     add_condition_to_action_dictionary(
@@ -420,6 +435,7 @@ def cleaned_action_behavior(action):
         name=re.sub('[^A-Za-z0-9]+', '', action))
 
 def generate_action_nodes(action):
+    # TODO: deal with LAT
     if constants.MULTI_ACTION_PAR_SEL_SEPERATOR not in action:
         return cleaned_action_behavior(action)
 
@@ -433,6 +449,7 @@ def generate_action_nodes(action):
 def pstring_to_btree(action_dict, sym_lookup_dict):
     root = py_trees.composites.Parallel(name="Parallel Root")
 
+    print(action_dict)
     for action in action_dict:
         top_conditional_seq_node = recursive_build(
             action_dict[action], sym_lookup_dict)
@@ -466,7 +483,6 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     """
     global binary_feature_set
     binary_feature_set = _binary_features
-
 
     if max_prune(dt):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, No Behavior Tree to be Made")
