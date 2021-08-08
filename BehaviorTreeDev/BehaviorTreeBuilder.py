@@ -13,6 +13,8 @@ from pyeda.boolalg.expr import _LITS
 
 import pipeline_constants as constants
 
+# something to do with grabbing an inverted variable in process leaf or process non leaf leading to things that should not be ther, maybe a counter issue?
+
 
 binary_feature_set = set()
 
@@ -193,7 +195,12 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
     # TODO: identify self loops? e.g. LAT == action itself -> do this when generating nodes
     for clean_cond in singular_conditions:
         # skip over inversions as !LAT could mean do any other of the N-1 actions
-        if '~' not in clean_cond and clean_cond in last_action_taken_cond_dict:
+        print(clean_cond)
+        if '~' not in  clean_cond and clean_cond in last_action_taken_cond_dict:
+            print("???????????????")
+            print(clean_cond)
+            print(last_action_taken_cond_dict[clean_cond])
+            print(action)
             new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
             # remove lat condition, introduces empty set of conditions tho in some cases
             cond_set_removed_lat = conditions_list.remove(clean_cond)
@@ -244,8 +251,6 @@ def is_bool_feature(dt, node_index, feature_names):
 
 
 def dt_to_pstring(dt, feature_names, label_names):
-    global last_action_taken_cond_dict
-    last_action_taken_cond_dict = {} # reset from last run
     sym_lookup = {}
     action_to_pstring = {}
     dt_to_pstring_recursive(dt, 0, "", sym_lookup,
@@ -511,6 +516,8 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     """
     global binary_feature_set
     binary_feature_set = _binary_features
+    global last_action_taken_cond_dict
+    last_action_taken_cond_dict = {} # reset from last run
 
     if max_prune(dt):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, No Behavior Tree to be Made")
