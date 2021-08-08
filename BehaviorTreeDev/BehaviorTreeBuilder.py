@@ -57,7 +57,7 @@ def add_condition_to_action_dictionary(dictionary, key, value):
     """
     if not key in dictionary:
         dictionary[key] = value
-    else:
+    elif value != "": # deal with empty conditions
         dictionary[key] = dictionary[key] + " | " + value
 
 def invert_expression(exp):
@@ -114,7 +114,6 @@ def build_last_action_taken_dict(condition, cond_symbol):
     global last_action_taken_cond_dict
     if is_last_action_taken_condition(condition) and cond_symbol not in last_action_taken_cond_dict:
         last_action_taken_cond_dict[cond_symbol] = condition.replace(constants.LAST_ACTION_TAKEN_COLUMN_NAME + "_", "")
-        print(last_action_taken_cond_dict)
 
 def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
     if is_leaf_node(dt, node_index):
@@ -191,11 +190,18 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
         conditions_list.append(condition_clean)
     # TODO: remove the LAT condition when adding to dict
     # TODO: deal with multiple LATs better
-    # TODO: identify self loops? e.g. LAT == action itself
+    # TODO: identify self loops? e.g. LAT == action itself -> do this when generating nodes
     for clean_cond in singular_conditions:
         if clean_cond in last_action_taken_cond_dict:
             new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
-            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, conditions)
+            # remove lat condition, introduces empty set of conditions tho in some cases
+            cond_set_removed_lat = conditions_list.remove(clean_cond)
+            final_condition_string = ""
+            if cond_set_removed_lat != None:
+                final_condition_string = cond_set_removed_lat[0]
+                for i in range(1, len(cond_set_removed_lat)):
+                    final_condition_string += " & " + cond_set_removed_lat[i]
+            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string)
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -312,6 +318,8 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
     # find all conditions with both variables
     # remove lower variable
     for action, condition_pstring in pstring_dict.items():
+        if(condition_pstring == ""):
+            continue # deal with empty conditions likely from LAT
         new_pstring = "("
         new_pstring_list = []
 
@@ -350,6 +358,8 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 
 def factorize_pstring(pstring_dict):
     for action, condition_pstring in pstring_dict.items():
+        if(condition_pstring == ""):
+            continue # deal with empty conditions likely from LAT
         can_simplify = condition_pstring.to_ast()[0] == constants.OR
         conditions_in_all, all_condition_sets = get_common_conditions(
             condition_pstring)
@@ -435,38 +445,39 @@ def cleaned_action_behavior(action):
         name=re.sub('[^A-Za-z0-9]+', '', action))
 
 def generate_action_nodes(action):
-    # TODO: deal with LAT
     # TODO: deal with recurssive LAT
-    la_node = None
+    last_action_taken_node = None
     if constants.LAST_ACTION_TAKEN_SEPERATOR in action:
         split_list = action.split(constants.LAST_ACTION_TAKEN_SEPERATOR)
         last_action_taken = split_list[0]
         action = split_list[1]
-        la_node = cleaned_action_behavior(last_action_taken)
+        last_action_taken_node = cleaned_action_behavior(last_action_taken)
 
-    # TODO: rename these terribly named nodes
     action_list = action.split(constants.MULTI_ACTION_PAR_SEL_SEPERATOR)
-    top_level_node = None
+    seq_for_mult_action_node = None
     if len(action_list) > 1:
-        top_level_node = py_trees.composites.Selector(
+        seq_for_mult_action_node = py_trees.composites.Selector(
         name="Selector / Parallel Replaceable" + get_node_name_counter())
         for a in action_list:
-            top_level_node.add_child(cleaned_action_behavior(a))
+            seq_for_mult_action_node.add_child(cleaned_action_behavior(a))
     else:
-        top_level_node = cleaned_action_behavior(action)
-    final_node = top_level_node
-    if la_node != None:
+        seq_for_mult_action_node = cleaned_action_behavior(action)
+    
+    final_node = seq_for_mult_action_node
+    if last_action_taken_node != None:
         seq = py_trees.composites.Sequence(name="Sequence" + get_node_name_counter())
-        seq.add_child(la_node)
-        seq.add_child(top_level_node)
+        seq.add_child(last_action_taken_node)
+        seq.add_child(seq_for_mult_action_node)
         final_node = seq
     return final_node
 
 def pstring_to_btree(action_dict, sym_lookup_dict):
-    root = py_trees.composites.Parallel(name="Parallel Root")
+    root = py_trees.composites.Parallel(name="|| Root")
 
-    print(action_dict)
     for action in action_dict:
+        if(action_dict[action] == ""):
+            root.add_child(generate_action_nodes(action))
+            continue # empty condition set likely from LAT, deal and continue
         top_conditional_seq_node = recursive_build(
             action_dict[action], sym_lookup_dict)
         final_behavior_node = None
@@ -518,6 +529,12 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
 def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
     for action in action_to_pstring:
+        if action_to_pstring[action] == "":
+            action_minimized[action] = ""
+            continue # no conditions, likely a LAT, continue
+        print("~~~~~~~~")
+        print(action_to_pstring[action])
+        print(action)
         expression = expr(action_to_pstring[action])
         # happens in case of VARX | ~VARX
         if(not expression.is_dnf() or type(expression) == pyeda.boolalg.expr._Zero):
