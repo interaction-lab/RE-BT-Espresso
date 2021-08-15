@@ -185,6 +185,7 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
     # conditions is a string split by & and ~
     singular_conditions = set()
     conditions_list = []
+    conditions = convert_expr_ast_to_str_rep(conditions.to_ast())
     for condition in conditions.split('&'):
         condition_clean = condition.replace(' ', "")
         singular_conditions.add(condition_clean)
@@ -383,9 +384,9 @@ def factorize_pstring(pstring_dict):
             pstring_dict[action] = expr(new_pstring).to_nnf()
 
     return pstring_dict
+
 # Used to give unique names to selector/sequence/inverter nodes to avoid stars
 node_name_counter = 0
-
 def get_node_name_counter():
     global node_name_counter
     _ = f"({node_name_counter})"
@@ -494,6 +495,71 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
 def max_prune(dt):
     return is_leaf_node(dt, 0)
 
+def convert_expr_ast_to_str_rep(expr_ast):
+    # Note this only works for dnf expressions
+
+#  if condition_pstring.to_ast()[0] == constants.OR:
+#         all_condition_sets = []
+#         for operand in condition_pstring.to_ast()[1:]:
+#             list_conditions = None
+#             if operand[0] == constants.AND:
+#                 list_conditions = [condition[1] for condition in operand[1:]]
+#             else:
+#                 list_conditions = [operand[1]]
+
+    result = ""
+    if(expr_ast[0] == constants.AND):
+        # for loop over?
+        list_conditions = [int_to_condition(condition[1]) for condition in expr_ast[1:]]
+        result = " & ".join(list_conditions)
+    elif(expr_ast[0] == constants.OR):
+        # loop through all literals and join
+        res_str_list = []
+        for and_expr in expr_ast[1:]:
+            res_str_list.append(convert_expr_ast_to_str_rep(and_expr))
+        result = " | ".join(res_str_list)
+    return result
+    
+
+
+def add_last_action_taken_subtrees(action_minimized):
+    # loop through the dictionary?
+    for action, condition in action_minimized.items():
+        check_for_last_action_taken(action_minimized, action, condition)
+
+def minimize_bool_expression(sym_lookup, action_to_pstring):
+    action_minimized = {}
+    for action in action_to_pstring:
+        if action_to_pstring[action] == "":
+            action_minimized[action] = ""
+            continue # no conditions, likely a LAT, continue
+        expression = expr(action_to_pstring[action])
+        # happens in case of VARX | ~VARX
+        if(not expression.is_dnf() or type(expression) == pyeda.boolalg.expr._Zero):
+            continue
+        dnf = expression.to_dnf()
+        action_minimized[action] = espresso_exprs(dnf)[0]
+
+    add_last_action_taken_subtrees(action_minimized)
+
+    action_minimized = remove_float_contained_variables(
+        sym_lookup, action_minimized)
+    action_minimized = factorize_pstring(
+        action_minimized)
+
+    return action_minimized
+
+def save_tree(tree, filename):
+    """Saves generated BehaviorTree to dot, svg, and png files
+
+    Args:
+        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
+        filename (str): full filename with path for tree to be saved to
+    """
+    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
+                                     with_blackboard_variables=False, target_directory=filename)
+
+
 def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     """Runs modified BT-Espresso algorithm with new reductions
 
@@ -510,6 +576,7 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     global last_action_taken_cond_dict
     last_action_taken_cond_dict = {} # reset from last run
 
+    # TODO: this should just be the make bottom action node right?
     if max_prune(dt):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, No Behavior Tree to be Made")
     
@@ -525,41 +592,3 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     btree = pstring_to_btree(action_minimized, sym_lookup)
     return btree
 
-def minimize_bool_expression(sym_lookup, action_to_pstring):
-    action_minimized = {}
-    for action in action_to_pstring:
-        if action_to_pstring[action] == "":
-            action_minimized[action] = ""
-            continue # no conditions, likely a LAT, continue
-        expression = expr(action_to_pstring[action])
-        # happens in case of VARX | ~VARX
-        if(not expression.is_dnf() or type(expression) == pyeda.boolalg.expr._Zero):
-            continue
-        dnf = expression.to_dnf()
-        action_minimized[action] = espresso_exprs(dnf)[0]
-    
-    check_for_last_action_taken(action_minimized, action, current_pstring)
-
-    print("~~~~~~~~~~~~~~~~~")
-    print(action_minimized) # need to check if optimized out action prior
-    # need a pointer to original 
-    # maybe just move the logic to post minimization here to find all of them
-    action_minimized = remove_float_contained_variables(
-        sym_lookup, action_minimized)
-    action_minimized = factorize_pstring(
-        action_minimized)
-
-    print(action_minimized)
-    print("__!!!______!!!!!!")
-
-    return action_minimized
-
-def save_tree(tree, filename):
-    """Saves generated BehaviorTree to dot, svg, and png files
-
-    Args:
-        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
-        filename (str): full filename with path for tree to be saved to
-    """
-    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
-                                     with_blackboard_variables=False, target_directory=filename)
