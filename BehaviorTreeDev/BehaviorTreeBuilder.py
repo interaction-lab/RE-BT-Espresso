@@ -106,7 +106,6 @@ def get_key(dictionary, val):
             return key
     return "key doesn't exist"
 
-# TODO: this is where can see last action taken or not
 def is_last_action_taken_condition(condition):
     return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition
 
@@ -195,12 +194,7 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
     # TODO: identify self loops? e.g. LAT == action itself -> do this when generating nodes
     for clean_cond in singular_conditions:
         # skip over inversions as !LAT could mean do any other of the N-1 actions
-        print(clean_cond)
         if '~' not in  clean_cond and clean_cond in last_action_taken_cond_dict:
-            print("???????????????")
-            print(clean_cond)
-            print(last_action_taken_cond_dict[clean_cond])
-            print(action)
             new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
             # remove lat condition, introduces empty set of conditions tho in some cases
             cond_set_removed_lat = conditions_list.remove(clean_cond)
@@ -209,7 +203,7 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
                 final_condition_string = cond_set_removed_lat[0]
                 for i in range(1, len(cond_set_removed_lat)):
                     final_condition_string += " & " + cond_set_removed_lat[i]
-            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string)
+            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string) # might need to move this logic to end post minmization due to things getting optimized out
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -225,9 +219,6 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         action_to_pstring, 
         action, 
         current_pstring)
-
-    check_for_last_action_taken(action_to_pstring, action, current_pstring)
-
 
 def is_last_action_taken_no_entry(condition):
     return condition == constants.LAST_ACTION_TAKEN_COLUMN_NAME_NO_ENTRY
@@ -546,8 +537,13 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
             continue
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
+    
+    check_for_last_action_taken(action_minimized, action, current_pstring)
+
     print("~~~~~~~~~~~~~~~~~")
-    print(action_minimized)
+    print(action_minimized) # need to check if optimized out action prior
+    # need a pointer to original 
+    # maybe just move the logic to post minimization here to find all of them
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
     action_minimized = factorize_pstring(
