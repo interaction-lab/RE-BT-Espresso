@@ -27,6 +27,9 @@ COLUMN_AXIS = 1
 MULTI_ACTION_PAR_SEL_SEPERATOR = "~||~"
 LAST_ACTION_TAKEN_SEPERATOR="~<-LAT~"
 
+SEL_PAR_REPLACEABLE_NAME = "Selector / Parallel Replaceable"
+LAT_SEQ_NAME = "LAT Sequence"
+
 AND = "and"
 OR = "or"
 
