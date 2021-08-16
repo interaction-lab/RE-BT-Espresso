@@ -2,7 +2,7 @@
 
 ##### This repository was made to facilitate the investigations in developing behavior tree robot action policy from Socially Assistive Robot (SAR) Wizard of Oz (WoZ) Interaction Data. This pipeline processes logged data from a WoZ interaction and generates behavior trees, along with data on the accuracy of the conversion process. These behavior trees are ready to be used alongside the BehaviorTree.CPP library, and redeployed back in the robot.
 
-IMPORTANT: The repo is not clean in the slightest. This will be cited as `open-source` in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written code even. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `bt_espresso_mod`.
+IMPORTANT: The repo is not clean in the slightest as it is divulging near deadlines. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `bt_espresso_mod`.
 
 ---
 ## Install
@@ -44,7 +44,7 @@ graphiz for python is broken. Instead, install via package manager:
 ```bash
 sudo apt-get install graphviz
 ```
-For OSX, likely you will need to `brew install` but this is yet to be tested.
+For OSX, use `brew` instead.
 
 ### pyeda literal error
 There is a bug is Pyeda library. See [#17](https://github.com/interaction-lab/BTFromSARDemostration/issues/17) for fix.
