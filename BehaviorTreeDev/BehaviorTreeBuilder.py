@@ -196,6 +196,7 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
         if '~' not in  clean_cond and clean_cond in last_action_taken_cond_dict:
             new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
             # remove LAT condition, introduces empty set of conditions tho in some cases
+            # TODO: order the action sequence so that it can self split later, e.g., c1 a1 c2 a2, curretly globbing all onto front
             cond_set_removed_lat = [n for n in conditions_list if n != clean_cond] # remove
             final_condition_string = convert_expr_ast_to_str_rep(action_to_pstring_dict[last_action_taken_cond_dict[clean_cond]].to_ast())
             for c in cond_set_removed_lat:
