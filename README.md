@@ -2,6 +2,8 @@
 
 ##### This repository was made to facilitate the investigations in developing behavior tree robot action policy from Socially Assistive Robot (SAR) Wizard of Oz (WoZ) Interaction Data. This pipeline processes logged data from a WoZ interaction and generates behavior trees, along with data on the accuracy of the conversion process. These behavior trees are ready to be used alongside the BehaviorTree.CPP library, and redeployed back in the robot.
 
+IMPORTANT: The repo is not clean in the slightest. This will be cited as `open-source` in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written code even. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `bt_espresso_mod`.
+
 ---
 ## Install
 1. Clone repo
@@ -9,10 +11,13 @@
 3. Fix [graphviz error via package install](#graphviz-pip-error)
 4. Fix [pyeda library error](#pyeda-literal-error)
 
-## To run an example:
-
-- Navigate to `BehaviorTreeDev/`
-- `python3`: run `python3 run.py -c example/config.json`
+## Running:
+- For running the builder etc, navigate to `BehaviorTreeDev/`
+    - BehaviorTreePipeline: `python3 run.py -c example/config.json`
+    - Recoloring Output: `python3 color_bt_trees.py -d .` (replace `.` with any parent directory of the output, example defaults to the `output` directory)
+- For simulating data, navigate to `DataSim`
+    1. `python3 bt_sim.py path/to/tree/config/you/want` (likely under `/config`)
+    2. Run it on the behavior tree builder, recreate a config based on `BehaviorTreeDev/example/config.json` with conrrect output data paths, variables, etc.
 
 
 ## Dependencies
