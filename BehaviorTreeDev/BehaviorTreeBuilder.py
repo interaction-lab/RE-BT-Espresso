@@ -60,7 +60,7 @@ def add_condition_to_action_dictionary(dictionary, key, value):
     if not key in dictionary:
         dictionary[key] = value
     elif value != "": # deal with empty conditions
-        dictionary[key] = dictionary[key] + " | " + value
+        dictionary[key] = dictionary[key] + " | " +  value
 
 def invert_expression(exp):
     """Inverts and returns logical operator expressions
@@ -180,7 +180,7 @@ def get_current_var_name():
     return tmp
 
 def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
-    global last_action_taken_cond_dict # [variable#] -> condition_srting
+    global last_action_taken_cond_dict # [variable#] -> action_string
     # check if conditions have a last action taken
     # conditions is a string split by & and ~
     singular_conditions = set()
@@ -189,21 +189,18 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
         condition_clean = condition.replace(' ', "")
         singular_conditions.add(condition_clean)
         conditions_list.append(condition_clean)
-    # TODO: remove the LAT condition when adding to dict
-    # TODO: deal with multiple LATs better
+    # TODO: deal with multiple LATs better - probably wontfix
     # TODO: identify self loops? e.g. LAT == action itself -> do this when generating nodes
     for clean_cond in singular_conditions:
         # skip over inversions as !LAT could mean do any other of the N-1 actions
         if '~' not in  clean_cond and clean_cond in last_action_taken_cond_dict:
             new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
-            # remove lat condition, introduces empty set of conditions tho in some cases
-            cond_set_removed_lat = conditions_list.remove(clean_cond)
-            final_condition_string = ""
-            if cond_set_removed_lat != None:
-                final_condition_string = cond_set_removed_lat[0]
-                for i in range(1, len(cond_set_removed_lat)):
-                    final_condition_string += " & " + cond_set_removed_lat[i]
-            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string) # might need to move this logic to end post minmization due to things getting optimized out
+            # remove LAT condition, introduces empty set of conditions tho in some cases
+            cond_set_removed_lat = [n for n in conditions_list if n != clean_cond] # remove
+            final_condition_string = convert_expr_ast_to_str_rep(action_to_pstring_dict[last_action_taken_cond_dict[clean_cond]].to_ast())
+            for c in cond_set_removed_lat:
+                final_condition_string += " & " + c
+            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string)
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -379,7 +376,6 @@ def factorize_pstring(pstring_dict):
                                               .replace("\'", "")
 
             new_pstring += ors + ")"
-
             pstring_dict[action] = expr(new_pstring).to_nnf()
 
     return pstring_dict
@@ -512,16 +508,20 @@ def convert_expr_ast_to_str_rep(expr_ast):
     else: # single literal
         result = str(int_to_condition(expr_ast[1]))
     return result
-    
+
+def convert_actions_back_to_expr_rep(action_minimized):
+    for action in action_minimized:
+        if isinstance(action_minimized[action], str):
+            action_minimized[action] = expr(action_minimized[action])
+
 def add_last_action_taken_subtrees(action_minimized):
     # loop through the dictionary?
     copy_of_dict = dict(action_minimized)
     for action, condition in copy_of_dict.items():
-        # TODO: split on ors here
-        # maybe string it out here first then split
         conditions = convert_expr_ast_to_str_rep(condition.to_ast())
         for singular_con in conditions.split("|"):
             check_for_last_action_taken(action_minimized, action, singular_con)
+    convert_actions_back_to_expr_rep(action_minimized)
 
 def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
