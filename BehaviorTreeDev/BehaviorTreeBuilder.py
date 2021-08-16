@@ -189,8 +189,6 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
         condition_clean = condition.replace(' ', "")
         singular_conditions.add(condition_clean)
         conditions_list.append(condition_clean)
-    print(conditions)
-    print(singular_conditions)
     # TODO: remove the LAT condition when adding to dict
     # TODO: deal with multiple LATs better
     # TODO: identify self loops? e.g. LAT == action itself -> do this when generating nodes
