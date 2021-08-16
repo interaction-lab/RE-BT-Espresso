@@ -318,7 +318,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
     # remove lower variable
     for action, condition_pstring in pstring_dict.items():
         if(condition_pstring == ""):
-            continue # deal with empty conditions likely from LAT
+            continue # deal with empty conditions likely from LAT, still valid
         new_pstring = "("
         new_pstring_list = []
 
@@ -358,7 +358,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
 def factorize_pstring(pstring_dict):
     for action, condition_pstring in pstring_dict.items():
         if(condition_pstring == ""):
-            continue # deal with empty conditions likely from LAT
+            continue # deal with empty conditions likely from LAT, still valid
         can_simplify = condition_pstring.to_ast()[0] == constants.OR
         conditions_in_all, all_condition_sets = get_common_conditions(
             condition_pstring)
@@ -476,7 +476,7 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
     for action in action_dict:
         if(action_dict[action] == ""):
             root.add_child(generate_action_nodes(action))
-            continue # empty condition set likely from LAT, deal and continue
+            continue # empty condition set likely from LAT, still valid, deal and continue
         top_conditional_seq_node = recursive_build(
             action_dict[action], sym_lookup_dict)
         final_behavior_node = None
