@@ -179,8 +179,27 @@ def get_current_var_name():
     var_cycle_count += 1
     return tmp
 
+
+def add_to_vec_hash_dict(dictionary, key, value):
+    '''Adds to a dictionary of the following, appending to end of set
+    key: -3
+    value: -1
+    dictionary: {
+        -3 : {4,6}
+    }
+    result: {
+        -3 : {4,6,-1}
+    }
+    '''
+    if key not in dictionary:
+        dictionary[key] = {value}
+    else:
+        dictionary[key].add(value)
+
+action_to_lat_dict = dict()
 def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
     global last_action_taken_cond_dict # [variable#] -> action_string
+    global action_to_lat_dict # [lat_action] -> prior action
     # check if conditions have a last action taken
     # conditions is a string split by & and ~
     singular_conditions = set()
@@ -193,6 +212,7 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
         # skip over inversions as !LAT could mean do any other of the N-1 actions
         if '~' not in  clean_cond and clean_cond in last_action_taken_cond_dict:
             new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
+            add_to_vec_hash_dict(action_to_lat_dict, action, last_action_taken_cond_dict[clean_cond])
             # remove LAT condition, introduces empty set of conditions tho in some cases
             # TODO: order the action sequence so that it can self split later, e.g., c1 a1 c2 a2, curretly globbing all onto front
             cond_set_removed_lat = [n for n in conditions_list if n != clean_cond] # remove
@@ -462,15 +482,26 @@ def generate_action_nodes(action):
         final_node = seq
     return final_node
 
+# [action] -> seq_node
+act_to_top_seq_dict = dict()
 def pstring_to_btree(action_dict, sym_lookup_dict):
-    root = py_trees.composites.Parallel(name="|| Root")
+    global act_to_top_seq_dict
 
+    root = py_trees.composites.Parallel(name="|| Root")
+    
     for action in action_dict:
+        root.add_child(create_action_seq_node(action, action_dict, sym_lookup_dict))
+    return root
+
+def create_action_seq_node(action, action_dict, sym_lookup_dict):
         if(action_dict[action] == ""):
-            root.add_child(generate_action_nodes(action))
-            continue # empty condition set likely from LAT, still valid, deal and continue
+            return generate_action_nodes(action) # empty condition set likely from LAT, still valid, deal and continue
+        
         top_conditional_seq_node = recursive_build(
             action_dict[action], sym_lookup_dict)
+        if action not in act_to_top_seq_dict:
+            act_to_top_seq_dict[action] = top_conditional_seq_node
+
         final_behavior_node = None
 
         if not isinstance(top_conditional_seq_node, py_trees.composites.Sequence):
@@ -482,8 +513,8 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
             final_behavior_node = top_conditional_seq_node
 
         final_behavior_node.add_child(generate_action_nodes(action))
-        root.add_child(final_behavior_node)
-    return root
+    
+        return final_behavior_node
 
 def max_prune(dt):
     return is_leaf_node(dt, 0)
@@ -537,12 +568,28 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
     
-    add_last_action_taken_subtrees(action_minimized)
+    add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
 
     action_minimized = factorize_pstring(
         action_minimized)
 
     return action_minimized
+
+
+#TODO: remove this dictionary: act_to_top_seq_dict
+def add_last_action_taken_seq_chains(root, action_minimized, sym_lookup_dict):
+    global action_to_lat_dict # [lat_action] -> action
+    global act_to_top_seq_dict # [action] -> top_level_seq_node (ref)
+
+    for lat_action, action_set in action_to_lat_dict.items():
+        for action in action_set:
+            top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
+            top_seq.add_child(create_action_seq_node(lat_action, action_minimized, sym_lookup_dict))
+            top_seq.add_child(create_action_seq_node(action, action_minimized, sym_lookup_dict))
+            # action, next action
+            root.add_child(top_seq)
+            break
+
 
 def save_tree(tree, filename):
     """Saves generated BehaviorTree to dot, svg, and png files
@@ -582,5 +629,7 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
         sym_lookup, 
         action_to_pstring)
 
-    btree = pstring_to_btree(action_minimized, sym_lookup)
+    btree = pstring_to_btree(action_minimized, sym_lookup) 
+
+    add_last_action_taken_seq_chains(btree,action_minimized, sym_lookup)
     return btree
