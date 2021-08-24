@@ -129,7 +129,7 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
         true_rule = invert_expression(feature_names[dt.feature[node_index]])
     else:
         true_rule = feature_names[dt.feature[node_index]] + " <= " + str(
-            round(dt.threshold[node_index], 3))  # TODO config this threshold
+            round(dt.threshold[node_index], 3))
     false_rule = invert_expression(true_rule)
 
     true_letter = None
@@ -189,8 +189,6 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
         condition_clean = condition.replace(' ', "")
         singular_conditions.add(condition_clean)
         conditions_list.append(condition_clean)
-    # TODO: deal with multiple LATs better - probably wontfix
-    # TODO: identify self loops? e.g. LAT == action itself -> do this when generating nodes
     for clean_cond in singular_conditions:
         # skip over inversions as !LAT could mean do any other of the N-1 actions
         if '~' not in  clean_cond and clean_cond in last_action_taken_cond_dict:
@@ -439,7 +437,6 @@ def cleaned_action_behavior(action):
         name=re.sub('[^A-Za-z0-9]+', '', action))
 
 def generate_action_nodes(action):
-    # TODO: deal with recurssive LAT - likely wont fix
     last_action_taken_node = None
     if constants.LAST_ACTION_TAKEN_SEPERATOR in action:
         split_list = action.split(constants.LAST_ACTION_TAKEN_SEPERATOR)
@@ -537,10 +534,11 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
-    add_last_action_taken_subtrees(action_minimized)
-
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
+    
+    add_last_action_taken_subtrees(action_minimized)
+
     action_minimized = factorize_pstring(
         action_minimized)
 
@@ -572,9 +570,8 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     global last_action_taken_cond_dict
     last_action_taken_cond_dict = {} # reset from last run
 
-    # TODO: this should just be the make bottom action node right?
     if max_prune(dt):
-        return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, No Behavior Tree to be Made")
+        return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, no behavior tree to be made as the most likley action would always be chosen.")
     
     sym_lookup, action_to_pstring = dt_to_pstring(
         dt, 
