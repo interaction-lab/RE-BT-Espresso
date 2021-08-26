@@ -107,7 +107,7 @@ def get_key(dictionary, val):
     return "key doesn't exist"
 
 def is_last_action_taken_condition(condition):
-    return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition
+    return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition and not "No Entry" in condition
 
 # [variable_symbol] -> condition
 last_action_taken_cond_dict = dict()
@@ -158,7 +158,7 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
     # proccess lat string here TODO
     # TODO: double check that false/true are being on correct tree
     left_pstring_wo_lat = right_pstring_wo_lat = current_pstring_wo_lat
-    if is_last_action_taken_condition(false_rule):
+    if not is_last_action_taken_condition(false_rule):
         left_pstring_wo_lat = true_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
             " & " + true_letter
         right_pstring_wo_lat = false_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
@@ -229,11 +229,12 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
             add_to_vec_hash_dict(action_to_lat_dict, action, last_action_taken_cond_dict[clean_cond])
             # remove LAT condition, introduces empty set of conditions tho in some cases
             # TODO: order the action sequence so that it can self split later, e.g., c1 a1 c2 a2, curretly globbing all onto front
-            cond_set_removed_lat = [n for n in conditions_list if n != clean_cond] # remove
-            final_condition_string = convert_expr_ast_to_str_rep(action_to_pstring_dict[last_action_taken_cond_dict[clean_cond]].to_ast())
-            for c in cond_set_removed_lat:
-                final_condition_string += " & " + c
-            add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string)
+            # TODO: repuposed this funciton for only adding in last action, this is so jank, below is what it was also used for
+            # cond_set_removed_lat = [n for n in conditions_list if n != clean_cond] # remove
+            # final_condition_string = convert_expr_ast_to_str_rep(action_to_pstring_dict[last_action_taken_cond_dict[clean_cond]].to_ast())
+            # for c in cond_set_removed_lat:
+            #     final_condition_string += " & " + c
+            # add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string)
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, action_to_pstring_wo_lat, current_pstring, current_pstring_wo_lat):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -579,6 +580,8 @@ def add_last_action_taken_subtrees(action_minimized):
     # loop through the dictionary?
     copy_of_dict = dict(action_minimized)
     for action, condition in copy_of_dict.items():
+        # if condition == "": # likely broken
+        #     continue
         conditions = convert_expr_ast_to_str_rep(condition.to_ast())
         for singular_con in conditions.split("|"):
             check_for_last_action_taken(action_minimized, action, singular_con)
@@ -597,26 +600,28 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
+    print(action_minimized)
+    add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
+
+    print(action_minimized)
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
-    
-    #add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
-
     action_minimized = factorize_pstring(
         action_minimized)
 
     return action_minimized
 
-def add_last_action_taken_seq_chains(root, action_minimized, sym_lookup_dict):
-    global action_to_lat_dict # [lat_action] -> action
+def add_last_action_taken_seq_chains(root, action_minimized_wo_lat, sym_lookup_dict):
+    global action_to_lat_dict # [lat_action] -> action, need to figure this out better
+    # need to build this dictionary myself.........
 
     for lat_action, action_set in action_to_lat_dict.items():
         for action in action_set:
             top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
-            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[lat_action].to_ast()))
-            top_seq.add_child(create_action_seq_node(lat_action, action_minimized, sym_lookup_dict))
-            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[action].to_ast()))
-            top_seq.add_child(create_action_seq_node(action, action_minimized, sym_lookup_dict))
+            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[lat_action].to_ast()))
+            top_seq.add_child(create_action_seq_node(lat_action, action_minimized_wo_lat, sym_lookup_dict))
+            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action].to_ast()))
+            top_seq.add_child(create_action_seq_node(action, action_minimized_wo_lat, sym_lookup_dict))
             # action, next action
             root.add_child(top_seq)
             break
@@ -655,15 +660,18 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
         feature_names, 
         label_names)
 
+    print(action_to_pstring)
     action_minimized = minimize_bool_expression(
         sym_lookup, 
         action_to_pstring)
+    print("done")
     
+    print(action_to_pstring_wo_lat)
     action_minimized_wo_lat = minimize_bool_expression(
         sym_lookup, 
         action_to_pstring_wo_lat)
 
     btree = pstring_to_btree(action_minimized, sym_lookup) 
 
-    #add_last_action_taken_seq_chains(btree, action_minimized_wo_lat, sym_lookup)
+    add_last_action_taken_seq_chains(btree, action_minimized_wo_lat, sym_lookup)
     return btree
