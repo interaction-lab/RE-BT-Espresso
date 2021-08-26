@@ -99,7 +99,7 @@ def is_leaf_node(dt, node_index):
     """
     return (dt.children_left[node_index] == -1
             and dt.children_right[node_index] == -1)
-
+56  
 def get_key(dictionary, val):
     for key, value in dictionary.items():
         if val == value:
@@ -116,13 +116,14 @@ def build_last_action_taken_dict(condition, cond_symbol):
     if is_last_action_taken_condition(condition) and cond_symbol not in last_action_taken_cond_dict:
         last_action_taken_cond_dict[cond_symbol] = condition.replace(constants.LAST_ACTION_TAKEN_COLUMN_NAME + "_", "")
 
-def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
+def dt_to_pstring_recursive(dt, node_index, current_pstring, current_pstring_wo_lat, sym_lookup, action_to_pstring, action_to_pstring_wo_lat, feature_names, label_names):
     if is_leaf_node(dt, node_index):
-        process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring)
+        process_leaf_node(dt, node_index, label_names, action_to_pstring, action_to_pstring_wo_lat, current_pstring, current_pstring_wo_lat)
     else:
-        process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names)
+        process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, current_pstring_wo_lat, action_to_pstring, action_to_pstring_wo_lat, label_names)
 
-def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names):
+def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, current_pstring_wo_lat, action_to_pstring, action_to_pstring_wo_lat, label_names):
+    global last_action_taken_cond_dict
     true_rule = None
     if is_bool_feature(dt, node_index, feature_names):
         # the == False exists because the tree denotes it as "IsNewExercise_True <= 0.5" which, when true, is actually Is_NewExercise_False
@@ -154,12 +155,23 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
     right_pstring = false_letter if current_pstring == "" else current_pstring + \
         " & " + false_letter
     
+    # proccess lat string here TODO
+    # TODO: double check that false/true are being on correct tree
+    left_pstring_wo_lat = right_pstring_wo_lat = current_pstring_wo_lat
+    if is_last_action_taken_condition(false_rule):
+        left_pstring_wo_lat = true_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
+            " & " + true_letter
+        right_pstring_wo_lat = false_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
+            " & " + false_letter
+
     # traverse left side of tree (true condition)
     dt_to_pstring_recursive(dt,
                             dt.children_left[node_index],
                             left_pstring,
+                            left_pstring_wo_lat,
                             sym_lookup,
                             action_to_pstring,
+                            action_to_pstring_wo_lat,
                             feature_names,
                             label_names)
 
@@ -167,8 +179,10 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
     dt_to_pstring_recursive(dt,
                             dt.children_right[node_index],
                             right_pstring,
+                            right_pstring_wo_lat,
                             sym_lookup,
                             action_to_pstring,
+                            action_to_pstring_wo_lat,
                             feature_names,
                             label_names)
 
@@ -221,7 +235,7 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
                 final_condition_string += " & " + c
             add_condition_to_action_dictionary(action_to_pstring_dict, new_key, final_condition_string)
 
-def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
+def process_leaf_node(dt, node_index, label_names, action_to_pstring, action_to_pstring_wo_lat, current_pstring, current_pstring_wo_lat):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
     action = ""
     for i in max_indices:
@@ -235,6 +249,11 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         action_to_pstring, 
         action, 
         current_pstring)
+    add_condition_to_action_dictionary(
+        action_to_pstring_wo_lat,
+        action,
+        current_pstring_wo_lat
+    )
 
 def is_last_action_taken_no_entry(condition):
     return condition == constants.LAST_ACTION_TAKEN_COLUMN_NAME_NO_ENTRY
@@ -256,13 +275,13 @@ def is_bool_feature(dt, node_index, feature_names):
 #  'Dialogue: 4': 'a & b & c & ~d | a & b & ~c & f & ~g',
 #  'Dialogue: 1': 'a & b & ~c & f & g | a & b & ~c & ~f', ...}
 
-
 def dt_to_pstring(dt, feature_names, label_names):
     sym_lookup = {}
     action_to_pstring = {}
-    dt_to_pstring_recursive(dt, 0, "", sym_lookup,
-                            action_to_pstring, feature_names, label_names)
-    return sym_lookup, action_to_pstring
+    action_to_pstring_wo_lat = {}
+    dt_to_pstring_recursive(dt, 0, "", "", sym_lookup,
+                            action_to_pstring, action_to_pstring_wo_lat, feature_names, label_names)
+    return sym_lookup, action_to_pstring, action_to_pstring_wo_lat
 
 def get_common_conditions(condition_pstring):
     if condition_pstring.to_ast()[0] == constants.OR:
@@ -482,11 +501,7 @@ def generate_action_nodes(action):
         final_node = seq
     return final_node
 
-# [action] -> seq_node
-act_to_top_seq_dict = dict()
 def pstring_to_btree(action_dict, sym_lookup_dict):
-    global act_to_top_seq_dict
-
     root = py_trees.composites.Parallel(name="|| Root")
     
     for action in action_dict:
@@ -499,8 +514,6 @@ def create_action_seq_node(action, action_dict, sym_lookup_dict):
         
         top_conditional_seq_node = recursive_build(
             action_dict[action], sym_lookup_dict)
-        if action not in act_to_top_seq_dict:
-            act_to_top_seq_dict[action] = top_conditional_seq_node
 
         final_behavior_node = None
 
@@ -555,7 +568,6 @@ def convert_expr_ast_to_str_rep(expr_ast):
         # result = " | ".join(res_str_list)
     else: # single literal
         result = str(int_to_condition(expr_ast[1]))
-    print(result)
     return result
 
 def convert_actions_back_to_expr_rep(action_minimized):
@@ -595,31 +607,8 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
 
     return action_minimized
 
-
-# this is one of the most inefficient things I have ever written
-def remove_all_lat_conditions(action_minimized):
-    copy_of_dict = dict(action_minimized)
-
-    for action, condition in copy_of_dict.items():
-        print(condition)
-        string_cond = convert_expr_ast_to_str_rep(condition.to_ast()) # only works with dnf.... dfskajhfskdhk
-        print(string_cond)
-        condition_set_list = []
-        for c in string_cond.split('&'):
-            condition_set_list.append(c.replace(' ', ""))
-        
-        cond_set_removed_lat = [n for n in condition_set_list if n not in last_action_taken_cond_dict] # remove
-        final_condition_string = ""
-        for c in cond_set_removed_lat:
-            final_condition_string += " & " + c
-        action_minimized[action] = expr(final_condition_string)
-
-#TODO: remove this dictionary: act_to_top_seq_dict
 def add_last_action_taken_seq_chains(root, action_minimized, sym_lookup_dict):
     global action_to_lat_dict # [lat_action] -> action
-    global act_to_top_seq_dict # [action] -> top_level_seq_node (ref)
-
-    remove_all_lat_conditions(action_minimized)
 
     for lat_action, action_set in action_to_lat_dict.items():
         for action in action_set:
@@ -629,7 +618,6 @@ def add_last_action_taken_seq_chains(root, action_minimized, sym_lookup_dict):
             # action, next action
             root.add_child(top_seq)
             break
-
 
 def save_tree(tree, filename):
     """Saves generated BehaviorTree to dot, svg, and png files
@@ -660,7 +648,7 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     if max_prune(dt):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, no behavior tree to be made as the most likley action would always be chosen.")
     
-    sym_lookup, action_to_pstring = dt_to_pstring(
+    sym_lookup, action_to_pstring, action_to_pstring_wo_lat = dt_to_pstring(
         dt, 
         feature_names, 
         label_names)
