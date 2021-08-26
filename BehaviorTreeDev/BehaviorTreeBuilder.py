@@ -473,7 +473,7 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 
 def cleaned_action_behavior(action):
     return py_trees.behaviours.Success(
-        name=re.sub('[^A-Za-z0-9]+', '', action))
+        name=constants.ACTION_NODE_STR + re.sub('[^A-Za-z0-9]+', '', action))
 
 def generate_action_nodes(action):
     last_action_taken_node = None
@@ -600,7 +600,7 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
     
-    add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
+    #add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
 
     action_minimized = factorize_pstring(
         action_minimized)
@@ -613,7 +613,9 @@ def add_last_action_taken_seq_chains(root, action_minimized, sym_lookup_dict):
     for lat_action, action_set in action_to_lat_dict.items():
         for action in action_set:
             top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
+            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[lat_action].to_ast()))
             top_seq.add_child(create_action_seq_node(lat_action, action_minimized, sym_lookup_dict))
+            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[action].to_ast()))
             top_seq.add_child(create_action_seq_node(action, action_minimized, sym_lookup_dict))
             # action, next action
             root.add_child(top_seq)
@@ -656,8 +658,12 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     action_minimized = minimize_bool_expression(
         sym_lookup, 
         action_to_pstring)
+    
+    action_minimized_wo_lat = minimize_bool_expression(
+        sym_lookup, 
+        action_to_pstring_wo_lat)
 
     btree = pstring_to_btree(action_minimized, sym_lookup) 
 
-    add_last_action_taken_seq_chains(btree,action_minimized, sym_lookup)
+    #add_last_action_taken_seq_chains(btree, action_minimized_wo_lat, sym_lookup)
     return btree

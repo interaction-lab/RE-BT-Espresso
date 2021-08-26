@@ -30,6 +30,8 @@ LAST_ACTION_TAKEN_SEPERATOR="~<-LAT~"
 SEL_PAR_REPLACEABLE_NAME = "Selector / Parallel Replaceable"
 LAT_SEQ_NAME = "LAT Sequence"
 
+ACTION_NODE_STR = "A->"
+
 AND = "and"
 OR = "or"
 
