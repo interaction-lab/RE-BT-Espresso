@@ -157,6 +157,7 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
     
 
     # TODO: fix chained conditions out, not correct right now
+    # TODO: likley removing as we have a new way below to remove
     left_pstring_wo_lat = right_pstring_wo_lat = ""
     # cp_wo_lat_list = current_pstring_wo_lat.split('|')
     # stop building the condition if it contains any LATs
@@ -234,7 +235,7 @@ def check_for_last_action_taken(action_to_pstring_dict, action, conditions):
     for clean_cond in singular_conditions:
         # skip over inversions as !LAT could mean do any other of the N-1 actions
         if '~' not in  clean_cond and clean_cond in last_action_taken_cond_dict:
-            new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
+            # new_key = last_action_taken_cond_dict[clean_cond] + constants.LAST_ACTION_TAKEN_SEPERATOR +  action
             add_to_vec_hash_dict(action_to_lat_dict, action, last_action_taken_cond_dict[clean_cond])
             # remove LAT condition, introduces empty set of conditions tho in some cases
             # TODO: order the action sequence so that it can self split later, e.g., c1 a1 c2 a2, curretly globbing all onto front
@@ -596,7 +597,39 @@ def add_last_action_taken_subtrees(action_minimized):
             check_for_last_action_taken(action_minimized, action, singular_con)
     #convert_actions_back_to_expr_rep(action_minimized)
 
-def minimize_bool_expression(sym_lookup, action_to_pstring, is_first):
+
+def contains_latcond(str_rep_cond):
+    for key in last_action_taken_cond_dict:
+        notted_key = "~" + key
+        if key in str_rep_cond and not notted_key in str_rep_cond:
+            print(notted_key)
+            print(str_rep_cond)
+            return key
+    return ""
+
+
+act_lat_conditions_dict = dict() # [action] -> conditions that came with lat
+def create_action_min_wo_lat_dict(action_minimized):
+    global act_lat_conditions_dict
+    action_min_wo_lat_dict = dict()
+    for action, condition in action_minimized.items():
+        # condition in expr form
+        cond_list = convert_expr_ast_to_str_rep(condition.to_ast()).split('|')
+        final_cond = ""
+        for anded_cond in cond_list:
+            latcond = contains_latcond(anded_cond)
+            if latcond == "":
+                if final_cond == "":
+                    final_cond = anded_cond
+                else:
+                    final_cond += " | " + anded_cond
+            else:
+                act_lat_conditions_dict[action] = expr(anded_cond.replace(latcond, " 1 ")) # need double key
+        if(final_cond.replace(" ", "") != ""):
+            action_min_wo_lat_dict[action] = expr(final_cond)
+    return action_min_wo_lat_dict
+
+def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
     for action in action_to_pstring:
         if action_to_pstring[action] == "":
@@ -609,30 +642,36 @@ def minimize_bool_expression(sym_lookup, action_to_pstring, is_first):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
-    if is_first:
-        add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
+
+    add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
 
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
+
+    # here we can create the proper action_minimized_wo_lat
+    action_min_wo_lat_dict = create_action_min_wo_lat_dict(action_minimized)
+
     action_minimized = factorize_pstring(
         action_minimized)
 
-    return action_minimized
+    action_min_wo_lat_dict = factorize_pstring(action_min_wo_lat_dict)
+
+    return action_minimized, action_min_wo_lat_dict
 
 def add_last_action_taken_seq_chains(root, action_minimized_wo_lat, sym_lookup_dict):
     #TODO: chain out for all and not just break, should essentially be list traversal checking for circular chain to end
     global action_to_lat_dict # [lat_action] -> action, need to figure this out better
+    global act_lat_conditions_dict # [action] -> conditions that came with lat
     # need to build this dictionary myself.........
     print(action_to_lat_dict)
     for lat_action, action_set in action_to_lat_dict.items():
         for action in action_set:
             top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
-            if lat_action in action_minimized_wo_lat:
+            if lat_action in action_minimized_wo_lat and type(action_minimized_wo_lat[lat_action]) !=  pyeda.boolalg.expr._One:
                 top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[lat_action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(lat_action))
-            #top_seq.add_child(create_action_seq_node(lat_action, action_minimized_wo_lat, sym_lookup_dict))
-            if action in action_minimized_wo_lat:
-                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action].to_ast()))
+            if action in act_lat_conditions_dict and type(act_lat_conditions_dict[action]) !=  pyeda.boolalg.expr._One:
+                top_seq.add_child(make_condition_node(sym_lookup_dict, act_lat_conditions_dict[action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(action))
             # action, next action
             root.add_child(top_seq)
@@ -676,22 +715,22 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
 
     print("top")
     print(action_to_pstring)
-    action_minimized = minimize_bool_expression(
+    action_minimized, action_minimized_wo_lat = minimize_bool_expression(
         sym_lookup, 
-        action_to_pstring,
-        True)
+        action_to_pstring)
+    
     print("new")
     print(action_minimized)
     
     print("prior")
-    print(action_to_pstring_wo_lat)
-    action_minimized_wo_lat = minimize_bool_expression(
-        sym_lookup, 
-        action_to_pstring_wo_lat,
-        False)
-
-    print("post")
     print(action_minimized_wo_lat)
+    # action_minimized_wo_lat = minimize_bool_expression(
+    #     sym_lookup, 
+    #     action_to_pstring_wo_lat,
+    #     False)
+
+    # print("post")
+    # print(action_minimized_wo_lat)
     btree = pstring_to_btree(action_minimized, sym_lookup) 
 
     add_last_action_taken_seq_chains(btree, action_minimized_wo_lat, sym_lookup)
