@@ -156,17 +156,20 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
         " & " + false_letter
     
 
-    # TODO: fix chained conditions out
+    # TODO: fix chained conditions out, not correct right now
     left_pstring_wo_lat = right_pstring_wo_lat = ""
-    cp_wo_lat_list = current_pstring_wo_lat.split('|')
+    # cp_wo_lat_list = current_pstring_wo_lat.split('|')
     # stop building the condition if it contains any LATs
-    if not is_last_action_taken_condition(false_rule) and (len(cp_wo_lat_list) == 0 or constants.LAT_REMOVAL_COND not in cp_wo_lat_list[-1]):
+    if not is_last_action_taken_condition(false_rule):
         left_pstring_wo_lat = true_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
             " & " + true_letter
         right_pstring_wo_lat = false_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
             " & " + false_letter
     else:
-        left_pstring_wo_lat = right_pstring_wo_lat = current_pstring_wo_lat = constants.LAT_REMOVAL_COND
+        left_pstring_wo_lat = constants.LAT_REMOVAL_COND if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
+            " & " + constants.LAT_REMOVAL_COND
+        right_pstring_wo_lat = constants.LAT_REMOVAL_COND if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
+            " & " + constants.LAT_REMOVAL_COND
 
     # traverse left side of tree (true condition)
     dt_to_pstring_recursive(dt,
@@ -617,6 +620,7 @@ def minimize_bool_expression(sym_lookup, action_to_pstring, is_first):
     return action_minimized
 
 def add_last_action_taken_seq_chains(root, action_minimized_wo_lat, sym_lookup_dict):
+    #TODO: chain out for all and not just break, should essentially be list traversal checking for circular chain to end
     global action_to_lat_dict # [lat_action] -> action, need to figure this out better
     # need to build this dictionary myself.........
     print(action_to_lat_dict)
