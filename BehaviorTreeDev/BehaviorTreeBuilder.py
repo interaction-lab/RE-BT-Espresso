@@ -155,14 +155,18 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
     right_pstring = false_letter if current_pstring == "" else current_pstring + \
         " & " + false_letter
     
-    # proccess lat string here TODO
-    # TODO: double check that false/true are being on correct tree
-    left_pstring_wo_lat = right_pstring_wo_lat = current_pstring_wo_lat
-    if not is_last_action_taken_condition(false_rule):
+
+    # TODO: fix chained conditions out
+    left_pstring_wo_lat = right_pstring_wo_lat = ""
+    cp_wo_lat_list = current_pstring_wo_lat.split('|')
+    # stop building the condition if it contains any LATs
+    if not is_last_action_taken_condition(false_rule) and (len(cp_wo_lat_list) == 0 or constants.LAT_REMOVAL_COND not in cp_wo_lat_list[-1]):
         left_pstring_wo_lat = true_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
             " & " + true_letter
         right_pstring_wo_lat = false_letter if current_pstring_wo_lat == "" else current_pstring_wo_lat + \
             " & " + false_letter
+    else:
+        left_pstring_wo_lat = right_pstring_wo_lat = current_pstring_wo_lat = constants.LAT_REMOVAL_COND
 
     # traverse left side of tree (true condition)
     dt_to_pstring_recursive(dt,
@@ -185,6 +189,8 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
                             action_to_pstring_wo_lat,
                             feature_names,
                             label_names)
+    # remove all LAT from string
+
 
 var_cycle_count = 0
 def get_current_var_name():
@@ -510,7 +516,7 @@ def pstring_to_btree(action_dict, sym_lookup_dict):
     return root
 
 def create_action_seq_node(action, action_dict, sym_lookup_dict):
-        if(action_dict[action] == ""):
+        if(action not in action_dict or action_dict[action] == ""):
             return generate_action_nodes(action) # empty condition set likely from LAT, still valid, deal and continue
         
         top_conditional_seq_node = recursive_build(
@@ -585,9 +591,9 @@ def add_last_action_taken_subtrees(action_minimized):
         conditions = convert_expr_ast_to_str_rep(condition.to_ast())
         for singular_con in conditions.split("|"):
             check_for_last_action_taken(action_minimized, action, singular_con)
-    convert_actions_back_to_expr_rep(action_minimized)
+    #convert_actions_back_to_expr_rep(action_minimized)
 
-def minimize_bool_expression(sym_lookup, action_to_pstring):
+def minimize_bool_expression(sym_lookup, action_to_pstring, is_first):
     action_minimized = {}
     for action in action_to_pstring:
         if action_to_pstring[action] == "":
@@ -600,10 +606,9 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
-    print(action_minimized)
-    add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
+    if is_first:
+        add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
 
-    print(action_minimized)
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
     action_minimized = factorize_pstring(
@@ -614,14 +619,17 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
 def add_last_action_taken_seq_chains(root, action_minimized_wo_lat, sym_lookup_dict):
     global action_to_lat_dict # [lat_action] -> action, need to figure this out better
     # need to build this dictionary myself.........
-
+    print(action_to_lat_dict)
     for lat_action, action_set in action_to_lat_dict.items():
         for action in action_set:
             top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
-            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[lat_action].to_ast()))
-            top_seq.add_child(create_action_seq_node(lat_action, action_minimized_wo_lat, sym_lookup_dict))
-            top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action].to_ast()))
-            top_seq.add_child(create_action_seq_node(action, action_minimized_wo_lat, sym_lookup_dict))
+            if lat_action in action_minimized_wo_lat:
+                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[lat_action].to_ast()))
+            top_seq.add_child(cleaned_action_behavior(lat_action))
+            #top_seq.add_child(create_action_seq_node(lat_action, action_minimized_wo_lat, sym_lookup_dict))
+            if action in action_minimized_wo_lat:
+                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action].to_ast()))
+            top_seq.add_child(cleaned_action_behavior(action))
             # action, next action
             root.add_child(top_seq)
             break
@@ -651,6 +659,8 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     binary_feature_set = _binary_features
     global last_action_taken_cond_dict
     last_action_taken_cond_dict = {} # reset from last run
+    global action_to_lat_dict
+    action_to_lat_dict = {} # reset from last run
 
     if max_prune(dt):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, no behavior tree to be made as the most likley action would always be chosen.")
@@ -660,17 +670,24 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
         feature_names, 
         label_names)
 
+    print("top")
     print(action_to_pstring)
     action_minimized = minimize_bool_expression(
         sym_lookup, 
-        action_to_pstring)
-    print("done")
+        action_to_pstring,
+        True)
+    print("new")
+    print(action_minimized)
     
+    print("prior")
     print(action_to_pstring_wo_lat)
     action_minimized_wo_lat = minimize_bool_expression(
         sym_lookup, 
-        action_to_pstring_wo_lat)
+        action_to_pstring_wo_lat,
+        False)
 
+    print("post")
+    print(action_minimized_wo_lat)
     btree = pstring_to_btree(action_minimized, sym_lookup) 
 
     add_last_action_taken_seq_chains(btree, action_minimized_wo_lat, sym_lookup)
