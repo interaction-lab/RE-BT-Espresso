@@ -369,7 +369,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
         pstring_dict[action] = expr(new_pstring).to_nnf()
     return pstring_dict
 
-def factorize_pstring(pstring_dict):
+def pull_out_common_factors(pstring_dict):
     for action, condition_pstring in pstring_dict.items():
         if(condition_pstring == ""):
             continue # deal with empty conditions likely from LAT, still valid
@@ -520,42 +520,22 @@ def max_prune(dt):
     return is_leaf_node(dt, 0)
 
 def convert_expr_ast_to_str_rep(expr_ast):
-    # Note this only works for dnf expressions, maybe we will fix this bleh
+    # Note this only works for dnf expressions, maybe we will add recurssive functionality later
     result = ""
     if expr_ast == "" or expr_ast == None:
         print("This should not happen, should pass in ast with at least one literal, returning empty string, likely will break rest of algo")
         return result
     elif(expr_ast[0] == constants.AND):
-        for every_operand in expr_ast[1:]:
-            if every_operand[0] == constants.AND or every_operand[0] == constants.OR:
-                if result == "":
-                    result = convert_expr_ast_to_str_rep(every_operand)
-                else:
-                    result += " & " + convert_expr_ast_to_str_rep(every_operand)
-            else:
-                result = convert_expr_ast_to_str_rep(every_operand)
-
-        # list_conditions = [int_to_condition(condition[1]) for condition in expr_ast[1:]]
-        # result = " & ".join(list_conditions)
+        list_conditions = [int_to_condition(condition[1]) for condition in expr_ast[1:]]
+        result = " & ".join(list_conditions)
     elif(expr_ast[0] == constants.OR):
-        # TODO: go through all sub conditions
-        for every_operand in expr_ast[1:]:
-            if every_operand[0] == constants.AND or every_operand[0] == constants.OR:
-                if result == "":
-                    result = convert_expr_ast_to_str_rep(every_operand)
-                else:
-                    result += " | " + convert_expr_ast_to_str_rep(every_operand)
-            else:
-                result = convert_expr_ast_to_str_rep(every_operand)
-
         # loop through all literals and join
-        # res_str_list = []
-        # for and_expr in expr_ast[1:]:
-        #     res_str_list.append(convert_expr_ast_to_str_rep(and_expr))
-        # result = " | ".join(res_str_list)
+        res_str_list = []
+        for and_expr in expr_ast[1:]:
+            res_str_list.append(convert_expr_ast_to_str_rep(and_expr))
+        result = " | ".join(res_str_list)
     else: # single literal
         result = str(int_to_condition(expr_ast[1]))
-    print(result)
     return result
 
 def convert_actions_back_to_expr_rep(action_minimized):
@@ -590,29 +570,11 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
     
     add_last_action_taken_subtrees(action_minimized) # TODO: possibly remove/edit if get chain working?
 
-    action_minimized = factorize_pstring(
+    action_minimized = pull_out_common_factors(
         action_minimized)
 
     return action_minimized
 
-
-# this is one of the most inefficient things I have ever written
-def remove_all_lat_conditions(action_minimized):
-    copy_of_dict = dict(action_minimized)
-
-    for action, condition in copy_of_dict.items():
-        print(condition)
-        string_cond = convert_expr_ast_to_str_rep(condition.to_ast()) # only works with dnf.... dfskajhfskdhk
-        print(string_cond)
-        condition_set_list = []
-        for c in string_cond.split('&'):
-            condition_set_list.append(c.replace(' ', ""))
-        
-        cond_set_removed_lat = [n for n in condition_set_list if n not in last_action_taken_cond_dict] # remove
-        final_condition_string = ""
-        for c in cond_set_removed_lat:
-            final_condition_string += " & " + c
-        action_minimized[action] = expr(final_condition_string)
 
 #TODO: remove this dictionary: act_to_top_seq_dict
 def add_last_action_taken_seq_chains(root, action_minimized, sym_lookup_dict):
