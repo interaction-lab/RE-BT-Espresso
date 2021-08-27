@@ -25,6 +25,7 @@ def run_upsample(json_file_path, fmt_file_path):
 		upsampled_path = json_manager.get_upsampled_path()
 		constants.remove_folder_if_exists(\
 			constants.UPSAMPLED_CSV_FOLDER_NAME, upsampled_path)
+		print("Upsampling")
 
 		hot_encoded_folder = os.fsdecode(os.path.join(\
 			json_manager.get_hot_encoded_path(), \

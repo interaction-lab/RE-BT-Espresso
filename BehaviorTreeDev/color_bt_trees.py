@@ -32,12 +32,16 @@ def main():
 	"""
 	directory = process_command_line_args()
 	# should all be from constants
+	output_filename = "output~"
+
 	lat_seq_name = constants.LAT_SEQ_NAME + "*"
 	lat_fillcolor = "#39FF14"
 
 	par_replace_sel_name = constants.SEL_PAR_REPLACEABLE_NAME + "*"
 	par_replace_sel_fillcolor = "#FF1818"
-	output_filename = "output~"
+
+	action_replace_name = constants.ACTION_NODE_STR + "*"
+	action_replace_fillcolor = "#FFC0CB"
 
 	for full_filepath in pathlib.Path(directory).glob("**/*.dot"):
 		filename = full_filepath.name
@@ -52,6 +56,8 @@ def main():
 				node.set_fillcolor(lat_fillcolor)
 			elif re.search(par_replace_sel_name, node.get_name()):
 				node.set_fillcolor(par_replace_sel_fillcolor)
+			elif re.search(action_replace_name, node.get_name()):
+				node.set_fillcolor(action_replace_fillcolor) 
 		
 		output_directory = files_dir + "/" + filename + "re_colored/"
 		if not os.path.exists(output_directory):

@@ -170,6 +170,7 @@ class Runner:
 		max_depth = self.json_manager.get_decision_tree_depth()
 
 		constants.remove_folder_if_exists(self.get_output_folder(kFold,max_depth))
+		print("Building BTs")
 
 		fmt, label_encoding = self.get_file_fmt_and_label_encoding()
 
