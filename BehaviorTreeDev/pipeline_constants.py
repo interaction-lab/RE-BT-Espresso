@@ -31,6 +31,8 @@ LAT_REMOVAL_COND = " 0 "
 SEL_PAR_REPLACEABLE_NAME = "Selector / Parallel Replaceable"
 LAT_SEQ_NAME = "LAT Sequence"
 
+CYLCE_NODE = "CYCLE"
+
 ACTION_NODE_STR = "A->"
 
 AND = "and"

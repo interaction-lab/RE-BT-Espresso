@@ -2,6 +2,8 @@ from lxml import etree
 import numpy as np
 import copy
 from numpy.core.arrayprint import _void_scalar_repr
+from queue import Queue
+import networkx as nx
 
 import py_trees.decorators
 import py_trees.display
@@ -10,6 +12,7 @@ import re
 import pyeda
 from pyeda.inter import *
 from pyeda.boolalg.expr import _LITS
+
 
 import pipeline_constants as constants
 
@@ -605,9 +608,75 @@ def espresso_reduction(action_to_pstring, action_minimized):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
+def update_freq_dict(dictionary, key, val):
+    if key in dictionary:
+        dictionary[key] += val
+    else:
+        dictionary[key] = val
+
+
+cycle_node_counter = 0
+def get_cycles_node_name():
+    global cycle_node_counter
+    name = constants.CYLCE_NODE + str(cycle_node_counter)
+    cycle_node_counter++
+    return name
+
+def find_all_source_nodes(outgoing_edge_dict):
+    if len(outgoing_edge_dict) == 0:
+        return set(), nx.DiGraph()
+
+    source_nodes = []
+    end_nodes = []
+ 
+    graph = nx.DiGraph()
+    for s_node in outgoing_edge_dict:
+        for d_node in outgoing_edge_dict[s_node]:
+            graph.add_edge(s_node, d_node)
+
+    # process cycles
+    cycles = list(nx.simple_cycles(graph))
+    cyclenode_to_path_dict = dict() # [cycle_node] -> cycle path list
+    illegal_ends = set()
+    for cycle in cycles:
+        # remove final edge from the graph
+        final_edge = cycle[-1]
+        graph.remove_edge(final_edge[0], final_edge[1])
+        # create new node
+        n_name = get_cycles_node_name()
+        graph.add_node(n_name)
+        # add all incoming from path beginning to the node, if there are 0 then don't add any, will process as source/end node anywhay
+        for edge in graph.in_edges(cycle[0][0]):
+            graph.add_edge(edge[0], n_name)
+        cyclenode_to_path_dict[n_name] = cycle
+        # now account for "illegal" paths aka paths ending on the final node
+        illegal_ends.add(final_edge[0])
+        
+
+    for node in graph.nodes:
+        print(graph.in_degree(node))
+        if graph.in_degree(node) == 0:
+            source_nodes.append(node)
+        elif graph.out_degree(node) == 0:
+            end_nodes.append(node)
+
+    print("non cycles")
+    for source in source_nodes:
+        for end in end_nodes:
+            for path in nx.all_simple_paths(graph, source, end):
+                print(path)
+    # grab all circular paths
+    print("cycles")
+    print() # possibly break all the cycles...?
+
+    return source_nodes, graph
+
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     #TODO: chain out for all and not just break, should essentially be list traversal checking for circular chain to end
+    # dfs and del nodes as I go, is there a way to find the start.....?
     global act_to_lat_sets_dict # [lat] -> {actions}
+
+    source_nodes, graph = find_all_source_nodes(act_to_lat_sets_dict)
     for lat_action, action_set in act_to_lat_sets_dict.items():
         for action in action_set:
             top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())

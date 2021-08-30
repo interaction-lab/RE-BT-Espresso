@@ -31,10 +31,11 @@ IMPORTANT: The repo is not clean in the slightest as it is divulging near deadli
 - [lxml](https://lxml.de/)
 - [py_trees](https://py-trees.readthedocs.io/en/devel/)
 - [pyeda](https://pypi.org/project/pyeda/)
+- [networkx](https://networkx.org/)
 
 Easy copy paste:
 ```
-pip3 install pandas sklearn graphviz imblearn matplotlib lxml py_trees pyeda
+pip3 install pandas sklearn graphviz imblearn matplotlib lxml py_trees pyeda networkx
 sudo apt-get install graphviz
 ```
 There are two other install issues due to issue with `graphiz` and `pyeda` packages. You will need to do the fixes below.
