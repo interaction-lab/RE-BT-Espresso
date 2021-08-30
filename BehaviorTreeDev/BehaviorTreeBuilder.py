@@ -567,7 +567,6 @@ def convert_double_dict_to_expr(dictionary):
             print("/////////////////////////")
             dictionary[key1][key2] = expr(dictionary[key1][key2])
 
-
 act_lat_conditions_dict = dict() # [action][lat_action] -> conditions that came with lat minus lat cond
 def create_action_min_wo_lat_dict(action_minimized):
     global act_lat_conditions_dict
@@ -622,7 +621,7 @@ def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo
             if lat_action in action_minimized and type(action_minimized[lat_action]) !=  pyeda.boolalg.expr._One:
                 top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[lat_action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(lat_action))
-            if action in action_minimized_wo_lat and type(action_minimized_wo_lat[action]) !=  pyeda.boolalg.expr._One:
+            if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
                 top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action][lat_action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(action))
             root.add_child(top_seq)
