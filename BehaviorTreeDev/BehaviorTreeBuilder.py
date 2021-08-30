@@ -538,9 +538,7 @@ def create_lat_cond_dict(action_minimized):
             add_lat_cond_to_dict_if_in_conds(action, singular_con)
 
 def contains_latcond(str_rep_cond):
-    #TODO: correct regex
     for key in lat_cond_lookup:
-        notted_key = "~" + key
         # (?<!~) is "is not preceded with ~" to avoid inverted conditions 
         # (?!\S) is nothing or whitespace to avoid VAR1 - VAR10 issue
         key_matches = re.findall("(?<!~)" + key + "(?!\S)", str_rep_cond)
@@ -585,14 +583,14 @@ def create_action_min_wo_lat_dict(action_minimized):
 def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
     espresso_reduction(action_to_pstring, action_minimized)
-    # create_lat_cond_dict(action_minimized) # TODO: possibly remove/edit if get chain working?
     action_minimized = remove_float_contained_variables(
         sym_lookup, action_minimized)
     action_min_wo_lat_dict = create_action_min_wo_lat_dict(action_minimized)
     action_minimized = factorize_pstring(
         action_minimized)
-    # TODO: this now is [action][lat] -> condition. factorize only does single key
-    #action_min_wo_lat_dict = factorize_pstring(action_min_wo_lat_dict)
+    dict_copy = dict(action_min_wo_lat_dict)
+    for action in dict_copy:
+        action_min_wo_lat_dict[action]= factorize_pstring(action_min_wo_lat_dict[action])
     return action_minimized, action_min_wo_lat_dict
 
 def espresso_reduction(action_to_pstring, action_minimized):
