@@ -538,6 +538,7 @@ def create_lat_cond_dict(action_minimized):
             add_lat_cond_to_dict_if_in_conds(action, singular_con)
 
 def contains_latcond(str_rep_cond):
+    #TODO: correct regex
     for key in lat_cond_lookup:
         notted_key = "~" + key
         if key in str_rep_cond and not notted_key in str_rep_cond:
@@ -548,7 +549,7 @@ def contains_latcond(str_rep_cond):
 def add_cond_to_double_dict(dictionary, key1, key2, val):
     if key1 in dictionary:
         if key2 in dictionary[key1]:
-            dictionary[key1][key2] += " & " + val
+            dictionary[key1][key2] += " | " + val
         else:
             dictionary[key1][key2] = val
     else:
@@ -559,8 +560,11 @@ def add_cond_to_double_dict(dictionary, key1, key2, val):
 def convert_double_dict_to_expr(dictionary):
     for key1 in dictionary:
         for key2 in dictionary[key1]:
-            print("~~~~~~~~")
-            print(dictionary[key1][key2])
+            print("********************")
+            print(dictionary)
+            print(key1)
+            print(key2)
+            print("/////////////////////////")
             dictionary[key1][key2] = expr(dictionary[key1][key2])
 
 
@@ -576,15 +580,8 @@ def create_action_min_wo_lat_dict(action_minimized):
         for cond in cond_list:
             latcond = contains_latcond(cond)
             if latcond != "":
-                print("***********************")
-                print(cond_list)
-                print(condition)
-                print(convert_expr_ast_to_str_rep(condition.to_ast()))
-                print(cond)
-                print(latcond)
-                final_cond = cond.replace(latcond, " 1 ") # will reduce out the condition
-                print(final_cond)
-                print("/////////////////////////")
+                #TODO: correct regex
+                final_cond = cond.replace(" " + latcond + " ", " 1 ") # will reduce out the condition
                 add_cond_to_double_dict(action_min_wo_lat_dict, action, lat_cond_lookup[latcond], final_cond)
                 add_to_vec_hash_dict(act_to_lat_sets_dict, action, lat_cond_lookup[latcond])
     
@@ -626,7 +623,7 @@ def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo
                 top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[lat_action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(lat_action))
             if action in action_minimized_wo_lat and type(action_minimized_wo_lat[action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action].to_ast()))
+                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action][lat_action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(action))
             root.add_child(top_seq)
             break
