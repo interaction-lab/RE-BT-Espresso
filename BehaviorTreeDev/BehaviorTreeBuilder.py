@@ -498,33 +498,14 @@ def convert_expr_ast_to_str_rep(expr_ast):
         print("This should not happen, should pass in ast with at least one literal, returning empty string, likely will break rest of algo")
         return result
     elif(expr_ast[0] == constants.AND):
-        for every_operand in expr_ast[1:]:
-            if every_operand[0] == constants.AND or every_operand[0] == constants.OR:
-                if result == "":
-                    result = convert_expr_ast_to_str_rep(every_operand)
-                else:
-                    result += " & " + convert_expr_ast_to_str_rep(every_operand)
-            else:
-                result = convert_expr_ast_to_str_rep(every_operand)
-
-        # list_conditions = [int_to_condition(condition[1]) for condition in expr_ast[1:]]
-        # result = " & ".join(list_conditions)
+        list_conditions = [int_to_condition(condition[1]) for condition in expr_ast[1:]]
+        result = " & ".join(list_conditions)
     elif(expr_ast[0] == constants.OR):
-        # TODO: go through all sub conditions
-        for every_operand in expr_ast[1:]:
-            if every_operand[0] == constants.AND or every_operand[0] == constants.OR:
-                if result == "":
-                    result = convert_expr_ast_to_str_rep(every_operand)
-                else:
-                    result += " | " + convert_expr_ast_to_str_rep(every_operand)
-            else:
-                result = convert_expr_ast_to_str_rep(every_operand)
-
         # loop through all literals and join
-        # res_str_list = []
-        # for and_expr in expr_ast[1:]:
-        #     res_str_list.append(convert_expr_ast_to_str_rep(and_expr))
-        # result = " | ".join(res_str_list)
+        res_str_list = []
+        for and_expr in expr_ast[1:]:
+            res_str_list.append(convert_expr_ast_to_str_rep(and_expr))
+        result = " | ".join(res_str_list)
     else: # single literal
         result = str(int_to_condition(expr_ast[1]))
     return result
@@ -578,6 +559,8 @@ def add_cond_to_double_dict(dictionary, key1, key2, val):
 def convert_double_dict_to_expr(dictionary):
     for key1 in dictionary:
         for key2 in dictionary[key1]:
+            print("~~~~~~~~")
+            print(dictionary[key1][key2])
             dictionary[key1][key2] = expr(dictionary[key1][key2])
 
 
@@ -593,7 +576,15 @@ def create_action_min_wo_lat_dict(action_minimized):
         for cond in cond_list:
             latcond = contains_latcond(cond)
             if latcond != "":
+                print("***********************")
+                print(cond_list)
+                print(condition)
+                print(convert_expr_ast_to_str_rep(condition.to_ast()))
+                print(cond)
+                print(latcond)
                 final_cond = cond.replace(latcond, " 1 ") # will reduce out the condition
+                print(final_cond)
+                print("/////////////////////////")
                 add_cond_to_double_dict(action_min_wo_lat_dict, action, lat_cond_lookup[latcond], final_cond)
                 add_to_vec_hash_dict(act_to_lat_sets_dict, action, lat_cond_lookup[latcond])
     
@@ -609,7 +600,8 @@ def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_min_wo_lat_dict = create_action_min_wo_lat_dict(action_minimized)
     action_minimized = factorize_pstring(
         action_minimized)
-    action_min_wo_lat_dict = factorize_pstring(action_min_wo_lat_dict)
+    # TODO: this now is [action][lat] -> condition. factorize only does single key
+    #action_min_wo_lat_dict = factorize_pstring(action_min_wo_lat_dict)
     return action_minimized, action_min_wo_lat_dict
 
 def espresso_reduction(action_to_pstring, action_minimized):
@@ -624,24 +616,18 @@ def espresso_reduction(action_to_pstring, action_minimized):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
-def add_last_action_taken_seq_chains(root, action_minimized_wo_lat, sym_lookup_dict):
+def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     #TODO: chain out for all and not just break, should essentially be list traversal checking for circular chain to end
-    global act_to_lat_sets_dict # [lat_action] -> action, need to figure this out better
-    global act_lat_conditions_dict # [action] -> conditions that came with lat
-    # need to build this dictionary myself.........
-    # general conditions for first lat
-    # lat removed conditions if dictionary[action][lat_action] : condition
-
+    global act_to_lat_sets_dict # [lat] -> {actions}
     for lat_action, action_set in act_to_lat_sets_dict.items():
         for action in action_set:
             top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
-            if lat_action in action_minimized_wo_lat and type(action_minimized_wo_lat[lat_action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[lat_action].to_ast()))
+            if lat_action in action_minimized and type(action_minimized[lat_action]) !=  pyeda.boolalg.expr._One:
+                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[lat_action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(lat_action))
-            if action in act_lat_conditions_dict and type(act_lat_conditions_dict[action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(make_condition_node(sym_lookup_dict, act_lat_conditions_dict[action].to_ast()))
+            if action in action_minimized_wo_lat and type(action_minimized_wo_lat[action]) !=  pyeda.boolalg.expr._One:
+                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action].to_ast()))
             top_seq.add_child(cleaned_action_behavior(action))
-            # action, next action
             root.add_child(top_seq)
             break
 
@@ -686,20 +672,10 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
     action_minimized, action_minimized_wo_lat = minimize_bool_expression(
         sym_lookup, 
         action_to_pstring)
-    
     print("new")
     print(action_minimized)
-    
     print("prior")
     print(action_minimized_wo_lat)
-    # action_minimized_wo_lat = minimize_bool_expression(
-    #     sym_lookup, 
-    #     action_to_pstring_wo_lat,
-    #     False)
-
-    # print("post")
-    # print(action_minimized_wo_lat)
     btree = pstring_to_btree(action_minimized, sym_lookup) 
-
-    add_last_action_taken_seq_chains(btree, action_minimized, sym_lookup)
+    add_last_action_taken_seq_chains(btree, action_minimized, action_minimized_wo_lat, sym_lookup)
     return btree
