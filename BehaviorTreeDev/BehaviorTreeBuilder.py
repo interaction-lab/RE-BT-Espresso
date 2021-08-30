@@ -657,7 +657,7 @@ def find_all_source_nodes(outgoing_edge_dict):
         print(graph.in_degree(node))
         if graph.in_degree(node) == 0:
             source_nodes.append(node)
-        elif graph.out_degree(node) == 0:
+        elif graph.out_degree(node) == 0 and node not in illegal_ends:
             end_nodes.append(node)
 
     print("non cycles")
