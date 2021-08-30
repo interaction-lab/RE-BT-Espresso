@@ -541,8 +541,11 @@ def contains_latcond(str_rep_cond):
     #TODO: correct regex
     for key in lat_cond_lookup:
         notted_key = "~" + key
-        if key in str_rep_cond and not notted_key in str_rep_cond:
-            return key
+        # (?<!~) is "is not preceded with ~" to avoid inverted conditions 
+        # (?!\S) is nothing or whitespace to avoid VAR1 - VAR10 issue
+        key_matches = re.findall("(?<!~)" + key + "(?!\S)", str_rep_cond)
+        if len(key_matches) > 0:
+            return key_matches[0]
     return ""
 
 def add_cond_to_double_dict(dictionary, key1, key2, val):
@@ -572,8 +575,7 @@ def create_action_min_wo_lat_dict(action_minimized):
         for cond in cond_list:
             latcond = contains_latcond(cond)
             if latcond != "":
-                #TODO: correct regex
-                final_cond = cond.replace(" " + latcond + " ", " 1 ") # will reduce out the condition
+                final_cond = re.sub("(?<!~)" + latcond + "(?!\S)", " 1 " , cond) # " 1 " will reduce out the condition
                 add_cond_to_double_dict(action_min_wo_lat_dict, action, lat_cond_lookup[latcond], final_cond)
                 add_to_vec_hash_dict(act_to_lat_sets_dict, action, lat_cond_lookup[latcond])
     
