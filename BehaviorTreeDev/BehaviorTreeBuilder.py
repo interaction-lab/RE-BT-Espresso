@@ -545,7 +545,6 @@ def contains_latcond(str_rep_cond):
             return key
     return ""
 
-
 def add_cond_to_double_dict(dictionary, key1, key2, val):
     if key1 in dictionary:
         if key2 in dictionary[key1]:
@@ -556,15 +555,9 @@ def add_cond_to_double_dict(dictionary, key1, key2, val):
         dictionary[key1] = dict()
         dictionary[key1][key2] = val
 
-
 def convert_double_dict_to_expr(dictionary):
     for key1 in dictionary:
         for key2 in dictionary[key1]:
-            print("********************")
-            print(dictionary)
-            print(key1)
-            print(key2)
-            print("/////////////////////////")
             dictionary[key1][key2] = expr(dictionary[key1][key2])
 
 act_lat_conditions_dict = dict() # [action][lat_action] -> conditions that came with lat minus lat cond
@@ -618,12 +611,15 @@ def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo
     for lat_action, action_set in act_to_lat_sets_dict.items():
         for action in action_set:
             top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
+            
             if lat_action in action_minimized and type(action_minimized[lat_action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized[lat_action].to_ast()))
+                top_seq.add_child(recursive_build(action_minimized[lat_action], sym_lookup_dict))
             top_seq.add_child(cleaned_action_behavior(lat_action))
+            
             if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(make_condition_node(sym_lookup_dict, action_minimized_wo_lat[action][lat_action].to_ast()))
+                top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
             top_seq.add_child(cleaned_action_behavior(action))
+            
             root.add_child(top_seq)
             break
 
@@ -662,16 +658,9 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
         dt, 
         feature_names, 
         label_names)
-
-    print("top")
-    print(action_to_pstring)
     action_minimized, action_minimized_wo_lat = minimize_bool_expression(
         sym_lookup, 
         action_to_pstring)
-    print("new")
-    print(action_minimized)
-    print("prior")
-    print(action_minimized_wo_lat)
     btree = pstring_to_btree(action_minimized, sym_lookup) 
     add_last_action_taken_seq_chains(btree, action_minimized, action_minimized_wo_lat, sym_lookup)
     return btree
