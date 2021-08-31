@@ -43,6 +43,9 @@ def main():
 	action_replace_name = constants.ACTION_NODE_STR + "*"
 	action_replace_fillcolor = "#FFC0CB"
 
+	repeat_replace_name = constants.REPEAT_SEQ_NAME + "*"
+	repeat_replace_fillcolor = "#C3B1E1"
+
 	for full_filepath in pathlib.Path(directory).glob("**/*.dot"):
 		filename = full_filepath.name
 		files_dir = str(full_filepath).replace(filename, "")
@@ -51,13 +54,16 @@ def main():
 		print("Re-coloring: " + str(full_filepath))
 		graph = pydot.graph_from_dot_file(full_filepath)[0]
 		nodes = graph.get_nodes()
+		# if only there were data structures that would make this loopable... lol
 		for node in nodes:
 			if re.search(lat_seq_name, node.get_name()):
 				node.set_fillcolor(lat_fillcolor)
 			elif re.search(par_replace_sel_name, node.get_name()):
 				node.set_fillcolor(par_replace_sel_fillcolor)
 			elif re.search(action_replace_name, node.get_name()):
-				node.set_fillcolor(action_replace_fillcolor) 
+				node.set_fillcolor(action_replace_fillcolor)
+			elif re.search(repeat_replace_name, node.get_name()):
+				node.set_fillcolor(repeat_replace_fillcolor) 
 		
 		output_directory = files_dir + "/" + filename + "re_colored/"
 		if not os.path.exists(output_directory):

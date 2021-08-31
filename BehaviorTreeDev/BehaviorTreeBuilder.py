@@ -619,78 +619,87 @@ cycle_node_counter = 0
 def get_cycles_node_name():
     global cycle_node_counter
     name = constants.CYLCE_NODE + str(cycle_node_counter)
-    cycle_node_counter++
+    cycle_node_counter += 1
     return name
 
 def find_all_source_nodes(outgoing_edge_dict):
     if len(outgoing_edge_dict) == 0:
-        return set(), nx.DiGraph()
+        return [], []
 
     source_nodes = []
     end_nodes = []
- 
-    graph = nx.DiGraph()
-    for s_node in outgoing_edge_dict:
-        for d_node in outgoing_edge_dict[s_node]:
-            graph.add_edge(s_node, d_node)
-
-    # process cycles
-    cycles = list(nx.simple_cycles(graph))
     cyclenode_to_path_dict = dict() # [cycle_node] -> cycle path list
     illegal_ends = set()
-    for cycle in cycles:
-        # remove final edge from the graph
-        final_edge = cycle[-1]
-        graph.remove_edge(final_edge[0], final_edge[1])
-        # create new node
-        n_name = get_cycles_node_name()
-        graph.add_node(n_name)
-        # add all incoming from path beginning to the node, if there are 0 then don't add any, will process as source/end node anywhay
-        for edge in graph.in_edges(cycle[0][0]):
-            graph.add_edge(edge[0], n_name)
-        cyclenode_to_path_dict[n_name] = cycle
-        # now account for "illegal" paths aka paths ending on the final node
-        illegal_ends.add(final_edge[0])
-        
+ 
+    graph = create_di_graph(outgoing_edge_dict)
+    cycles = list(nx.simple_cycles(graph))
+    dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends)
+    find_source_and_end_nodes(source_nodes, end_nodes, graph, illegal_ends)
+    non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
+    return cycles, non_cycles
 
+def find_non_cycle_paths(source_nodes, end_nodes, graph):
+    non_cycles = list()
+    for source in source_nodes:
+        for end in end_nodes:
+            for path in nx.all_simple_paths(graph, source, end):
+                non_cycles.append(path)
+    return non_cycles
+
+def find_source_and_end_nodes(source_nodes, end_nodes, graph, illegal_ends):
     for node in graph.nodes:
-        print(graph.in_degree(node))
         if graph.in_degree(node) == 0:
             source_nodes.append(node)
         elif graph.out_degree(node) == 0 and node not in illegal_ends:
             end_nodes.append(node)
 
-    print("non cycles")
-    for source in source_nodes:
-        for end in end_nodes:
-            for path in nx.all_simple_paths(graph, source, end):
-                print(path)
-    # grab all circular paths
-    print("cycles")
-    print() # possibly break all the cycles...?
+def create_di_graph(outgoing_edge_dict):
+    graph = nx.DiGraph()
+    for s_node in outgoing_edge_dict:
+        for d_node in outgoing_edge_dict[s_node]:
+            graph.add_edge(s_node, d_node)
+    return graph
 
-    return source_nodes, graph
+def is_cycle_node(node):
+    return constants.CYLCE_NODE in node
+
+def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends):
+    # HERE: likley have cycle wrong
+    for cycle in cycles:
+        end_node = cycle[-1]
+        start_node = cycle[0]
+        graph.remove_edge(start_node, end_node)
+        
+        n_name = get_cycles_node_name()
+        graph.add_node(n_name)
+        # add all incoming from path beginning to the node, if there are 0 then don't add any, will process as source/end node anywhay
+        for edge in graph.in_edges(start_node):
+            graph.add_edge(edge[0], n_name)
+        cyclenode_to_path_dict[n_name] = cycle
+        # now account for "illegal" paths aka paths ending on the final node
+        illegal_ends.add(end_node)
 
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     #TODO: chain out for all and not just break, should essentially be list traversal checking for circular chain to end
     # dfs and del nodes as I go, is there a way to find the start.....?
     global act_to_lat_sets_dict # [lat] -> {actions}
 
-    source_nodes, graph = find_all_source_nodes(act_to_lat_sets_dict)
-    for lat_action, action_set in act_to_lat_sets_dict.items():
-        for action in action_set:
-            top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
-            
-            if lat_action in action_minimized and type(action_minimized[lat_action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(recursive_build(action_minimized[lat_action], sym_lookup_dict))
-            top_seq.add_child(cleaned_action_behavior(lat_action))
-            
-            if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
-            top_seq.add_child(cleaned_action_behavior(action))
-            
-            root.add_child(top_seq)
-            break
+    cycle_paths, non_cycle_paths = find_all_source_nodes(act_to_lat_sets_dict)
+
+    for path in cycle_paths:
+        top_seq = py_trees.composites.Sequence(name=constants.REPEAT_SEQ_NAME + get_node_name_counter())
+        lat_action = ""
+        for action in path:
+            if lat_action == "": # first action in chain
+                if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
+                    top_seq.add_child(recursive_build(action_minimized_wo_lat[action][action], sym_lookup_dict))
+                top_seq.add_child(cleaned_action_behavior(action))
+            else:
+                if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
+                   top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
+                top_seq.add_child(cleaned_action_behavior(action))
+            lat_action = action
+        root.add_child(top_seq)
 
 def save_tree(tree, filename):
     """Saves generated BehaviorTree to dot, svg, and png files
