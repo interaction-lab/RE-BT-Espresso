@@ -665,8 +665,9 @@ def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends):
             graph.add_edge(n_name, edge[1])
 
         cyclenode_to_path_dict[n_name] = cycle
-        # now account for "illegal" paths aka paths ending on the final node
-        illegal_ends.add(end_node)
+        # now account for "illegal" paths aka paths ending on any node in path
+        for node in cycle:
+            illegal_ends.add(node)
 
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     global act_to_lat_sets_dict # [lat] -> {actions}
