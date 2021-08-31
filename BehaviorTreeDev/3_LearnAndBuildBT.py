@@ -214,19 +214,12 @@ class Runner:
 		run_alphas = set()
 		i = 0
 		ccp_alpha_list_copy = ccp_alphas.copy()
-		print(len(ccp_alphas))
-		print(len(self.train_scores))
 		for ccp_alpha in ccp_alpha_list_copy:
 			if ccp_alpha < 0: # bug in sklearn I think
 				ccp_alpha *= -1
 			if ccp_alpha in run_alphas: # dublicate zero ccp due to low rounding float
-				print("**************")
-				print(ccp_alphas)
 				ccp_alphas = np.delete(ccp_alphas, i)
-				print(ccp_alphas)
-				print(self.train_scores)
 				self.train_scores = np.delete(self.train_scores, i)
-				print(self.train_scores)
 				self.test_scores = np.delete(self.test_scores, i)
 				continue
 			run_alphas.add(ccp_alpha)
@@ -272,9 +265,6 @@ class Runner:
 		ax.set_xlabel("alpha")
 		ax.set_ylabel("accuracy")
 		ax.set_title("Accuracy vs alpha for Final Tree Prunes (note: uses all data for final training)")
-		print("jsdfkhfkjsdfhjk")
-		print(ccp_alphas)
-		print(self.train_scores)
 		ax.plot(ccp_alphas, self.train_scores, marker='o', label="train", drawstyle="steps-post")
 		ax.plot(ccp_alphas, self.test_scores, marker='x', label="test", drawstyle="steps-post")
 		ax.legend()
