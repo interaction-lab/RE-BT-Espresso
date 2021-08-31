@@ -439,6 +439,7 @@ def cleaned_action_behavior(action):
 
 def generate_action_nodes(action):
     last_action_taken_node = None
+    # TODO: I think this is done/deprecated
     if constants.LAST_ACTION_TAKEN_SEPERATOR in action:
         split_list = action.split(constants.LAST_ACTION_TAKEN_SEPERATOR)
         last_action_taken = split_list[0]
@@ -681,11 +682,11 @@ def generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_l
         elif lat_action == "": # first action in chain    
             if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
                 top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
-            top_seq.add_child(cleaned_action_behavior(action))
+            top_seq.add_child(generate_action_nodes(action))
         else:
             if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
                 top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
-            top_seq.add_child(cleaned_action_behavior(action))
+            top_seq.add_child(generate_action_nodes(action))
         lat_action = action
     return top_seq
 
@@ -698,11 +699,11 @@ def generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_looku
         if lat_action == "": # first action in chain    
             if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
                 top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
-            top_seq.add_child(cleaned_action_behavior(action))
+            top_seq.add_child(generate_action_nodes(action))
         else:
             if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
                top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
-            top_seq.add_child(cleaned_action_behavior(action))
+            top_seq.add_child(generate_action_nodes(action))
         lat_action = action
     return top_seq
 
