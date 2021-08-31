@@ -518,27 +518,7 @@ def convert_actions_back_to_expr_rep(action_minimized):
         if isinstance(action_minimized[action], str):
             action_minimized[action] = expr(action_minimized[action])
 
-# DEPRECATED
-act_to_lat_sets_dict = dict()
-def add_lat_cond_to_dict_if_in_conds(action, conditions):
-    global lat_cond_lookup # [variable#] -> action_string
-    global act_to_lat_sets_dict # [lat_action] -> prior action
-    singular_conditions = set()
-    conditions_list = []
-    for condition in conditions.split('&'):
-        condition_clean = condition.replace(' ', "")
-        singular_conditions.add(condition_clean)
-        conditions_list.append(condition_clean)
-    for clean_cond in singular_conditions:
-        if '~' not in  clean_cond and clean_cond in lat_cond_lookup:
-            add_to_vec_hash_dict(act_to_lat_sets_dict, action, lat_cond_lookup[clean_cond])
-
-# DEPRECATED
-def create_lat_cond_dict(action_minimized):
-    for action, condition in action_minimized.items():
-        conditions = convert_expr_ast_to_str_rep(condition.to_ast())
-        for singular_con in conditions.split("|"):
-            add_lat_cond_to_dict_if_in_conds(action, singular_con)
+act_to_lat_sets_dict = dict() # 
 
 def contains_latcond(str_rep_cond):
     for key in lat_cond_lookup:
@@ -621,7 +601,7 @@ def get_cycles_node_name():
     cycle_node_counter += 1
     return name
 
-def find_all_source_nodes(outgoing_edge_dict):
+def find_all_paths(outgoing_edge_dict):
     if len(outgoing_edge_dict) == 0:
         return [], [], []
 
@@ -654,8 +634,8 @@ def find_source_and_end_nodes(source_nodes, end_nodes, graph, illegal_ends):
 
 def create_di_graph(outgoing_edge_dict):
     graph = nx.DiGraph()
-    for s_node in outgoing_edge_dict:
-        for d_node in outgoing_edge_dict[s_node]:
+    for d_node in outgoing_edge_dict:
+        for s_node in outgoing_edge_dict[d_node]:
             graph.add_edge(s_node, d_node)
     return graph
 
@@ -680,7 +660,7 @@ def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends):
 
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     global act_to_lat_sets_dict # [lat] -> {actions}
-    cycle_paths, non_cycle_paths, cyclenode_to_path_dict = find_all_source_nodes(act_to_lat_sets_dict)
+    cycle_paths, non_cycle_paths, cyclenode_to_path_dict = find_all_paths(act_to_lat_sets_dict)
     for path in cycle_paths:
         root.add_child(generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path))
     for path in non_cycle_paths:
