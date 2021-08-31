@@ -623,7 +623,7 @@ def get_cycles_node_name():
 
 def find_all_source_nodes(outgoing_edge_dict):
     if len(outgoing_edge_dict) == 0:
-        return [], []
+        return [], [], []
 
     source_nodes = []
     end_nodes = []
@@ -635,7 +635,7 @@ def find_all_source_nodes(outgoing_edge_dict):
     dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends)
     find_source_and_end_nodes(source_nodes, end_nodes, graph, illegal_ends)
     non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
-    return cycles, non_cycles
+    return cycles, non_cycles, cyclenode_to_path_dict
 
 def find_non_cycle_paths(source_nodes, end_nodes, graph):
     non_cycles = list()
@@ -679,16 +679,29 @@ def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends):
         illegal_ends.add(end_node)
 
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
-    #TODO: chain out for all and not just break, should essentially be list traversal checking for circular chain to end
-    # dfs and del nodes as I go, is there a way to find the start.....?
     global act_to_lat_sets_dict # [lat] -> {actions}
-
-    cycle_paths, non_cycle_paths = find_all_source_nodes(act_to_lat_sets_dict)
+    cycle_paths, non_cycle_paths, cyclenode_to_path_dict = find_all_source_nodes(act_to_lat_sets_dict)
     for path in cycle_paths:
         root.add_child(generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path))
-    
     for path in non_cycle_paths:
-        print(path)
+        root.add_child(generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path))
+
+def generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path):
+    top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME+ get_node_name_counter())
+    lat_action = ""
+    for action in path:
+        if is_cycle_node(action):
+            top_seq.add_child(generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict[action]))
+        elif lat_action == "": # first action in chain    
+            if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
+                top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
+            top_seq.add_child(cleaned_action_behavior(action))
+        else:
+            if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
+                top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
+            top_seq.add_child(cleaned_action_behavior(action))
+        lat_action = action
+    return top_seq
 
 def generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path):
     top_seq = py_trees.composites.Sequence(name=constants.REPEAT_SEQ_NAME + get_node_name_counter())
