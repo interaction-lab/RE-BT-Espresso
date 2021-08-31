@@ -620,6 +620,9 @@ def find_all_paths(outgoing_edge_dict):
     dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict)
     find_source_and_end_nodes(source_nodes, end_nodes, graph)
     non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
+    print("*********************")
+    print(non_cycles)
+    print(cyclenode_to_path_dict)
     return non_cycles, cyclenode_to_path_dict
 
 def find_non_cycle_paths(source_nodes, end_nodes, graph):
@@ -651,11 +654,14 @@ def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict):
     for cycle in cycles:
         n_name = get_cycles_node_name()
         graph.add_node(n_name)
+        nodes_in_cycle_set = set(cycle) # avoid self looping
         for node in cycle:
             for edge in graph.in_edges(node):
-                graph.add_edge(edge[0], n_name)
+                if edge[0] not in nodes_in_cycle_set:
+                    graph.add_edge(edge[0], n_name)
             for edge in graph.out_edges(node):
-                graph.add_edge(n_name, edge[1])
+                if edge[1] not in nodes_in_cycle_set:
+                    graph.add_edge(n_name, edge[1])
         graph.remove_nodes_from(cycle)
         cyclenode_to_path_dict[n_name] = cycle
 
