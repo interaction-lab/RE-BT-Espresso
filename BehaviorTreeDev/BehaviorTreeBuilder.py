@@ -629,15 +629,19 @@ def find_non_cycle_paths(source_nodes, end_nodes, graph):
     non_cycles = list()
     for source in source_nodes:
         for end in end_nodes:
+            if end == source:
+                non_cycles.append([source]) # singular node, not caught in all_simple_paths
+                continue
             for path in nx.all_simple_paths(graph, source, end):
                 non_cycles.append(path)
     return non_cycles
 
 def find_source_and_end_nodes(source_nodes, end_nodes, graph):
     for node in graph.nodes:
+
         if graph.in_degree(node) == 0:
             source_nodes.append(node)
-        elif graph.out_degree(node) == 0:
+        if graph.out_degree(node) == 0: # cannot be elif, can be singular node in graph with node
             end_nodes.append(node)
 
 def create_di_graph(outgoing_edge_dict):

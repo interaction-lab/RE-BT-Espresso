@@ -210,7 +210,16 @@ class Runner:
 
 		clfs = []
 		train_scores = []
-		for i, ccp_alpha in enumerate(ccp_alphas):
+		run_alphas = set()
+		i = -1
+		for iteri, ccp_alpha in enumerate(ccp_alphas):
+			if ccp_alpha < 0: # bug in sklearn I think
+				ccp_alpha *= -1
+			if ccp_alpha in run_alphas: # dublicate zero ccp due to low rounding float
+				continue
+			else:
+				run_alphas.add(ccp_alpha)
+				i += 1
 			clf = tree.DecisionTreeClassifier(random_state = self.json_manager.get_random_state(), \
 				max_depth = max_depth, ccp_alpha=ccp_alpha)
 			clf.fit(self.features_data, self.labels_data)
