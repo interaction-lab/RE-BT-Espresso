@@ -684,23 +684,28 @@ def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo
     global act_to_lat_sets_dict # [lat] -> {actions}
 
     cycle_paths, non_cycle_paths = find_all_source_nodes(act_to_lat_sets_dict)
-
     for path in cycle_paths:
-        top_seq = py_trees.composites.Sequence(name=constants.REPEAT_SEQ_NAME + get_node_name_counter())
-        lat_action = ""
-        for action in path:
-            if len(path) == 1: # self cycle
-                lat_action = action
-            if lat_action == "": # first action in chain    
-                if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
-                    top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
-                top_seq.add_child(cleaned_action_behavior(action))
-            else:
-                if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
-                   top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
-                top_seq.add_child(cleaned_action_behavior(action))
+        root.add_child(generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path))
+    
+    for path in non_cycle_paths:
+        print(path)
+
+def generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path):
+    top_seq = py_trees.composites.Sequence(name=constants.REPEAT_SEQ_NAME + get_node_name_counter())
+    lat_action = ""
+    for action in path:
+        if len(path) == 1: # self cycle
             lat_action = action
-        root.add_child(top_seq)
+        if lat_action == "": # first action in chain    
+            if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
+                top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
+            top_seq.add_child(cleaned_action_behavior(action))
+        else:
+            if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
+               top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
+            top_seq.add_child(cleaned_action_behavior(action))
+        lat_action = action
+    return top_seq
 
 def save_tree(tree, filename):
     """Saves generated BehaviorTree to dot, svg, and png files
