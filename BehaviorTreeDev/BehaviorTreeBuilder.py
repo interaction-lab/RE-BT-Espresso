@@ -614,7 +614,6 @@ def update_freq_dict(dictionary, key, val):
     else:
         dictionary[key] = val
 
-
 cycle_node_counter = 0
 def get_cycles_node_name():
     global cycle_node_counter
@@ -690,9 +689,11 @@ def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo
         top_seq = py_trees.composites.Sequence(name=constants.REPEAT_SEQ_NAME + get_node_name_counter())
         lat_action = ""
         for action in path:
-            if lat_action == "": # first action in chain
+            if len(path) == 1: # self cycle
+                lat_action = action
+            if lat_action == "": # first action in chain    
                 if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
-                    top_seq.add_child(recursive_build(action_minimized_wo_lat[action][action], sym_lookup_dict))
+                    top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
                 top_seq.add_child(cleaned_action_behavior(action))
             else:
                 if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
