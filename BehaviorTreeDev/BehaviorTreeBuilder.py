@@ -614,12 +614,11 @@ def find_all_paths(outgoing_edge_dict):
     source_nodes = []
     end_nodes = []
     cyclenode_to_path_dict = dict() # [cycle_node] -> cycle path list
-    illegal_ends = set()
  
     graph = create_di_graph(outgoing_edge_dict)
     cycles = list(nx.simple_cycles(graph))
-    dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends)
-    find_source_and_end_nodes(source_nodes, end_nodes, graph, illegal_ends)
+    dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict)
+    find_source_and_end_nodes(source_nodes, end_nodes, graph)
     non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
     return cycles, non_cycles, cyclenode_to_path_dict
 
@@ -631,11 +630,11 @@ def find_non_cycle_paths(source_nodes, end_nodes, graph):
                 non_cycles.append(path)
     return non_cycles
 
-def find_source_and_end_nodes(source_nodes, end_nodes, graph, illegal_ends):
+def find_source_and_end_nodes(source_nodes, end_nodes, graph):
     for node in graph.nodes:
         if graph.in_degree(node) == 0:
             source_nodes.append(node)
-        elif graph.out_degree(node) == 0 and node not in illegal_ends:
+        elif graph.out_degree(node) == 0:
             end_nodes.append(node)
 
 def create_di_graph(outgoing_edge_dict):
@@ -648,26 +647,17 @@ def create_di_graph(outgoing_edge_dict):
 def is_cycle_node(node):
     return constants.CYLCE_NODE in node
 
-def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends):
-    # HERE: likley have cycle wrong
+def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict):
     for cycle in cycles:
-        end_node = cycle[-1]
-        start_node = cycle[0]
-        graph.remove_edge(start_node, end_node)
-        
         n_name = get_cycles_node_name()
         graph.add_node(n_name)
-        # add all incoming from path beginning to the node, if there are 0 then don't add any, will process as source/end node anywhay
-        for edge in graph.in_edges(start_node):
-            graph.add_edge(edge[0], n_name)
-        # add all outgoing edges
-        for edge in graph.out_edges(end_node):
-            graph.add_edge(n_name, edge[1])
-
-        cyclenode_to_path_dict[n_name] = cycle
-        # now account for "illegal" paths aka paths ending on any node in path
         for node in cycle:
-            illegal_ends.add(node)
+            for edge in graph.in_edges(node):
+                graph.add_edge(edge[0], n_name)
+            for edge in graph.out_edges(node):
+                graph.add_edge(n_name, edge[1])
+        graph.remove_nodes_from(cycle)
+        cyclenode_to_path_dict[n_name] = cycle
 
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     global act_to_lat_sets_dict # [lat] -> {actions}
