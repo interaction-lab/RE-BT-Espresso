@@ -556,12 +556,18 @@ def create_action_min_wo_lat_dict(action_minimized):
         for cond in cond_list:
             latcond = contains_latcond(cond)
             if latcond != "":
-                final_cond = re.sub("(?<!~)" + latcond + "(?!\S)", " 1 " , cond) # " 1 " will reduce out the condition
+                final_cond = remove_all_lat_conditions(cond)
                 add_cond_to_double_dict(action_min_wo_lat_dict, action, lat_cond_lookup[latcond], final_cond)
                 add_to_vec_hash_dict(act_to_lat_sets_dict, action, lat_cond_lookup[latcond])
     
     convert_double_dict_to_expr(action_min_wo_lat_dict)
     return action_min_wo_lat_dict
+
+def remove_all_lat_conditions(final_cond):
+    for key in lat_cond_lookup:
+        final_cond = re.sub("(?<!~)" + key + "(?!\S)", " 1 " , final_cond)
+        final_cond = re.sub("~" + key + "(?!\S)", " 1 ", final_cond)
+    return final_cond
 
 def minimize_bool_expression(sym_lookup, action_to_pstring):
     action_minimized = {}
