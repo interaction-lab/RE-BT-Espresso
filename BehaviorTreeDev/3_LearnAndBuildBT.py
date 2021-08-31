@@ -148,6 +148,8 @@ class Runner:
 			
 			# create tree on each alpha
 			for i, alpha in enumerate(ccp_alphas):
+				if alpha < 0: # bug in sklearn I think
+					alpha *= -1
 				clf = tree.DecisionTreeClassifier(\
 					random_state = self.json_manager.get_random_state(), \
 					max_depth = max_depth, \

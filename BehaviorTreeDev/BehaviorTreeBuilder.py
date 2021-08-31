@@ -620,7 +620,7 @@ def find_all_paths(outgoing_edge_dict):
     dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict)
     find_source_and_end_nodes(source_nodes, end_nodes, graph)
     non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
-    return cycles, non_cycles, cyclenode_to_path_dict
+    return non_cycles, cyclenode_to_path_dict
 
 def find_non_cycle_paths(source_nodes, end_nodes, graph):
     non_cycles = list()
@@ -661,9 +661,7 @@ def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict):
 
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     global act_to_lat_sets_dict # [lat] -> {actions}
-    cycle_paths, non_cycle_paths, cyclenode_to_path_dict = find_all_paths(act_to_lat_sets_dict)
-    for path in cycle_paths:
-        root.add_child(generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path))
+    non_cycle_paths, cyclenode_to_path_dict = find_all_paths(act_to_lat_sets_dict)
     for path in non_cycle_paths:
         root.add_child(generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path))
 
