@@ -157,6 +157,7 @@ class Runner:
 				clf = clf.fit(X_train, y_train)
 				self.train_scores[i] += clf.score(X_train, y_train) / num_k_folds
 				self.test_scores[i] += clf.score(X_test, y_test) / num_k_folds
+		return ccp_alphas
 
 	def generate_full_binary_set(self):
 		bin_set = self.json_manager.get_binary_features()
@@ -182,7 +183,7 @@ class Runner:
 
 
 		output_full_path = self.create_output_folder(kFold, max_depth)
-		self.k_fold_train_decision_tree_w_max_depth(kFold, max_depth, output_full_path)
+		ccp_alphas = self.k_fold_train_decision_tree_w_max_depth(kFold, max_depth, output_full_path)
 
 
 		report_file = "{}_kFold_{}_maxDepth.txt".format(kFold, max_depth)
@@ -203,7 +204,7 @@ class Runner:
 		plot_decision_tree(clf, dot_pdf_full_path, self.features_data.columns)
 
 		prune_path = clf.cost_complexity_pruning_path(self.features_data, self.labels_data)
-		ccp_alphas, impurities = prune_path.ccp_alphas, prune_path.impurities
+		#ccp_alphas, impurities = prune_path.ccp_alphas, prune_path.impurities
 
 		pruning_folder = constants.add_folder_to_directory(\
 			constants.PRUNE_FOLDER_NAME, output_full_path)
@@ -211,15 +212,25 @@ class Runner:
 		clfs = []
 		train_scores = []
 		run_alphas = set()
-		i = -1
-		for iteri, ccp_alpha in enumerate(ccp_alphas):
+		i = 0
+		ccp_alpha_list_copy = ccp_alphas.copy()
+		print(len(ccp_alphas))
+		print(len(self.train_scores))
+		for ccp_alpha in ccp_alpha_list_copy:
 			if ccp_alpha < 0: # bug in sklearn I think
 				ccp_alpha *= -1
 			if ccp_alpha in run_alphas: # dublicate zero ccp due to low rounding float
+				print("**************")
+				print(ccp_alphas)
+				ccp_alphas = np.delete(ccp_alphas, i)
+				print(ccp_alphas)
+				print(self.train_scores)
+				self.train_scores = np.delete(self.train_scores, i)
+				print(self.train_scores)
+				self.test_scores = np.delete(self.test_scores, i)
 				continue
-			else:
-				run_alphas.add(ccp_alpha)
-				i += 1
+			run_alphas.add(ccp_alpha)
+			
 			clf = tree.DecisionTreeClassifier(random_state = self.json_manager.get_random_state(), \
 				max_depth = max_depth, ccp_alpha=ccp_alpha)
 			clf.fit(self.features_data, self.labels_data)
@@ -255,11 +266,15 @@ class Runner:
 			report_file_obj.write("	Decision Tree saved to {}\n".format(decision_tree_path))
 			report_file_obj.write("	Behavior Tree saved to {}\n\n".format(behaviot_tree_full_path))
 			report_file_obj.write("")
+			i += 1
 
 		fig, ax = plt.subplots()
 		ax.set_xlabel("alpha")
 		ax.set_ylabel("accuracy")
 		ax.set_title("Accuracy vs alpha for Final Tree Prunes (note: uses all data for final training)")
+		print("jsdfkhfkjsdfhjk")
+		print(ccp_alphas)
+		print(self.train_scores)
 		ax.plot(ccp_alphas, self.train_scores, marker='o', label="train", drawstyle="steps-post")
 		ax.plot(ccp_alphas, self.test_scores, marker='x', label="test", drawstyle="steps-post")
 		ax.legend()
