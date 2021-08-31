@@ -660,6 +660,10 @@ def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict, illegal_ends):
         # add all incoming from path beginning to the node, if there are 0 then don't add any, will process as source/end node anywhay
         for edge in graph.in_edges(start_node):
             graph.add_edge(edge[0], n_name)
+        # add all outgoing edges
+        for edge in graph.out_edges(end_node):
+            graph.add_edge(n_name, edge[1])
+
         cyclenode_to_path_dict[n_name] = cycle
         # now account for "illegal" paths aka paths ending on the final node
         illegal_ends.add(end_node)
