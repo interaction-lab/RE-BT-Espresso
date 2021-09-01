@@ -2,7 +2,6 @@ from lxml import etree
 import numpy as np
 import copy
 from numpy.core.arrayprint import _void_scalar_repr
-from queue import Queue
 import networkx as nx
 
 import py_trees.decorators
