@@ -17,6 +17,7 @@ DataSim/simulated_data.csv
 *env/
 *.vscode/
 *sim_data/
+*output/
 
 # Visual Studio cache directory
 .vs/

@@ -9,6 +9,7 @@ bt_pipeline_folder = "BehaviorTreeDev"
 
 # sim imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '.', sim_folder))
+import bt_sim
 
 # pipeline imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '.', bt_pipeline_folder))

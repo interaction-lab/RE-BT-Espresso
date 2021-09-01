@@ -7,13 +7,11 @@ from student import Student
 from tree_units import*
 import os
 
-def main():
-    print("start")
+def run_sim(path):
+    print("Start Sim")
     pt.logging.level = pt.logging.Level.WARN
     pt.blackboard.Blackboard.enable_activity_stream(100)
     
-    g.config_folder_name = sys.argv[1].replace(".json", "") + "/"
-    path = os.getcwd() + "/" + g.global_output_folder + g.config_folder_name
     g.remove_folder_if_exists(path)
     os.makedirs(path)
 
@@ -34,8 +32,12 @@ def main():
             s.update()
             w.update()
             r.b_tree.tick()
-
     print("done")
+
+def main():
+    g.config_folder_name = sys.argv[1].replace(".json", "") + "/"
+    path = os.getcwd() + "/" + g.global_output_folder + g.config_folder_name
+    run_sim()
         
 if __name__ == '__main__':
     main()
