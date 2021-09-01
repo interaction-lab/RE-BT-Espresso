@@ -51,4 +51,6 @@ def get_freq_unique_node_dict(graph):
 
 def num_unique_nodes(graph):
 	return sum(x > 0 for x in get_freq_unique_node_dict(graph).values())
-    
+
+def total_num_nodes(graph):
+    return len(graph.nodes)

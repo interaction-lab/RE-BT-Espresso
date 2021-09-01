@@ -1,10 +1,21 @@
 # global imports
 import argparse
-import sys, os
-import glob
+import os
 import pydot
 import networkx as nx
 import node_helpers as nh
+import json
+
+
+results_filename = "results.json"
+gen_key = "generated"
+sim_key = "simulated"
+tree_keys = {
+	gen_key,
+	sim_key
+}
+num_unique_nodes_key = "num_unique_nodes"
+total_nodes_key = "total_nodes"
 
 def parse_args():
 	ap = argparse.ArgumentParser()
@@ -20,16 +31,29 @@ def parse_args():
 
 	return generated_path, simulated_path
 
-
-
-
 def run_result(generated_tree_path, simulated_tree_path):
-	print(f"Start results on {generated_tree_path}")
-	generated_graph = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(generated_tree_path)[0])
-	simulated_graph = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(simulated_tree_path)[0])
-	print(nh.num_unique_nodes(generated_graph))
-	print(nh.num_unique_nodes(simulated_graph))
+	print(f"Start results on generated {generated_tree_path} from simulated {simulated_tree_path}")
+	global gen_key, sim_key, tree_keys, num_unique_nodes
+	results_dict = dict()
+	graph_dict = dict()
+	graph_dict[gen_key] = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(generated_tree_path)[0])
+	graph_dict[sim_key] = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(simulated_tree_path)[0])
 
+	generate_results(results_dict, graph_dict)
+	write_results(simulated_tree_path, results_dict)
+
+def write_results(simulated_tree_path, results_dict):
+	results_path = os.path.dirname(simulated_tree_path) + "/" + results_filename
+	with open(results_path, 'w') as outfile:
+		json.dump(results_dict, outfile)
+
+
+def generate_results(results_dict, graph_dict):
+	for key in tree_keys:
+		results_dict[key] = dict()
+		results_dict[key][num_unique_nodes_key] =  nh.num_unique_nodes(graph_dict[key])
+		results_dict[key][total_nodes_key] = nh.total_num_nodes(graph_dict[key])
+			
 
 def main():
 	generated_path, simulated_path = parse_args()
