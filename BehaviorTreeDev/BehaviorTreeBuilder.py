@@ -531,6 +531,13 @@ def contains_latcond(str_rep_cond):
     return ""
 
 def add_cond_to_double_dict(dictionary, key1, key2, val):
+    # check if val would lead to issue #91 aka it is a 1 in expr, 
+    # this would turn all vals in | condition to 1
+    if type(expr(val)) ==  pyeda.boolalg.expr._One:
+        print("************")
+        print(key1)
+        print(key2)
+        return
     if key1 in dictionary:
         if key2 in dictionary[key1]:
             dictionary[key1][key2] += " | " + val
@@ -543,7 +550,12 @@ def add_cond_to_double_dict(dictionary, key1, key2, val):
 def convert_double_dict_to_expr(dictionary):
     for key1 in dictionary:
         for key2 in dictionary[key1]:
+            print(dictionary[key1][key2])
             dictionary[key1][key2] = expr(dictionary[key1][key2])
+            if type(dictionary[key1][key2]) == pyeda.boolalg.expr._One:
+                print(key1)
+                print(key2)
+                print("////////////////////////////")
 
 act_lat_conditions_dict = dict() # [action][lat_action] -> conditions that came with lat minus lat cond
 def create_action_min_wo_lat_dict(action_minimized):
@@ -684,7 +696,7 @@ def generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_l
                 top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
             top_seq.add_child(generate_action_nodes(action))
         else:
-            if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
+            if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) != pyeda.boolalg.expr._One:
                 top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
             top_seq.add_child(generate_action_nodes(action))
         lat_action = action
