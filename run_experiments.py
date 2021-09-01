@@ -39,6 +39,7 @@ def main():
 	"""
 	print("Start Experiments")
 	sim_config = "/home/tgroechel/scripts/RE-BT-Espresso/DataSim/configs/experiments/expr0.json"
+	
 	print(bt_sim.run_sim(sim_config))
 	json_file_path, should_recolor = parse_args()
 	run_pipeline.run_pipeline(json_file_path, should_recolor)
