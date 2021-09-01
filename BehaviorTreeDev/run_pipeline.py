@@ -18,29 +18,24 @@ upsample_2 = __import__('2_UpsampleData')
 behaviortree_3 = __import__('3_LearnAndBuildBT')
 color_bt_trees = __import__('color_bt_trees')
 
-json_file_path = "config.json"
 output_file_path = "output.log"
-should_recolor = False
 
 def parse_args():
-	global json_file_path
-	global should_recolor
-
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-c", "--config", required = False, help = "Full path to json config file, relative paths work as well")
+	ap.add_argument("-c", "--config", required = True, help = "Full path to json config file, relative paths work as well")
 	ap.add_argument("-r", "--recolor", required = False, action='store_true', help = "Run recoloring of all trees")
 	args = vars(ap.parse_args())
+	json_file_path = ""
 	if "config" in args and args["config"] != None:
 		json_file_path = args["config"]
 
 	should_recolor = "recolor" in args and args["recolor"] != None and args['recolor']
 
-def main():
-	"""Runs the full pipeline end to end
-	'-c, --config' - [optional] Path to json config
-	"""
-	print("Start")
-	parse_args()
+	return json_file_path, should_recolor
+
+
+def run_pipeline(json_file_path, should_recolor):
+	print("Start BTBuilder pipeline")
 	json_manager = JsonManager(json_file_path)
 
 	normalize_0.run_normalize(json_file_path)
@@ -51,6 +46,13 @@ def main():
 	if should_recolor:
 		color_bt_trees.run_color(json_manager.get_output_path())
 
+def main():
+	"""Runs the full pipeline end to end
+	'-c, --config' - [optional] Path to json config
+	'-r, --recolor' - [optional] runs recoloring when trees are done generating
+	"""
+	json_file_path, should_recolor = parse_args()
+	run_pipeline(json_file_path, should_recolor)
 
 if __name__ == '__main__':
 	main()

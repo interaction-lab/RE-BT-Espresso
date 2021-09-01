@@ -13,7 +13,7 @@ IMPORTANT: The repo is not clean in the slightest as it is divulging near deadli
 
 ## Running:
 - For running the builder etc, navigate to `BehaviorTreeDev/`
-    - BehaviorTreePipeline: `python3 run.py -c example/config.json`
+    - BehaviorTreePipeline: `python3 run_pipeline.py -c example/config.json`
     - Recoloring Output: `python3 color_bt_trees.py -d .` (replace `.` with any parent directory of the output, example defaults to the `output` directory)
 - For simulating data, navigate to `DataSim`
     1. `python3 bt_sim.py path/to/tree/config/you/want` (likely under `/config`)
