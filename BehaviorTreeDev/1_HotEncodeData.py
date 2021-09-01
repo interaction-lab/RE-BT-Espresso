@@ -74,7 +74,7 @@ def get_header_row(combined_csv_file):
 	    return d_reader.fieldnames
 
 add_last_action_taken = False
-def run_hotencode(json_file_path):
+def run_hotencode(json_file_path, output_log_path):
 	global add_last_action_taken
 	print(f"Hot encoding started using {json_file_path}")
 	
@@ -148,7 +148,7 @@ def run_hotencode(json_file_path):
 		delimiter = constants.CSV_DELIMITER, \
 		comments='')
 
-	f = open(OUTPUT_LOG_FILE, "w")
+	f = open(output_log_path, "w")
 	f.write("{}\n".format(total_fmt))
 	f.write(str((label_encoder.classes_).tolist()))
 	f.close()
@@ -156,7 +156,7 @@ def run_hotencode(json_file_path):
 
 def main():
 	json_file_path = process_command_line_args()
-	run_hotencode(json_file_path)
+	run_hotencode(json_file_path, OUTPUT_LOG_FILE)
 
 if __name__ == '__main__':
 	main()

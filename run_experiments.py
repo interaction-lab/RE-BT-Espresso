@@ -55,7 +55,7 @@ def run_all_experiments(base_pipeline_config, should_recolor):
 def run_experiment(base_pipeline_config, experiment_file, should_recolor):
 	sim_data_output_path, tree_name = bt_sim.run_sim(experiment_file)	
 	pipeline_config_path = write_pipeline_config(base_pipeline_config, sim_data_output_path, sim_data_output_path + "output")
-	run_pipeline.run_pipeline(pipeline_config_path, should_recolor)
+	run_pipeline.run_pipeline(pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log")
 	
 
 def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):

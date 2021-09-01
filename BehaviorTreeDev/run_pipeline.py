@@ -18,7 +18,7 @@ upsample_2 = __import__('2_UpsampleData')
 behaviortree_3 = __import__('3_LearnAndBuildBT')
 color_bt_trees = __import__('color_bt_trees')
 
-output_file_path = "output.log"
+DEFAULT_OUTPUT_PATH = "output.log"
 
 def parse_args():
 	ap = argparse.ArgumentParser()
@@ -34,12 +34,12 @@ def parse_args():
 	return json_file_path, should_recolor
 
 
-def run_pipeline(json_file_path, should_recolor):
+def run_pipeline(json_file_path, should_recolor, output_file_path):
 	print("Start BTBuilder pipeline")
 	json_manager = JsonManager(json_file_path)
 
 	normalize_0.run_normalize(json_file_path)
-	hotencode_1.run_hotencode(json_file_path)
+	hotencode_1.run_hotencode(json_file_path, output_file_path)
 	upsample_2.run_upsample(json_file_path, output_file_path)
 	behaviortree_3.run_behaviortree(json_file_path, output_file_path)
 
@@ -52,7 +52,7 @@ def main():
 	'-r, --recolor' - [optional] runs recoloring when trees are done generating
 	"""
 	json_file_path, should_recolor = parse_args()
-	run_pipeline(json_file_path, should_recolor)
+	run_pipeline(json_file_path, should_recolor, DEFAULT_OUTPUT_PATH)
 
 if __name__ == '__main__':
 	main()
