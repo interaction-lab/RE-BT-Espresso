@@ -1,3 +1,5 @@
+import re
+
 SEQUENCE = "Sequence"
 SELECTOR = "Selector"
 PARALLEL = "Parallel"
@@ -37,3 +39,16 @@ def unique_node_freq_counter():
     return dict.fromkeys(unique_node_set(), 0)
 
 
+def get_freq_unique_node_dict(graph):
+	freq_dict = unique_node_freq_counter()
+	node_regex = get_node_regex_dict()
+	for node in graph.nodes:
+		for reg_pat, node_type in node_regex.items():
+			if reg_pat == "*" or re.search(reg_pat, node):
+				freq_dict[node_type] += 1
+				continue # go to next node
+	return freq_dict
+
+def num_unique_nodes(graph):
+	return sum(x > 0 for x in get_freq_unique_node_dict(graph).values())
+    

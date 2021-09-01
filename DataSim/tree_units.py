@@ -54,11 +54,11 @@ class Tree_Basic(Tree):
         composite_node = None
 
         if type_ == "selector":
-            composite_node = pt.composites.Selector(name="selector")
+            composite_node = pt.composites.Selector(name="Selector")
         elif type_ == "sequence":
-            composite_node = pt.composites.Sequence(name="sequence")
+            composite_node = pt.composites.Sequence(name="Sequence")
         elif type_ == "parallel":
-            composite_node = pt.composites.Parallel(name="parallel")
+            composite_node = pt.composites.Parallel(name="|| Parallel")
         
         if composite_node:
             if root:
@@ -69,7 +69,7 @@ class Tree_Basic(Tree):
 
         for child in c_list:
             if child["inverted"]:
-                root.add_child(pt.decorators.Inverter(name="inverted_"+child["name"]))
+                root.add_child(pt.decorators.Inverter(name="Inverter_"+child["name"]))
             if child["type_"] in self.composite_set:
                 self.recursive_tree_build(root, child["type_"], child["child_list"])
             elif child["type_"] == "action":
