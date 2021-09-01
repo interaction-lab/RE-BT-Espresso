@@ -34,17 +34,19 @@ def parse_args():
 	return json_file_path, should_recolor
 
 
-def run_pipeline(json_file_path, should_recolor, output_file_path):
+def run_pipeline(json_file_path, should_recolor, fmt_file_path):
 	print("Start BTBuilder pipeline")
 	json_manager = JsonManager(json_file_path)
 
 	normalize_0.run_normalize(json_file_path)
-	hotencode_1.run_hotencode(json_file_path, output_file_path)
-	upsample_2.run_upsample(json_file_path, output_file_path)
-	behaviortree_3.run_behaviortree(json_file_path, output_file_path)
+	hotencode_1.run_hotencode(json_file_path, fmt_file_path)
+	upsample_2.run_upsample(json_file_path, fmt_file_path)
+	bt_tree_filepath_list = behaviortree_3.run_behaviortree(json_file_path, fmt_file_path)
 
 	if should_recolor:
 		color_bt_trees.run_color(json_manager.get_output_path())
+	
+	return bt_tree_filepath_list
 
 def main():
 	"""Runs the full pipeline end to end

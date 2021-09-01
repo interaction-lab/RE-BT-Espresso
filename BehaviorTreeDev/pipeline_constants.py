@@ -15,7 +15,7 @@ UPSAMPLED_CSV_FILENAME = "upsampled_combined.csv"
 
 PIPELINE_OUTPUT_FOLDER_NAME = "pipeline_output"
 PRUNE_FOLDER_NAME = "Pruning"
-BEHAVIOR_TREE_XML_FILENAME = "behaviorTree"
+BEHAVIOR_TREE_XML_FILENAME = "behaviortree"
 
 CSV_DELIMITER = ','
 CSV_QUOTECHAR = '"'

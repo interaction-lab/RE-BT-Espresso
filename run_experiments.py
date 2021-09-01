@@ -7,6 +7,7 @@ import glob
 sim_folder = "DataSim"
 experiments_folder = sim_folder + "/configs/experiments"
 bt_pipeline_folder = "BehaviorTreeDev"
+result_analysis_folder = "ResultAnalysis"
 
 # local imports, uses hacky path additions
 # sim imports
@@ -18,6 +19,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.', bt_pipeline_folder)
 import run_pipeline
 import json_manager
 from json_manager import JsonManager
+
+# result analysis imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '.', result_analysis_folder))
+import run_results
 
 json_file_path = "config.json"
 output_file_path = "output.log"
@@ -53,9 +58,11 @@ def run_all_experiments(base_pipeline_config, should_recolor):
        run_experiment(base_pipeline_config, config_file, should_recolor)
 
 def run_experiment(base_pipeline_config, experiment_file, should_recolor):
-	sim_data_output_path, tree_name = bt_sim.run_sim(experiment_file)	
+	sim_data_output_path, sim_tree_name = bt_sim.run_sim(experiment_file)	
 	pipeline_config_path = write_pipeline_config(base_pipeline_config, sim_data_output_path, sim_data_output_path + "output")
-	run_pipeline.run_pipeline(pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log")
+	bt_tree_filepath_list = run_pipeline.run_pipeline(pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log")
+	# TODO: decide which tree we care about, right now will be the tree with no pruning, rest are in the bt_tree_filepath_list
+	run_results.run_result(bt_tree_filepath_list[0] , sim_data_output_path + sim_tree_name + ".dot") # generated tree, simulated tree
 	
 
 def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):

@@ -62,7 +62,7 @@ def run_behaviortree(json_file_path, log_file_path):
 	"""
 
 	r = Runner(json_file_path, log_file_path)
-	r.run()
+	return r.run()
 
 class Runner:
 
@@ -214,6 +214,7 @@ class Runner:
 		run_alphas = set()
 		i = 0
 		ccp_alpha_list_copy = ccp_alphas.copy()
+		bt_tree_filepath_list = []
 		for ccp_alpha in ccp_alpha_list_copy:
 			if ccp_alpha < 0: # bug in sklearn I think
 				ccp_alpha *= -1
@@ -240,7 +241,6 @@ class Runner:
 			decision_tree_obj = clf.tree_
 
 			# theoretical split to dump decision trees out to files
-			# TODO: should we include categorical features as binary?
 			full_binary_set = self.generate_full_binary_set()
 			behavior_tree_obj = btBuilder.bt_espresso_mod(\
 				decision_tree_obj, 
@@ -248,16 +248,16 @@ class Runner:
 				label_encoding,
 				self.json_manager.get_binary_features())
 
-			behaviot_tree_full_path = os.fsdecode(os.path.join(\
+			behavior_tree_full_path = os.fsdecode(os.path.join(\
 				newPrunePath, constants.BEHAVIOR_TREE_XML_FILENAME))
 
-			# btBuilder.save_tree(behavior_tree_obj, behaviot_tree_full_path)
+			bt_tree_filepath_list.append(newPrunePath + "/" + constants.BEHAVIOR_TREE_XML_FILENAME + ".dot")
 			btBuilder.save_tree(behavior_tree_obj, newPrunePath)
 
 			report_file_obj.write("prune: {} \n".format(i))
 			report_file_obj.write("	ccp_alpha: {}, train score: {}\n".format(ccp_alpha, train_scores[i]))
 			report_file_obj.write("	Decision Tree saved to {}\n".format(decision_tree_path))
-			report_file_obj.write("	Behavior Tree saved to {}\n\n".format(behaviot_tree_full_path))
+			report_file_obj.write("	Behavior Tree saved to {}\n\n".format(behavior_tree_full_path))
 			report_file_obj.write("")
 			i += 1
 
@@ -283,12 +283,13 @@ class Runner:
 
 		report_file_obj.close()
 		print(f"BehaviorTree buidling finished, results in {output_full_path}")
+		return bt_tree_filepath_list
 		
 def main():
 	"""Runs the behavior tree via command line arguments
 	"""
-	json_file_path, log_file_path = process_command_line_args()
-	run_behaviortree(json_file_path, log_file_path)
+	json_file_path, fmt_file_path = process_command_line_args()
+	run_behaviortree(json_file_path, fmt_file_path)
 
 if __name__ == '__main__':
 	main()
