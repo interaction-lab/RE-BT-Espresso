@@ -45,9 +45,15 @@ class JsonManager:
 
 	def get_normalized_path(self):
 		return str(self.v_json_object[JSON_NORMALIZED_PATH_KEY])
+	
+	def set_normalized_path(self, new_path):
+		self.v_json_object[JSON_NORMALIZED_PATH_KEY] = new_path
 
 	def get_upsampled_path(self):
 		return str(self.v_json_object[JSON_UPSAMPLED_PATH_KEY])
+	
+	def set_upsampled_path(self, new_path):
+		self.v_json_object[JSON_UPSAMPLED_PATH_KEY] = new_path
 
 	def get_sliding_window_length(self):
 		return int(self.v_json_object[JSON_SLIDING_WINDOW_LENGTH_KEY])
@@ -57,6 +63,9 @@ class JsonManager:
 
 	def get_hot_encoded_path(self):
 		return str(self.v_json_object[JSON_HOT_ENCODED_PATH_KEY])
+
+	def set_hot_encoded_path(self, new_path):
+		self.v_json_object[JSON_HOT_ENCODED_PATH_KEY] = new_path
 
 	def get_random_state(self):
 		return self.v_json_object[JSON_RANDOM_STATE_KEY]
@@ -72,6 +81,9 @@ class JsonManager:
 
 	def get_output_path(self):
 		return str(self.v_json_object[JSON_OUTPUT_PATH_KEY])
+	
+	def set_output_path(self, new_path):
+		self.v_json_object[JSON_OUTPUT_PATH_KEY] = new_path
 
 	def get_binary_features(self):
 		return list(self.v_json_object[JSON_BINARY_FEATURES])

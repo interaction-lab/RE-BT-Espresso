@@ -54,16 +54,21 @@ def run_all_experiments(base_pipeline_config, should_recolor):
 
 def run_experiment(base_pipeline_config, experiment_file, should_recolor):
 	sim_data_output_path, tree_name = bt_sim.run_sim(experiment_file)	
-	pipeline_config_path = write_pipeline_config(base_pipeline_config, sim_data_output_path)
+	pipeline_config_path = write_pipeline_config(base_pipeline_config, sim_data_output_path, sim_data_output_path + "output")
 	run_pipeline.run_pipeline(pipeline_config_path, should_recolor)
 	
 
-def write_pipeline_config(base_pipeline_config, sim_data_output_path):
-    jm = JsonManager(base_pipeline_config)
-    jm.set_csv_path(sim_data_output_path)
-    pipeline_config_path = sim_data_output_path + "pipeline_config.json"
-    jm.write_out_json_to_file(pipeline_config_path)
-    return pipeline_config_path
+def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):
+	jm = JsonManager(base_pipeline_config)
+	jm.set_csv_path(sim_data_output_path)
+	jm.set_output_path(output_folder)
+	jm.set_normalized_path(output_folder)
+	jm.set_upsampled_path(output_folder)
+	jm.set_hot_encoded_path(output_folder)
+
+	pipeline_config_path = sim_data_output_path + "pipeline_config.json"
+	jm.write_out_json_to_file(pipeline_config_path)
+	return pipeline_config_path
 
 if __name__ == '__main__':
 	main()
