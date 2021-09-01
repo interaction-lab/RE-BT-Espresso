@@ -34,41 +34,45 @@ class Tree():
         pt.display.render_dot_tree(self.root, target_directory=g.global_output_folder + g.config_folder_name)
         
 class Tree_Basic(Tree):
-    def __init__(self, type, child_list):
+    def __init__(self, type_, child_list):
         self.child_list = child_list
-        self.type = type
+        self.type_ = type_
         self.writer = None
         self.storage = None
+        self.composite_set = {
+            "selector",
+            "sequence",
+            "parallel"
+        }
         super().__init__()
         
     def define_tree(self):
-        self.root = self.recursive_tree_build(self.type, self.child_list)
+        self.recursive_tree_build(self.root, self.type_, self.child_list)
         self.b_tree = pt.trees.BehaviourTree(self.root)
         
-    def recursive_tree_build(self, type, c_list):
-        if type == "selector":
-            composite = pt.composites.Selector(name="selector")
-        elif type == "sequence":
-            composite = pt.composites.Sequence(name="sequence")
-        elif type == "parallel":
-            composite = pt.composites.Parallel(name="parallel")
+    def recursive_tree_build(self, root, type_, c_list):
+        composite_node = None
+
+        if type_ == "selector":
+            composite_node = pt.composites.Selector(name="selector")
+        elif type_ == "sequence":
+            composite_node = pt.composites.Sequence(name="sequence")
+        elif type_ == "parallel":
+            composite_node = pt.composites.Parallel(name="parallel")
         
+        if composite_node:
+            if root:
+                root.add_child(composite_node)
+            else:
+                self.root = composite_node
+            root = composite_node
+
         for child in c_list:
             if child["inverted"]:
-                if child["type"] == "action":
-                    composite.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=Action(child["name"], child["p_success"])))
-                elif child["type"] == "condition":
-                    composite.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=Condition(child["name"], child["p_success"], child['target_state'], child["threshold"])))
-                elif child["type"] == "composite":
-                    composite.add_child(pt.decorators.Inverter(name="inverted_"+child["name"], child=self.recursive_tree_build(child["name"], child["child_list"])))
-            elif child["type"] == "composite":
-                composite.add_child(self.recursive_tree_build(child["name"], child["child_list"]))
-            elif child["type"] == "action":
-                composite.add_child(Action(child["name"], child["p_success"]))
-            elif child["type"] == "condition":
-                composite.add_child(Condition(child["name"], child["p_success"], child['target_state'], child["threshold"]))
-        return composite
-    
-    
-
-            
+                root.add_child(pt.decorators.Inverter(name="inverted_"+child["name"]))
+            if child["type_"] in self.composite_set:
+                self.recursive_tree_build(root, child["type_"], child["child_list"])
+            elif child["type_"] == "action":
+                root.add_child(Action(child["name"], child["p_success"]))
+            elif child["type_"] == "condition":
+                root.add_child(Condition(child["name"], child["p_success"], child['target_state'], child["threshold"]))
