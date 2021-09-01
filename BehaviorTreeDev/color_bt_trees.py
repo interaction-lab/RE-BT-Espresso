@@ -26,11 +26,7 @@ def process_command_line_args():
 	args = vars(ap.parse_args())
 	return args["directory"]
 
-
-def main():
-	"""Colors behavior tree files
-	"""
-	directory = process_command_line_args()
+def run_color(directory):
 	# should all be from constants
 	output_filename = "output~"
 
@@ -74,5 +70,11 @@ def main():
 		graph.write_dot(full_output_name + ".dot")
 		graph.write_png(full_output_name + ".png")
 
+def main():
+	"""Colors behavior tree files
+	"""
+	directory = process_command_line_args()
+	run_color(directory)
+	
 if __name__ == '__main__':
 	main()
