@@ -7,6 +7,7 @@ sim_folder = "DataSim"
 experiments_folder = sim_folder + "/configs/experiments"
 bt_pipeline_folder = "BehaviorTreeDev"
 
+# local imports, uses hacky path additions
 # sim imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '.', sim_folder))
 import bt_sim
@@ -37,6 +38,8 @@ def main():
 	'-c, --config' - [optional] Path to json config
 	"""
 	print("Start Experiments")
+	sim_config = "/home/tgroechel/scripts/RE-BT-Espresso/DataSim/configs/experiments/expr0.json"
+	print(bt_sim.run_sim(sim_config))
 	json_file_path, should_recolor = parse_args()
 	run_pipeline.run_pipeline(json_file_path, should_recolor)
 
