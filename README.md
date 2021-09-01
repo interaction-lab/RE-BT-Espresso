@@ -1,6 +1,4 @@
-# Behavior Tree Robot Action Policy from SAR WoZ Interaction Data
-
-##### This repository was made to facilitate the investigations in developing behavior tree robot action policy from Socially Assistive Robot (SAR) Wizard of Oz (WoZ) Interaction Data. This pipeline processes logged data from a WoZ interaction and generates behavior trees, along with data on the accuracy of the conversion process. These behavior trees are ready to be used alongside the BehaviorTree.CPP library, and redeployed back in the robot.
+# RE:BT-Espresso, Representation Exploitation of BT-Espresso for Behavior Trees Learned from Robot Demonstrations 
 
 IMPORTANT: The repo is not clean in the slightest as it is divulging near deadlines. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `bt_espresso_mod`.
 
@@ -11,13 +9,16 @@ IMPORTANT: The repo is not clean in the slightest as it is divulging near deadli
 3. Fix [graphviz error via package install](#graphviz-pip-error)
 4. Fix [pyeda library error](#pyeda-literal-error)
 
-## Running:
-- For running the builder etc, navigate to `BehaviorTreeDev/`
-    - BehaviorTreePipeline: `python3 run_pipeline.py -c example/config.json`
-    - Recoloring Output: `python3 color_bt_trees.py -d .` (replace `.` with any parent directory of the output, example defaults to the `output` directory)
-- For simulating data, navigate to `DataSim`
-    1. `python3 bt_sim.py path/to/tree/config/you/want` (likely under `/config`)
-    2. Run it on the behavior tree builder, recreate a config based on `BehaviorTreeDev/example/config.json` with conrrect output data paths, variables, etc.
+## Running Experiments
+In the top level directory, to run all experiments:
+`python3 run_experiments.py [-r, --recolor] [-c --config]`
+where `-r` is an optional flag to also re-color the trees and `-c` allows a specification of a single experiment. By default, all experiments are run.
+
+## Experiment Pipeline
+1. DataSim
+2. BuildBT
+3. [OPTIONAL] ReColorBT
+4. RunResults
 
 
 ## Dependencies
