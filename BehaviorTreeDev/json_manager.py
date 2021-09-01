@@ -24,6 +24,10 @@ class JsonManager:
 	def __init__(self, json_file_path):
 		self.v_json_object = json.load(open(json_file_path))
 
+	def write_out_json_to_file(self, output_path):
+		with open(output_path, 'w') as outfile:
+			json.dump(self.v_json_object, outfile)
+
 	def get_feature_columns(self):
 		return self.v_json_object[JSON_FEATURE_COLUMNS_KEY]
 
@@ -35,6 +39,9 @@ class JsonManager:
 
 	def get_csv_path(self):
 		return str(self.v_json_object[JSON_CSV_PATH_KEY])
+	
+	def set_csv_path(self, new_path):
+		self.v_json_object[JSON_CSV_PATH_KEY] = new_path
 
 	def get_normalized_path(self):
 		return str(self.v_json_object[JSON_NORMALIZED_PATH_KEY])

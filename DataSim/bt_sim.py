@@ -11,15 +11,15 @@ def run_sim(json_file_path_and_name):
     print("Start Sim")
     pt.logging.level = pt.logging.Level.WARN
     pt.blackboard.Blackboard.enable_activity_stream(100)
-    json_filename = os.path.basename(json_file_path_and_name)
-    output_path = os.getcwd() + "/" + g.global_output_folder + json_filename.replace(".json", "") + "/"
+    json_filename_wo_extension = os.path.basename(json_file_path_and_name).replace(".json", "")
+    output_path = os.getcwd() + "/" + g.global_output_folder + json_filename_wo_extension + "/"
     g.remove_folder_if_exists(output_path)
     os.makedirs(output_path)
 
     # autofind json 
     with open(json_file_path_and_name) as rc:
         r = Tree_Basic(**json.loads(rc.read()))
-        r.render_tree(output_path)
+        r.render_tree(output_path, json_filename_wo_extension)
 
     s = Student()
     w = World()
@@ -35,7 +35,7 @@ def run_sim(json_file_path_and_name):
             w.update()
             r.b_tree.tick()
     print(f"Simulation completed for {json_file_path_and_name}")
-    return output_path
+    return output_path, json_filename_wo_extension
 
 def main():
     run_sim(sys.argv[1])

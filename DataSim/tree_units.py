@@ -30,8 +30,8 @@ class Tree():
     def define_tree(self):
         pass
         
-    def render_tree(self, output_path):
-        pt.display.render_dot_tree(self.root, target_directory=output_path)
+    def render_tree(self, output_path, n_in):
+        pt.display.render_dot_tree(self.root, target_directory=output_path, name=n_in)
         
 class Tree_Basic(Tree):
     def __init__(self, type_, child_list):
