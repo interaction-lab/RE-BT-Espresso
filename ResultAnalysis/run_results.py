@@ -8,9 +8,6 @@ import json
 from pathlib import Path
 
 
-num_unique_nodes_key = "num_unique_nodes"
-total_nodes_key = "total_nodes" # move these out to the functions?
-
 def parse_args():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-p", "--pathtodot", required = True, help = "Path to dot file")
@@ -38,11 +35,24 @@ def run_result(path_to_tree_dot_file, results_dict):
 	print(f"Start results on generated {path_to_tree_dot_file}")
 	graph = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(path_to_tree_dot_file)[0])
 	generate_results(path_to_tree_dot_file, results_dict, graph)
-	
+
+
+def is_generated(path):
+	return "Pruning" in path
+
+# possibly move these out to functions, will leave here for now for convenience
+is_generated_key = "is_generated"
+num_unique_nodes_key = "num_unique_nodes"
+total_nodes_key = "total_nodes" 
+unique_node_freq_key = "unique_node_freq"
+# assumes key is the full path for `is_generated`
 def generate_results(key, results_dict, graph):
 	results_dict[key] = dict()
+	results_dict[key][is_generated_key] = is_generated(key)
 	results_dict[key][num_unique_nodes_key] =  nh.num_unique_nodes(graph)
 	results_dict[key][total_nodes_key] = nh.total_num_nodes(graph)
+	results_dict[key][unique_node_freq_key] = nh.get_freq_unique_node_dict(graph)
+	
 
 def write_results(output_path, results_filename, results_dict):
 	results_path = os.path.dirname(output_path) + "/" + results_filename
