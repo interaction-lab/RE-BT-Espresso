@@ -20,7 +20,7 @@ regex_dict = {
         RE_NOTHINGORWHITESPACESTART + SEQUENCE + RE_ANY : SEQUENCE,
         RE_NOTHINGORWHITESPACESTART + SELECTOR + RE_ANY : SELECTOR,
         RE_NOTHINGORWHITESPACESTART + "\|\|" + RE_ANY : PARALLEL,
-        RE_NOTHINGORWHITESPACESTART + "A->" + RE_ANY : ACTION,
+        "(" + RE_NOTHINGORWHITESPACESTART + "A->" + RE_ANY + "|" + RE_NOTHINGORWHITESPACESTART + "action" + RE_ANY + ")" : ACTION,
         RE_NOTHINGORWHITESPACESTART + INVERTER + RE_ANY : INVERTER,
         RE_NOTHINGORWHITESPACESTART + "Selector \/ Parallel Replaceable" + RE_ANY : PARSEL,
         RE_NOTHINGORWHITESPACESTART + "Repeat<>" + RE_ANY : REPEAT,
@@ -46,7 +46,7 @@ def get_freq_unique_node_dict(graph):
 		for reg_pat, node_type in node_regex.items():
 			if reg_pat == "*" or re.search(reg_pat, node):
 				freq_dict[node_type] += 1
-				continue # go to next node
+				break # go to next node
 	return freq_dict
 
 def num_unique_nodes(graph):

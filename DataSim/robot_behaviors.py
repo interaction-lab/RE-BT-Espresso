@@ -36,7 +36,7 @@ class Condition(pt.behaviour.Behaviour):
 
 class Action(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct):
-        super().__init__(name="A->" + name)
+        super().__init__(name=name)
         self.p_correct = p_correct
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="success", access=pt.common.Access.WRITE)
