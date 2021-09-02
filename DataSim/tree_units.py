@@ -34,11 +34,12 @@ class Tree():
         pt.display.render_dot_tree(self.root, target_directory=output_path, name=n_in)
         
 class Tree_Basic(Tree):
-    def __init__(self, type_, child_list):
+    def __init__(self, type_, name, child_list):
         self.child_list = child_list
         self.type_ = type_
         self.writer = None
         self.storage = None
+        self.name = name
         self.composite_set = {
             "selector",
             "sequence",
@@ -47,32 +48,63 @@ class Tree_Basic(Tree):
         super().__init__()
         
     def define_tree(self):
-        self.recursive_tree_build(self.root, self.type_, self.child_list)
+        self.build_tree(self.root, self.type_, self.name, self.child_list)
         self.b_tree = pt.trees.BehaviourTree(self.root)
         
-    def recursive_tree_build(self, root, type_, c_list):
-        composite_node = None
-
-        if type_ == "selector":
-            composite_node = pt.composites.Selector(name="Selector")
-        elif type_ == "sequence":
-            composite_node = pt.composites.Sequence(name="Sequence")
-        elif type_ == "parallel":
-            composite_node = pt.composites.Parallel(name="|| Parallel")
-        
+    def build_tree(self, root, type_, name_, c_list):
+        composite_node = self.create_composite(type_, name_)
         if composite_node:
-            if root:
-                root.add_child(composite_node)
-            else:
-                self.root = composite_node
-            root = composite_node
-
+            root = self.add_composite_to_root(root, composite_node)
         for child in c_list:
-            if child["inverted"]:
-                root.add_child(pt.decorators.Inverter(name="Inverter_"+child["name"]))
-            if child["type_"] in self.composite_set:
-                self.recursive_tree_build(root, child["type_"], child["child_list"])
-            elif child["type_"] == "action":
-                root.add_child(Action(child["name"], child["p_success"]))
-            elif child["type_"] == "condition":
-                root.add_child(Condition(child["name"], child["p_success"], child['target_state'], child["threshold"]))
+            self.add_child_to_root(root, child)
+
+
+    def add_child_to_root(self, root, child):
+        if child["inverted"]:
+            root.add_child(pt.decorators.Inverter(name="Inverter_"+child["name"]))
+        if child["type_"] in self.composite_set:
+            self.build_tree(root, child["type_"], child['name'], child["child_list"])
+        elif child["type_"] == "action":
+            root.add_child(Action(child["name"], child["p_success"]))
+        elif child["type_"] == "condition":
+            root.add_child(Condition(child["name"], child["p_success"], child['target_state'], child["threshold"]))
+
+    def add_composite_to_root(self, root, composite_node):
+        if root:
+            root.add_child(composite_node)
+        else:
+            self.root = composite_node
+        root = composite_node
+        return root
+
+    def create_composite(self, type_, name):
+        composite_node = None
+        if type_ == "selector":
+            composite_node = self.create_selector_node(name)
+        elif type_ == "sequence":
+            composite_node = self.create_sequence_node(name)
+        elif type_ == "parallel":
+            composite_node = self.create_parallel_node(name)
+        return composite_node
+
+    def create_selector_node(self, name):
+        if "Selector" not in name:
+            if "selector" in name:
+                name = name.replace("selector", "Selector")
+            else:
+                name = "Selector_" + name
+        return pt.composites.Selector(name=name)
+
+    def create_sequence_node(self, name):
+        if "Sequence" not in name:
+            if "sequence" in name:
+                name = name.replace("sequence", "Sequence")
+            else:
+                name = "Sequence_" + name
+        return pt.composites.Sequence(name=name)
+
+
+    def create_parallel_node(self, name):
+        if "||" not in name:
+            name = "||_" + name
+        return pt.composites.Parallel(name=name)

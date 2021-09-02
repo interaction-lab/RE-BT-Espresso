@@ -38,6 +38,8 @@ class Action(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct):
         super().__init__(name=name)
         self.p_correct = p_correct
+        if "action" not in self.name:
+            self.name = "action_" + self.name # needed for results
         self.blackboard = self.attach_blackboard_client(name=self.name)
         self.blackboard.register_key(key="success", access=pt.common.Access.WRITE)
         self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)

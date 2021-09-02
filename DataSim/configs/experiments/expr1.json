@@ -1,5 +1,6 @@
 {
     "type_": "parallel",
+    "name" : "root",
     "child_list": [
         {
             "name": "sequence_1",
