@@ -39,6 +39,7 @@ def parse_args():
 	should_recolor = "recolor" in args and args["recolor"] != None and args['recolor']
 
 	return json_file_path, should_recolor
+
 def main():
 	"""Runs the simulator and full pipeline end to end
 	'-c, --config' - [optional] Path to json config
@@ -62,7 +63,9 @@ def run_experiment(base_pipeline_config, experiment_file, should_recolor):
 	pipeline_config_path = write_pipeline_config(base_pipeline_config, sim_data_output_path, sim_data_output_path + "output")
 	bt_tree_filepath_list = run_pipeline.run_pipeline(pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log")
 	# TODO: decide which tree we care about, right now will be the tree with no pruning, rest are in the bt_tree_filepath_list
-	run_results.run_result(bt_tree_filepath_list[0] , sim_data_output_path + sim_tree_name + ".dot") # generated tree, simulated tree
+	simulated_tree_file = sim_data_output_path + sim_tree_name + ".dot"
+	bt_tree_filepath_list.insert(0, simulated_tree_file)
+	run_results.run_result_list(bt_tree_filepath_list)
 	
 
 def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):

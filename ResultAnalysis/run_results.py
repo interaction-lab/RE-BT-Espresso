@@ -5,63 +5,55 @@ import pydot
 import networkx as nx
 import node_helpers as nh
 import json
+from pathlib import Path
 
 
-results_filename = "results.json"
-gen_key = "generated"
-sim_key = "simulated"
-tree_keys = {
-	gen_key,
-	sim_key
-}
 num_unique_nodes_key = "num_unique_nodes"
-total_nodes_key = "total_nodes"
+total_nodes_key = "total_nodes" # move these out to the functions?
 
 def parse_args():
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-g", "--generated", required = True, help = "Path to generated tree")
-	ap.add_argument("-s", "--simulated", required = True, help = "Path to simulated tree")
+	ap.add_argument("-p", "--pathtodot", required = True, help = "Path to dot file")
 	args = vars(ap.parse_args())
 
-	generated_path = simulated_path = None
-	if "generated" in args and args["generated"] != None:
-		generated_path = args["generated"]
-	if "simulated" in args and args["simulated"] != None:
-		simulated_path = args["simulated"]
+	path_to_dot = None
+	if "pathtodot" in args and args["pathtodot"] != None:
+		path_to_dot = args["pathtodot"]
 
-	return generated_path, simulated_path
+	return path_to_dot
 
-def run_result(generated_tree_path, simulated_tree_path):
-	print(f"Start results on generated {generated_tree_path} from simulated {simulated_tree_path}")
-	global gen_key, sim_key, tree_keys, num_unique_nodes
+
+def run_result_list(paths):
 	results_dict = dict()
-	graph_dict = dict()
-	graph_dict[gen_key] = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(generated_tree_path)[0])
-	graph_dict[sim_key] = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(simulated_tree_path)[0])
+	for path in paths:
+		run_result(path, results_dict)
+	
+	# first path in list is simulated
+	basename = os.path.basename(paths[0]).replace(".dot", "")
+	results_filename = basename + "_results.json" 
+	results_path = "./results/"
+	write_results(results_path, results_filename, results_dict)
 
-	generate_results(results_dict, graph_dict)
-	write_results(simulated_tree_path, results_dict)
+def run_result(path_to_tree_dot_file, results_dict):
+	print(f"Start results on generated {path_to_tree_dot_file}")
+	graph = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(path_to_tree_dot_file)[0])
+	generate_results(path_to_tree_dot_file, results_dict, graph)
+	
+def generate_results(key, results_dict, graph):
+	results_dict[key] = dict()
+	results_dict[key][num_unique_nodes_key] =  nh.num_unique_nodes(graph)
+	results_dict[key][total_nodes_key] = nh.total_num_nodes(graph)
 
-def write_results(simulated_tree_path, results_dict):
-	results_path = os.path.dirname(simulated_tree_path) + "/" + results_filename
+def write_results(output_path, results_filename, results_dict):
+	results_path = os.path.dirname(output_path) + "/" + results_filename
+	Path(os.path.dirname(output_path)).mkdir(parents=True, exist_ok=True)
 	with open(results_path, 'w') as outfile:
 		json.dump(results_dict, outfile)
-
-
-def generate_results(results_dict, graph_dict):
-	for key in tree_keys:
-		results_dict[key] = dict()
-		results_dict[key][num_unique_nodes_key] =  nh.num_unique_nodes(graph_dict[key])
-		results_dict[key][total_nodes_key] = nh.total_num_nodes(graph_dict[key])
-			
+	print(f"Results output to {results_path}")
 
 def main():
-	generated_path, simulated_path = parse_args()
-	run_result(generated_path, simulated_path)
+	path_to_dot = parse_args()
+	run_result(path_to_dot)
 
 if __name__ == '__main__':
 	main()
-
-
-# CONVENIENCE COMMAND (used for now before abstarcting out over file system):
-#  python3 run_results.py -g ../sim_data/expr0/output/pipeline_output/5_kFold_5_maxDepth/Pruning/Pruning_0_0/behaviortree.dot -s ../sim_data/expr0/expr0.dot
