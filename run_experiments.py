@@ -1,7 +1,10 @@
 # global imports
 import argparse
+from multiprocessing import process
 import sys, os
 import glob
+import multiprocessing as mp
+from joblib import Parallel, delayed
 
 # relative file paths
 sim_folder = "DataSim"
@@ -55,8 +58,14 @@ def main():
 		run_all_experiments(base_pipeline_config, should_recolor)
 
 def run_all_experiments(base_pipeline_config, should_recolor):
-    for config_file in glob.glob(experiments_folder + "/*.json"):
-       run_experiment(base_pipeline_config, config_file, should_recolor)
+	processes = []
+	for config_file in glob.glob(experiments_folder + "/*.json"):
+		p = mp.Process(target=run_experiment, args=(base_pipeline_config, config_file, should_recolor))
+		processes.append(p)
+		p.start()
+	for process in processes:
+		process.join()
+	print("Finished all experiments")
 
 def run_experiment(base_pipeline_config, experiment_file, should_recolor):
 	sim_data_output_path, sim_tree_name = bt_sim.run_sim(experiment_file)	
