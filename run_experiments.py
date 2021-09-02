@@ -29,19 +29,20 @@ import run_results
 
 json_file_path = "config.json"
 output_file_path = "output.log"
-should_recolor = False
+should_recolor = run_multiprocess = False
 
 def parse_args():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-c", "--config", required = False, help = "Name of experiment config json, without this flag it will recurse though all experiments")
 	ap.add_argument("-r", "--recolor", required = False, action='store_true', help = "Run recoloring of all trees")
+	ap.add_argument("-m", "--multiprocess", required = False, action='store_true', help = "Run experiments in ||")
 	args = vars(ap.parse_args())
 	json_file_path = None
 	if "config" in args and args["config"] != None:
 		json_file_path = args["config"]
 	should_recolor = "recolor" in args and args["recolor"] != None and args['recolor']
-
-	return json_file_path, should_recolor
+	run_multiprocess = "multiprocess" in args and args["multiprocess"] != None and args['multiprocess']
+	return json_file_path, should_recolor, run_multiprocess
 
 def main():
 	"""Runs the simulator and full pipeline end to end
@@ -51,20 +52,25 @@ def main():
 	global experiments_folder
 	base_pipeline_config = "DataSim/configs/base_pipeline_config.json" # this should not be moved
 
-	single_experiment_filename, should_recolor = parse_args()
+	single_experiment_filename, should_recolor, run_multiprocess = parse_args()
 	if single_experiment_filename:
 		run_experiment(base_pipeline_config, experiments_folder + "/" + single_experiment_filename, should_recolor)
 	else:
-		run_all_experiments(base_pipeline_config, should_recolor)
+		run_all_experiments(base_pipeline_config, should_recolor, run_multiprocess)
 
-def run_all_experiments(base_pipeline_config, should_recolor):
-	processes = []
-	for config_file in glob.glob(experiments_folder + "/*.json"):
-		p = mp.Process(target=run_experiment, args=(base_pipeline_config, config_file, should_recolor))
-		processes.append(p)
-		p.start()
-	for process in processes:
-		process.join()
+def run_all_experiments(base_pipeline_config, should_recolor, run_multiprocess):
+	if run_multiprocess:
+		processes = []
+		for config_file in glob.glob(experiments_folder + "/*.json"):
+			p = mp.Process(target=run_experiment, args=(base_pipeline_config, config_file, should_recolor))
+			processes.append(p)
+			p.start()
+		for process in processes:
+			process.join()
+	else:
+		for config_file in glob.glob(experiments_folder + "/*.json"):
+			run_experiment(base_pipeline_config, config_file, should_recolor)
+			
 	print("Finished all experiments")
 
 def run_experiment(base_pipeline_config, experiment_file, should_recolor):
