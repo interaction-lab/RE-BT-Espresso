@@ -45,13 +45,25 @@ is_generated_key = "is_generated"
 num_unique_nodes_key = "num_unique_nodes"
 total_nodes_key = "total_nodes" 
 unique_node_freq_key = "unique_node_freq"
+num_sub_trees_key = "num_sub_trees"
+graph_sim_key = "graph_similarity"
+
+simulated_graph = None
 # assumes key is the full path for `is_generated`
 def generate_results(key, results_dict, graph):
+	global simulated_graph
 	results_dict[key] = dict()
 	results_dict[key][is_generated_key] = is_generated(key)
 	results_dict[key][num_unique_nodes_key] =  nh.num_unique_nodes(graph)
 	results_dict[key][total_nodes_key] = nh.total_num_nodes(graph)
+	results_dict[key][num_sub_trees_key] = nh.get_num_subtrees_from_root(graph)
 	results_dict[key][unique_node_freq_key] = nh.get_freq_unique_node_dict(graph)
+	if simulated_graph:
+		results_dict[key][graph_sim_key] = nh.find_graph_sim(graph, simulated_graph)
+	else:
+		results_dict[key][graph_sim_key] = 0
+		simulated_graph = graph
+
 	
 
 def write_results(output_path, results_filename, results_dict):

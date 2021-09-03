@@ -1,4 +1,7 @@
 import re
+import networkx as nx
+import time
+import threading
 
 SEQUENCE = "Sequence"
 SELECTOR = "Selector"
@@ -54,3 +57,42 @@ def num_unique_nodes(graph):
 
 def total_num_nodes(graph):
     return len(graph.nodes)
+
+def get_root_node(graph):
+    return [n for n, d in graph.in_degree() if d == 0][0]
+
+def get_num_subtrees_from_root(graph):
+    return len(graph.edges(get_root_node(graph)))
+
+
+def get_subtree_graph(graph, sub_tree_node):
+    return nx.bfs_tree(graph, source=sub_tree_node, reverse=False)
+
+def find_graph_sim(generated_graph, sim_graph):
+    # define node match function
+    # define edge match function
+    gen_root = get_root_node(generated_graph)
+    sim_root = get_root_node(sim_graph)
+
+    gen_subtrees = [get_subtree_graph(generated_graph, edges[1]) for edges in generated_graph.out_edges(gen_root)]
+    sim_subtrees = [get_subtree_graph(sim_graph, edges[1]) for edges in sim_graph.out_edges(sim_root)]
+
+    # possibly split all expriment sub_trees as well
+
+    max_iters = 3 # tunable
+    min_score = gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters)
+    return min_score
+
+def gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters):
+    min_score = None
+    for g_tree in gen_subtrees:
+        i = 0
+        for score in nx.optimize_graph_edit_distance(g_tree, sim_graph):
+            if min_score == None or score < min_score:
+                min_score = score
+            i += 1
+            if i == max_iters:
+                break
+    return min_score
+
+
