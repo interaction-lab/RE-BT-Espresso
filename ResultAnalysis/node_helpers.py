@@ -21,7 +21,7 @@ RE_ANY = "*"
 #TODO: should pull some regex constants from the pipeline constants, hard coded for now
 regex_dict = {
         RE_NOTHINGORWHITESPACESTART + INVERTER + RE_ANY : INVERTER,
-        RE_NOTHINGORWHITESPACESTART + "Selector \/ Parallel Replaceable" + RE_ANY : PARSEL,
+        RE_NOTHINGORWHITESPACESTART + "\|\| \/ Selector" + RE_ANY : PARSEL,
         RE_NOTHINGORWHITESPACESTART + "Repeat<>" + RE_ANY : REPEAT,
         RE_NOTHINGORWHITESPACESTART + LATSEQ + RE_ANY : LATSEQ, # must be before Sequence, too lazy to figure out the regex
         RE_NOTHINGORWHITESPACESTART + SEQUENCE + RE_ANY : SEQUENCE,
@@ -79,7 +79,7 @@ def find_graph_sim(generated_graph, sim_graph):
 
     # possibly split all expriment sub_trees as well
 
-    max_iters = 3 # tunable
+    max_iters = 3 # tunable, possibly look at timeouts
 
     for tree in gen_subtrees:
         name_dict = dict(zip(tree.nodes, tree.nodes))
@@ -88,23 +88,23 @@ def find_graph_sim(generated_graph, sim_graph):
     min_score = gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters)
     return min_score
 
-
-
-
 # make it so that we rename everything from each first
 # DONE: expr conditionals should have same name as env etc
 # DONE: LAT Sequence, sequence, selector, ||, conditional, action
 # TODO: remove all inverters
-# TODO: repeaters
-# TODO: sel par replaceable
+# TODO: repeaters -> I think I should just do the following:
+#                   1) add Repeat<> in each of the expr
+#                   2) special case that in the sim for behavior to repeat a few times
+# TODO: sel par replaceable -> possibly move this to say || in it and Selector specifically? or special case in sim
+#                              I think special casing this in the BT sim and having both actions go below... idk
 
 # match everything but invert conditionsal, should just remove from graph
 # sequence
 # selector
 # par selector
 
-# removes all space from sim_node
-pattern = re.compile('[\W_]+')
+# removes all everyhting except[alphanumeric, '|']
+pattern = re.compile('[^A-Za-z0-9\|]+')
 def custom_node_match(gen_node, sim_node):
     return pattern.sub("", sim_node['label']) in gen_node['label']
 
