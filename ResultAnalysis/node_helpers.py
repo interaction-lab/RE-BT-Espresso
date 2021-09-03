@@ -21,10 +21,10 @@ RE_ANY = "*"
 #TODO: should pull some regex constants from the pipeline constants, hard coded for now
 regex_dict = {
         RE_NOTHINGORWHITESPACESTART + INVERTER + RE_ANY : INVERTER,
-        RE_NOTHINGORWHITESPACESTART + "\|\| \/ Selector" + RE_ANY : PARSEL,
         RE_NOTHINGORWHITESPACESTART + "Repeat<>" + RE_ANY : REPEAT,
         RE_NOTHINGORWHITESPACESTART + LATSEQ + RE_ANY : LATSEQ, # must be before Sequence, too lazy to figure out the regex
         RE_NOTHINGORWHITESPACESTART + SEQUENCE + RE_ANY : SEQUENCE,
+		RE_NOTHINGORWHITESPACESTART + "\|\| \/ Selector" + RE_ANY : PARSEL, # must be before || and Selector
         RE_NOTHINGORWHITESPACESTART + SELECTOR + RE_ANY : SELECTOR,
         RE_NOTHINGORWHITESPACESTART + "\|\|" + RE_ANY : PARALLEL,
         "(" + RE_NOTHINGORWHITESPACESTART + "A->" + RE_ANY + "|" + RE_NOTHINGORWHITESPACESTART + "action" + RE_ANY + ")" : ACTION,
