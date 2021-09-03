@@ -80,14 +80,39 @@ def find_graph_sim(generated_graph, sim_graph):
     # possibly split all expriment sub_trees as well
 
     max_iters = 3 # tunable
+
+    for tree in gen_subtrees:
+        name_dict = dict(zip(tree.nodes, tree.nodes))
+        nx.set_node_attributes(tree,name_dict,'label')
+        
     min_score = gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters)
     return min_score
+
+
+
+
+# make it so that we rename everything from each first
+# DONE: expr conditionals should have same name as env etc
+# DONE: LAT Sequence, sequence, selector, ||, conditional, action
+# TODO: remove all inverters
+# TODO: repeaters
+# TODO: sel par replaceable
+
+# match everything but invert conditionsal, should just remove from graph
+# sequence
+# selector
+# par selector
+
+# removes all space from sim_node
+pattern = re.compile('[\W_]+')
+def custom_node_match(gen_node, sim_node):
+    return pattern.sub("", sim_node['label']) in gen_node['label']
 
 def gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters):
     min_score = None
     for g_tree in gen_subtrees:
         i = 0
-        for score in nx.optimize_graph_edit_distance(g_tree, sim_graph):
+        for score in nx.optimize_graph_edit_distance(g_tree, sim_graph, node_match=custom_node_match):
             if min_score == None or score < min_score:
                 min_score = score
             i += 1

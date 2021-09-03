@@ -67,7 +67,8 @@ class Tree_Basic(Tree):
         elif child["type_"] == "action":
             root.add_child(Action(child["name"], child["p_success"]))
         elif child["type_"] == "condition":
-            root.add_child(Condition(child["name"], child["p_success"], child['target_state'], child["threshold"]))
+            # made name target state for easier matching
+            root.add_child(Condition(child["target_state"], child["p_success"], child['target_state'], child["threshold"]))
 
     def add_composite_to_root(self, root, composite_node):
         if root:
@@ -93,6 +94,7 @@ class Tree_Basic(Tree):
                 name = name.replace("selector", "Selector")
             else:
                 name = "Selector_" + name
+            name = "Selector"
         return pt.composites.Selector(name=name)
 
     def create_sequence_node(self, name):
@@ -101,10 +103,12 @@ class Tree_Basic(Tree):
                 name = name.replace("sequence", "Sequence")
             else:
                 name = "Sequence_" + name
+            name = "Sequence"
         return pt.composites.Sequence(name=name)
 
 
     def create_parallel_node(self, name):
         if "||" not in name:
             name = "||_" + name
+        name = "||"
         return pt.composites.Parallel(name=name)
