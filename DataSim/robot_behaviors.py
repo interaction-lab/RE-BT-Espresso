@@ -45,15 +45,10 @@ class Action(pt.behaviour.Behaviour):
         self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)
             
     def update(self):
-        if random.random() <= self.p_correct:
-            status = self.do_act()
-            g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
-            return status
-        else:
-            status = self.fail_act()
-            g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
-            return status
-    
+        status = self.do_act() if random.random() <= self.p_correct else self.fail_act()
+        g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
+        return status
+
     def do_act(self):
         self.blackboard.robot_action = self.name
         self.blackboard.success = True

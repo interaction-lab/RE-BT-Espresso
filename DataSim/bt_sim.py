@@ -30,10 +30,10 @@ def run_sim(json_file_path_and_name):
         g.csv_writer.writeheader()
 
         for t in range(g.num_rows):
-            g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
             s.update()
             w.update()
-            r.b_tree.tick()
+            r.b_tree.tick() # actions write the rows due to "concurrent" tick nature
+            
     print(f"Simulation completed for {json_file_path_and_name}")
     return output_path, json_filename_wo_extension
 
