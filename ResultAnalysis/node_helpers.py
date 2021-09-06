@@ -79,7 +79,7 @@ def find_graph_sim(generated_graph, sim_graph):
 
     # possibly split all expriment sub_trees as well
 
-    max_iters = 3 # tunable, possibly look at timeouts
+    max_iters = 1 # tunable, possibly look at timeouts
 
     for tree in gen_subtrees:
         name_dict = dict(zip(tree.nodes, tree.nodes))
@@ -92,11 +92,11 @@ def find_graph_sim(generated_graph, sim_graph):
 # DONE: expr conditionals should have same name as env etc
 # DONE: LAT Sequence, sequence, selector, ||, conditional, action
 # TODO: remove all inverters
+# TODO: remove the LAT conditions in the trees
 # TODO: repeaters -> I think I should just do the following:
 #                   1) add Repeat<> in each of the expr
 #                   2) special case that in the sim for behavior to repeat a few times
-# TODO: sel par replaceable -> possibly move this to say || in it and Selector specifically? or special case in sim
-#                              I think special casing this in the BT sim and having both actions go below... idk
+# TODO: sel par replaceable -> special case this in sim similar to repeaters
 
 # match everything but invert conditionsal, should just remove from graph
 # sequence

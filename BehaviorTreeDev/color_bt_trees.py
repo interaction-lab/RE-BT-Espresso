@@ -33,7 +33,7 @@ def run_color(directory):
 	lat_seq_name = constants.LAT_SEQ_NAME + "*"
 	lat_fillcolor = "#39FF14"
 
-	par_replace_sel_name = constants.SEL_PAR_REPLACEABLE_NAME + "*"
+	par_replace_sel_name = "\|\| \/ Selector" + "*"
 	par_replace_sel_fillcolor = "#FF1818"
 
 	action_replace_name = constants.ACTION_NODE_STR + "*"
