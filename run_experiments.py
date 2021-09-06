@@ -80,7 +80,7 @@ def run_experiment(base_pipeline_config, experiment_file, should_recolor):
 	# TODO: decide which tree we care about, right now will be the tree with no pruning, rest are in the bt_tree_filepath_list
 	simulated_tree_file = sim_data_output_path + sim_tree_name + ".dot"
 	bt_tree_filepath_list.insert(0, simulated_tree_file)
-	run_results.run_result_list(bt_tree_filepath_list)
+	run_results.run_result_list(bt_tree_filepath_list[:-1]) # remove the tree with nothing in it / final prune
 	
 
 def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):

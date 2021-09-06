@@ -46,7 +46,7 @@ class Action(pt.behaviour.Behaviour):
             
     def update(self):
         status = self.do_act() if random.random() <= self.p_correct else self.fail_act()
-        g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
+        g.csv_writer.writerow(pt.blackboard.Blackboard.storage) # how to deal with repeaters....
         return status
 
     def do_act(self):

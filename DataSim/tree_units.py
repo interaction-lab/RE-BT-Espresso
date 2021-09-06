@@ -1,6 +1,8 @@
 import py_trees as pt
 import random
 import sys
+
+from py_trees import composites
 from globals import robot_vars, env_vars, student_vars
 from robot_behaviors import*
 
@@ -43,7 +45,9 @@ class Tree_Basic(Tree):
         self.composite_set = {
             "selector",
             "sequence",
-            "parallel"
+            "parallel",
+            "repeater",
+            "parsel"
         }
         super().__init__()
         
@@ -60,8 +64,9 @@ class Tree_Basic(Tree):
 
 
     def add_child_to_root(self, root, child):
-        if child["inverted"]:
+        if "inverted" in child and child["inverted"]:
             root.add_child(pt.decorators.Inverter(name="Inverter_"+child["name"]))
+
         if child["type_"] in self.composite_set:
             self.build_tree(root, child["type_"], child['name'], child["child_list"])
         elif child["type_"] == "action":
@@ -86,6 +91,10 @@ class Tree_Basic(Tree):
             composite_node = self.create_sequence_node(name)
         elif type_ == "parallel":
             composite_node = self.create_parallel_node(name)
+        elif type_ == "repeater":
+            composite_node = self.create_repeater_node(name)
+        elif type_ == "parsel":
+            composite_node = self.create_par_sel_node(name)
         return composite_node
 
     def create_selector_node(self, name):
@@ -94,7 +103,7 @@ class Tree_Basic(Tree):
                 name = name.replace("selector", "Selector")
             else:
                 name = "Selector_" + name
-            name = "Selector"
+            name = "Selector" #hardcoded for analysis
         return pt.composites.Selector(name=name)
 
     def create_sequence_node(self, name):
@@ -103,12 +112,18 @@ class Tree_Basic(Tree):
                 name = name.replace("sequence", "Sequence")
             else:
                 name = "Sequence_" + name
-            name = "Sequence"
+            name = "Sequence" #hardcoded for analysis
         return pt.composites.Sequence(name=name)
 
 
     def create_parallel_node(self, name):
         if "||" not in name:
             name = "||_" + name
-        name = "||"
+        name = "||" #hardcoded for analysis
         return pt.composites.Parallel(name=name)
+
+    def create_repeater_node(self, name):
+        return pt.composites.Sequence(name="Repeat<>")
+
+    def create_par_sel_node(self, name):
+        return pt.composites.Parallel(name="|| / Selector")
