@@ -613,7 +613,7 @@ def get_cycles_node_name():
 
 def find_all_paths(outgoing_edge_dict):
     if len(outgoing_edge_dict) == 0:
-        return [], [], []
+        return [], []
 
     source_nodes = []
     end_nodes = []

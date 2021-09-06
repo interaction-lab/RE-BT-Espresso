@@ -33,7 +33,7 @@ class Condition(pt.behaviour.Behaviour):
         else:
             return pt.common.Status.SUCCESS
         
-
+write_this_turn = True
 class Action(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct):
         super().__init__(name=name)
@@ -45,9 +45,14 @@ class Action(pt.behaviour.Behaviour):
         self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)
             
     def update(self):
+        global write_this_turn
+
         status = self.do_act() if random.random() <= self.p_correct else self.fail_act()
-        g.csv_writer.writerow(pt.blackboard.Blackboard.storage) # how to deal with repeaters....
-        return status
+        write_this_turn = random.random() > 0.4
+        if write_this_turn:
+            g.csv_writer.writerow(pt.blackboard.Blackboard.storage) # how to deal with repeaters....
+            return status
+        return pt.common.Status.RUNNING
 
     def do_act(self):
         self.blackboard.robot_action = self.name
