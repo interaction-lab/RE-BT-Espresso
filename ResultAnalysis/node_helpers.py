@@ -69,8 +69,6 @@ def get_subtree_graph(graph, sub_tree_node):
     return nx.bfs_tree(graph, source=sub_tree_node, reverse=False)
 
 def find_graph_sim(generated_graph, sim_graph):
-    # define node match function
-    # define edge match function
     gen_root = get_root_node(generated_graph)
     sim_root = get_root_node(sim_graph)
 
@@ -78,35 +76,45 @@ def find_graph_sim(generated_graph, sim_graph):
     sim_subtrees = [get_subtree_graph(sim_graph, edges[1]) for edges in sim_graph.out_edges(sim_root)]
 
     # possibly split all expriment sub_trees as well
-
     max_iters = 1 # tunable, possibly look at timeouts
+    clean_graphs_for_ged(gen_subtrees)
+    add_label_to_gen_trees(gen_subtrees)
+    min_score = gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters)
+    return min_score
 
+def add_label_to_gen_trees(gen_subtrees):
     for tree in gen_subtrees:
         name_dict = dict(zip(tree.nodes, tree.nodes))
         nx.set_node_attributes(tree,name_dict,'label')
-        
-    min_score = gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters)
-    return min_score
 
 # make it so that we rename everything from each first
 # DONE: expr conditionals should have same name as env etc
 # DONE: LAT Sequence, sequence, selector, ||, conditional, action
-# TODO: remove all inverters
-# TODO: remove the LAT conditions in the trees
+# DONE: remove all inverters
 # TODO: repeaters -> I think I should just do the following:
 #                   1) add Repeat<> in each of the expr
 #                   2) special case that in the sim for behavior to repeat a few times
 # TODO: sel par replaceable -> special case this in sim similar to repeaters
+# TODO: remove the LAT conditions in the trees -> possibly should keep?
 
-# match everything but invert conditionsal, should just remove from graph
-# sequence
-# selector
-# par selector
-
-# removes all everyhting except[alphanumeric, '|']
+# removes all everything except[alphanumeric, '|']
 pattern = re.compile('[^A-Za-z0-9\|]+')
 def custom_node_match(gen_node, sim_node):
     return pattern.sub("", sim_node['label']) in gen_node['label']
+
+
+def clean_graphs_for_ged(gen_subtrees):
+    # remove all inverters
+    for graph in gen_subtrees:
+        for node in list(graph.nodes):
+            if INVERTER in node:
+                # replace node
+                parent_node = list(graph.in_edges(node))[0]
+                for edge in graph.out_edges(node):
+                    graph.add_edge(parent_node, edge[1], data=True)
+                    graph.remove_node(node)
+
+    # remove anything with LAT possibly here
 
 def gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters):
     min_score = None
