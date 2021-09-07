@@ -128,9 +128,6 @@ def gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters):
     min_score = None
     for g_tree in gen_subtrees:
         i = 0
-        print("//////////////")
-        print(g_tree.nodes)
-        print(g_tree.edges)
         for score in nx.optimize_graph_edit_distance(g_tree, sim_graph, node_match=custom_node_match):
             if min_score == None or score < min_score:
                 min_score = score
