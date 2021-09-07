@@ -6,6 +6,7 @@ import pprint
 import copy
 
 max_sub_trees = 3
+max_things_in_composite = 5
 
 num_actions = 5
 action_set = ["action_" + str(i) for i in range(num_actions)]
@@ -66,16 +67,35 @@ def gen_subtree(tree_dict):
 
 pp = pprint.PrettyPrinter(indent=4)
 
-def run_gen():
-	global default_w_child, max_sub_trees, output_path
+def already_genned_tree(tree_dict):
+	global all_tree_dicts
+	for d in all_tree_dicts:
+		if d == tree_dict:
+			print("duplicate")
+			return True
+	return False
+
+def run_gen(expr_ext_name):
+	global default_w_child, max_sub_trees, output_path, all_tree_dicts
 	tree_dict = copy.deepcopy(default_w_child)
 	tree_dict["type_"] = get_root_type()
 	num_sub_trees = random.randint(1, max_sub_trees)
 	for i in range(num_sub_trees):
 		gen_subtree(tree_dict)
 	
-	write_expr(output_path, "expr_test.json", tree_dict)
+	if already_genned_tree(tree_dict): # make sure no duplicates
+		tree_dict = dict()
+		run_gen(expr_ext_name)
+		return # none inf recur
+	
+	all_tree_dicts.append(copy.deepcopy(tree_dict))
+	write_expr(output_path, "expr" + expr_ext_name +".json", tree_dict)
 
+
+all_tree_dicts = []
+def run_gen_all():
+	for i in expr_num:
+		run_gen(str(i))
 
 def write_expr(output_path, filename, tree_dict):
 	tree_path = output_path + "/" + filename
@@ -85,7 +105,7 @@ def write_expr(output_path, filename, tree_dict):
 	print(f"Tree output to {tree_path}")
 
 def main():
-	run_gen()
+	run_gen_all()
 		
 if __name__ == '__main__':
 	main()
