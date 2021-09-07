@@ -87,21 +87,11 @@ def add_label_to_gen_trees(gen_subtrees):
         name_dict = dict(zip(tree.nodes, tree.nodes))
         nx.set_node_attributes(tree,name_dict,'label')
 
-# make it so that we rename everything from each first
-# DONE: expr conditionals should have same name as env etc
-# DONE: LAT Sequence, sequence, selector, ||, conditional, action
-# DONE: remove all inverters
-# DONE: sel par replaceable -> special case this in sim similar to repeaters
-# DONE: remove the LAT conditions in the trees -> possibly should keep?
-# TODO: repeaters -> I think I should just do the following:
-#                   1) add Repeat<> in each of the expr
-#                   2) special case that in the sim for behavior to repeat a few times
 
 # removes all everything except[alphanumeric, '|']
 pattern = re.compile('[^A-Za-z0-9\|]+')
 def custom_node_match(gen_node, sim_node):
     return pattern.sub("", sim_node['label']) in gen_node['label']
-
 
 def clean_graphs_for_ged(gen_subtrees):
     remove_all_inverters(gen_subtrees)
