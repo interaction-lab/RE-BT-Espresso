@@ -56,6 +56,15 @@ pip3 install pandas sklearn graphviz imblearn matplotlib lxml py_trees pyeda net
 sudo apt-get install graphviz
 ```
 
+Results analysis `expr_analysis.ipynb` also depends on the following:
+- [matplotlib](https://matplotlib.org/)
+- [seaborn](https://seaborn.pydata.org/)
+
+Easy copy paste:
+```
+pip3 install matplotlib seaborn
+```
+
 ### Pyeda Literal Error
 There is a bug is Pyeda library that also need to be fixed. See [#17](https://github.com/interaction-lab/BTFromSARDemostration/issues/17) for fix.
 
