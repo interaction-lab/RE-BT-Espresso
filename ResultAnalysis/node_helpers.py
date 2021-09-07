@@ -91,11 +91,11 @@ def add_label_to_gen_trees(gen_subtrees):
 # DONE: expr conditionals should have same name as env etc
 # DONE: LAT Sequence, sequence, selector, ||, conditional, action
 # DONE: remove all inverters
+# DONE: sel par replaceable -> special case this in sim similar to repeaters
+# DONE: remove the LAT conditions in the trees -> possibly should keep?
 # TODO: repeaters -> I think I should just do the following:
 #                   1) add Repeat<> in each of the expr
 #                   2) special case that in the sim for behavior to repeat a few times
-# TODO: sel par replaceable -> special case this in sim similar to repeaters
-# TODO: remove the LAT conditions in the trees -> possibly should keep?
 
 # removes all everything except[alphanumeric, '|']
 pattern = re.compile('[^A-Za-z0-9\|]+')
@@ -104,7 +104,10 @@ def custom_node_match(gen_node, sim_node):
 
 
 def clean_graphs_for_ged(gen_subtrees):
-    # remove all inverters
+    remove_all_inverters(gen_subtrees)
+    remove_all_lat(gen_subtrees)
+
+def remove_all_inverters(gen_subtrees):
     for graph in gen_subtrees:
         for node in list(graph.nodes):
             if INVERTER in node:
@@ -114,7 +117,11 @@ def clean_graphs_for_ged(gen_subtrees):
                     graph.add_edge(parent_node, edge[1], data=True)
                     graph.remove_node(node)
 
-    # remove anything with LAT possibly here
+def remove_all_lat(gen_subtrees):
+    for graph in gen_subtrees:
+        for node in list(graph.nodes):
+            if "LAST_ACTION_TAKEN" in node:
+                graph.remove_node(node)
 
 def gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters):
     min_score = None

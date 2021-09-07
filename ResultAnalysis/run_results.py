@@ -46,7 +46,7 @@ num_unique_nodes_key = "num_unique_nodes"
 total_nodes_key = "total_nodes" 
 unique_node_freq_key = "unique_node_freq"
 num_sub_trees_key = "num_sub_trees"
-graph_sim_key = "graph_similarity"
+graph_sim_key = "graph_edit_distance"
 
 simulated_graph = None
 # assumes key is the full path for `is_generated`
