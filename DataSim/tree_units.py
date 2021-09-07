@@ -63,17 +63,23 @@ class Tree_Basic(Tree):
             self.add_child_to_root(root, child)
 
 
-    def add_child_to_root(self, root, child):
-        if "inverted" in child and child["inverted"]:
-            root.add_child(pt.decorators.Inverter(name="Inverter_"+child["name"]))
 
+    def add_child_to_root(self, root, child):
         if child["type_"] in self.composite_set:
+            if "inverted" in child and child["inverted"]:
+                pt.decorators.Inverter(name="Inverter", child=root)
             self.build_tree(root, child["type_"], child['name'], child["child_list"])
         elif child["type_"] == "action":
-            root.add_child(Action(child["name"], child["p_success"]))
+            a_node = Action(child["name"], child["p_success"])
+            if "inverted" in child and child["inverted"]:
+                a_node = pt.decorators.Inverter(name="Inverter", child=a_node)
+            root.add_child(a_node)
         elif child["type_"] == "condition":
             # made name target state for easier matching
-            root.add_child(Condition(child["target_state"], child["p_success"], child['target_state'], child["threshold"]))
+            c_node = Condition(child["target_state"], child["p_success"], child['target_state'], child["threshold"])
+            if "inverted" in child and child["inverted"]:
+                c_node = pt.decorators.Inverter(name="Inverter", child=c_node)
+            root.add_child(c_node)
 
     def add_composite_to_root(self, root, composite_node):
         if root:
