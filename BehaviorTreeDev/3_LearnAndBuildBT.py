@@ -49,19 +49,18 @@ def process_command_line_args():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-c", "--config", required = True, help = "Full path to json config file, relative paths work as well")
 	ap.add_argument("-o", "--outputlog", required = True, help = "Path to log file")
+	ap.add_argument("-k", "--kevin", required = False, action='store_true', help = "Run w original BT-Espresso also")
 	args = vars(ap.parse_args())
-	return args["config"], args["outputlog"]
+	return args["config"], args["outputlog"], "kevin" in args and args["kevin"] != None and args['kevin']
 
-def run_behaviortree(json_file_path, log_file_path):
-	"""Summary
-	Runs decision tree classifier, TODO: needs to be broken up per #19
-	
+def run_behaviortree(json_file_path, log_file_path, run_original_bt_espresso):
+	"""Summary	
 	Args:
 	    json_file_path (str): Full filepath to config.json
 	    log_file_path (str): Full filepath to output.log file 
 	"""
 
-	r = Runner(json_file_path, log_file_path)
+	r = Runner(json_file_path, log_file_path, run_original_bt_espresso)
 	return r.run()
 
 class Runner:
@@ -73,7 +72,7 @@ class Runner:
 	    log_file (_io.TextIOWrapper): Log file used for formatting
 	"""
 	
-	def __init__(self, json_file_path, log_file_path):
+	def __init__(self, json_file_path, log_file_path, run_original_bt_espresso):
 		"""Summary
 		
 		Args:
@@ -83,6 +82,7 @@ class Runner:
 		print(f"BehaviorTree building started using {json_file_path} and {log_file_path}")
 		self.json_manager = JsonManager(json_file_path)
 		self.log_file = open(log_file_path, "r")
+		self.run_original_bt_espresso = run_original_bt_espresso
 	
 	def get_file_fmt_and_label_encoding(self):
 		"""Summary
@@ -164,7 +164,6 @@ class Runner:
 		# categrorical
 		cat_set = self.json_manager.get_categorical_features()
 		
-		# LAT
 
 	def run(self):
 		"""Reads in data, trains, and reports results
@@ -242,7 +241,7 @@ class Runner:
 
 			# theoretical split to dump decision trees out to files
 			full_binary_set = self.generate_full_binary_set()
-			behavior_tree_obj = btBuilder.bt_espresso_mod(\
+			behavior_tree_obj = btBuilder.re_bt_espresso(\
 				decision_tree_obj, 
 				self.features_data.columns, 
 				label_encoding,
@@ -259,6 +258,21 @@ class Runner:
 			report_file_obj.write("	Decision Tree saved to {}\n".format(decision_tree_path))
 			report_file_obj.write("	Behavior Tree saved to {}\n\n".format(behavior_tree_full_path))
 			report_file_obj.write("")
+
+			# KEVINS BT ESPRESSO
+			if self.run_original_bt_espresso:
+				behavior_tree_obj = btBuilder.re_bt_espresso(\
+				decision_tree_obj, 
+				self.features_data.columns, 
+				label_encoding,
+				self.json_manager.get_binary_features(),
+				True) # run kevins
+				
+				original_path = constants.add_folder_to_directory("original_bt_espresso", newPrunePath)
+				btBuilder.save_tree(behavior_tree_obj, original_path)
+				
+
+
 			i += 1
 
 		fig, ax = plt.subplots()
@@ -288,8 +302,8 @@ class Runner:
 def main():
 	"""Runs the behavior tree via command line arguments
 	"""
-	json_file_path, fmt_file_path = process_command_line_args()
-	run_behaviortree(json_file_path, fmt_file_path)
+	json_file_path, fmt_file_path, run_original_bt_espresso = process_command_line_args()
+	run_behaviortree(json_file_path, fmt_file_path, run_original_bt_espresso)
 
 if __name__ == '__main__':
 	main()

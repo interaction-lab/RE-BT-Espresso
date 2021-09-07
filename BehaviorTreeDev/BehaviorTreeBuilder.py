@@ -573,17 +573,18 @@ def remove_all_lat_conditions(final_cond):
         final_cond = re.sub("~" + key + "(?!\S)", " 1 ", final_cond)
     return final_cond
 
-def minimize_bool_expression(sym_lookup, action_to_pstring):
-    action_minimized = {}
+def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso):
+    action_minimized = action_min_wo_lat_dict = {}
     espresso_reduction(action_to_pstring, action_minimized)
-    action_minimized = remove_float_contained_variables(
-        sym_lookup, action_minimized)
-    action_min_wo_lat_dict = create_action_min_wo_lat_dict(action_minimized)
-    action_minimized = factorize_pstring(
-        action_minimized)
-    dict_copy = dict(action_min_wo_lat_dict)
-    for action in dict_copy:
-        action_min_wo_lat_dict[action]= factorize_pstring(action_min_wo_lat_dict[action])
+    if not run_original_bt_espresso:
+        action_minimized = remove_float_contained_variables(
+            sym_lookup, action_minimized)
+        action_min_wo_lat_dict = create_action_min_wo_lat_dict(action_minimized)
+        action_minimized = factorize_pstring(
+            action_minimized)
+        dict_copy = dict(action_min_wo_lat_dict)
+        for action in dict_copy:
+            action_min_wo_lat_dict[action]= factorize_pstring(action_min_wo_lat_dict[action])
     return action_minimized, action_min_wo_lat_dict
 
 def espresso_reduction(action_to_pstring, action_minimized):
@@ -720,7 +721,7 @@ def save_tree(tree, filename):
     py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
                                      with_blackboard_variables=False, target_directory=filename)
 
-def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
+def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal_bt_espresso=False):
     """Runs modified BT-Espresso algorithm with new reductions
 
     Args:
@@ -747,7 +748,10 @@ def bt_espresso_mod(dt, feature_names, label_names, _binary_features):
         label_names)
     action_minimized, action_minimized_wo_lat = minimize_bool_expression(
         sym_lookup, 
-        action_to_pstring)
-    btree = pstring_to_btree(action_minimized, sym_lookup) 
-    add_last_action_taken_seq_chains(btree, action_minimized, action_minimized_wo_lat, sym_lookup)
+        action_to_pstring,
+        run_orginal_bt_espresso)
+    btree = pstring_to_btree(action_minimized, sym_lookup)
+    
+    if not run_orginal_bt_espresso:
+        add_last_action_taken_seq_chains(btree, action_minimized, action_minimized_wo_lat, sym_lookup)
     return btree

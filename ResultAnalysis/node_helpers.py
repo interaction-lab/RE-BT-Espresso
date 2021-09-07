@@ -97,6 +97,7 @@ def clean_graphs_for_ged(gen_subtrees):
     remove_all_inverters(gen_subtrees)
     remove_all_lat(gen_subtrees)
 
+# TODO: need to do this for simulated as well
 def remove_all_inverters(gen_subtrees):
     for graph in gen_subtrees:
         for node in list(graph.nodes):
