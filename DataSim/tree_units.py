@@ -123,7 +123,7 @@ class Tree_Basic(Tree):
         return pt.composites.Parallel(name=name)
 
     def create_repeater_node(self, name):
-        return pt.composites.Sequence(name="Repeat<>")
+        return Repeater(name="Repeat<>", num_repeats=3) # configurable
 
     def create_par_sel_node(self, name):
         return pt.composites.Parallel(name="|| / Selector")

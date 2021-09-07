@@ -22,22 +22,10 @@
                     "p_success": 1
                 },
                 {
-                    "name": "sequence_2",
+                    "name": "Repeat",
                     "inverted": false,
-                    "type_": "sequence",
+                    "type_": "repeater",
                     "child_list": [
-                        {
-                            "name": "action_2",
-                            "inverted": false,
-                            "type_": "action",
-                            "p_success": 1
-                        },
-                        {
-                            "name": "action_2",
-                            "inverted": false,
-                            "type_": "action",
-                            "p_success": 1
-                        },
                         {
                             "name": "action_2",
                             "inverted": false,

@@ -3,6 +3,12 @@ from bt_sim import pt
 import random
 import globals as g
 
+# extend py_trees w/ Repeater
+import itertools
+import typing
+from py_trees import common
+
+
 class Condition(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct, target_state, threshold):
         super().__init__(name=name)
@@ -63,4 +69,68 @@ class Action(pt.behaviour.Behaviour):
         self.blackboard.success = False
         return pt.common.Status.FAILURE
     
+class Repeater(pt.composites.Sequence):
+    def __init__(self, 
+        num_repeats,
+        name: str="Repeat<>",
+        memory: bool=True,
+        children: typing.List[pt.behaviour.Behaviour]=None,
+        ):
+
+        super().__init__(name=name, memory=memory, children=children)
+        self.num_repeats = num_repeats
+        self.at_iter = 0
+
+    def tick(self):
+        """
+        Tick over the children.
+
+        Yields:
+            :class:`~py_trees.behaviour.Behaviour`: a reference to itself or one of its children
+        """
+        self.logger.debug("%s.tick()" % self.__class__.__name__)
+
+        # initialise
+        index = 0
+        if self.status != common.Status.RUNNING or not self.memory:
+            self.current_child = self.children[0] if self.children else None
+            for child in self.children:
+                if child.status != common.Status.INVALID:
+                    child.stop(common.Status.INVALID)
+            # user specific initialisation
+            self.initialise()
+            self.at_iter = 0 # reset repeater
+        else:  # self.memory is True and status is RUNNING
+            index = self.children.index(self.current_child)
+
+        # customised work
+        self.update()
+
+        # nothing to do
+        if not self.children:
+            self.current_child = None
+            self.stop(common.Status.SUCCESS)
+            yield self
+            return
+
+        # actual work
+        while self.at_iter < self.num_repeats:
+            for child in itertools.islice(self.children, index, None):
+                for node in child.tick():
+                    yield node
+                    if node is child and node.status != common.Status.SUCCESS:
+                        self.status = node.status
+                        yield self
+                        return
+                try:
+                    # advance if there is 'next' sibling
+                    self.current_child = self.children[index + 1]
+                    index += 1
+                except IndexError:
+                    pass
+            self.at_iter += 1
+            index = 0
+
+        self.stop(common.Status.SUCCESS)
+        yield self
 
