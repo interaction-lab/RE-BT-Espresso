@@ -1,0 +1,1 @@
+{"name": "DEFAULT", "type_": ["parallel"], "p_success": 1, "inverted": false, "threshold": 0.5, "child_list": [{"name": ["action_1"], "type_": "action", "p_success": 1, "inverted": false, "threshold": 0.5}, {"name": "root", "type_": ["parallel"], "p_success": 1, "inverted": false, "threshold": 0.5, "child_list": 
