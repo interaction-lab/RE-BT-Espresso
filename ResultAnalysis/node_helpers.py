@@ -2,6 +2,7 @@ import re
 import networkx as nx
 import time
 import threading
+import matplotlib.pyplot as plt
 
 SEQUENCE = "Sequence"
 SELECTOR = "Selector"
@@ -76,7 +77,7 @@ def find_graph_sim(generated_graph, sim_graph):
     sim_subtrees = [get_subtree_graph(sim_graph, edges[1]) for edges in sim_graph.out_edges(sim_root)]
 
     # possibly split all expriment sub_trees as well
-    max_iters = 1 # tunable, possibly look at timeouts
+    max_iters = 2 # tunable, possibly look at timeouts
     clean_graphs_for_ged(gen_subtrees)
     add_label_to_gen_trees(gen_subtrees)
     min_score = gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters)
@@ -97,16 +98,25 @@ def clean_graphs_for_ged(gen_subtrees):
     remove_all_inverters(gen_subtrees)
     remove_all_lat(gen_subtrees)
 
+counter = 0
 # TODO: need to do this for simulated as well
 def remove_all_inverters(gen_subtrees):
-    for graph in gen_subtrees:
+    global counter
+    for graph in gen_subtrees:      
         for node in list(graph.nodes):
             if INVERTER in node:
                 # replace node
-                parent_node = list(graph.in_edges(node))[0]
+                parent_node = list(graph.in_edges(node))[0][0]
                 for edge in graph.out_edges(node):
-                    graph.add_edge(parent_node, edge[1], data=True)
+                    graph.add_edge(parent_node, edge[1])
                     graph.remove_node(node)
+
+
+        counter += 1
+
+        # plt.clf()
+        # nx.draw_networkx(graph)
+        # plt.savefig("post_graph_" + str(counter) + ".png")
 
 def remove_all_lat(gen_subtrees):
     for graph in gen_subtrees:
@@ -118,6 +128,9 @@ def gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters):
     min_score = None
     for g_tree in gen_subtrees:
         i = 0
+        print("//////////////")
+        print(g_tree.nodes)
+        print(g_tree.edges)
         for score in nx.optimize_graph_edit_distance(g_tree, sim_graph, node_match=custom_node_match):
             if min_score == None or score < min_score:
                 min_score = score
