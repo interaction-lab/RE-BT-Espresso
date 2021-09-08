@@ -35,7 +35,7 @@ default_w_cond["threshold"] = 0.5
 output_path = "./experiments"
 
 total_num_experiments = 100
-expr_num = range(5, total_num_experiments)
+expr_num = range(0, total_num_experiments)
 
 
 def reset_sets():

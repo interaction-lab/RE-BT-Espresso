@@ -1,0 +1,20 @@
+{
+    "type_": "sequence",
+    "name" : "sequence_1",
+    "child_list": [
+        {
+            "name": "action_1",
+            "inverted": false,
+            "type_": "action",
+            "p_success": 1
+        },
+        {
+            "name": "action_2",
+            "inverted": false,
+            "type_": "action",
+            "p_success": 1
+        }
+    ]
+}
+  
+  
