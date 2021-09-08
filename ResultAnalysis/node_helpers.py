@@ -79,14 +79,14 @@ def find_graph_sim(generated_graph, sim_graph):
     sim_subtrees = [get_subtree_graph(sim_graph, edges[1]) for edges in sim_graph.out_edges(sim_root)]
 
     # possibly split all expriment sub_trees as well
-    max_iters = 1 # tunable, possibly look at timeouts
-    max_time = 10 # tunable
+    max_iters = 2 # tunable, possibly look at timeouts
+    max_time = 30 # tunable
     clean_graphs_for_ged(gen_subtrees)
     add_label_to_gen_trees(gen_subtrees)
     clean_graphs_for_ged(sim_subtrees)
     add_label_to_gen_trees(sim_subtrees)
     final_score_list = []
-    for sim_tree in sim_subtrees:
+    for i, sim_tree in enumerate(sim_subtrees):
         min_score_list = []
         e = threading.Event()
         t = threading.Thread(target=gen_min_edit_distance_for_all_subtrees, args=(e, sim_tree, gen_subtrees, max_iters, min_score_list))
@@ -94,7 +94,14 @@ def find_graph_sim(generated_graph, sim_graph):
         t.join(max_time)
         e.set()
         t.join()
-        final_score_list.append(min_score_list[-1])
+        final_score_list.append({ 
+            "sim_tree_num" : i,
+            "num_nodes_in_subtree" : total_num_nodes(sim_tree),
+            "num_uniq_nodes_in_subtree" : num_unique_nodes(sim_tree),
+            "unique_node_dict" : get_freq_unique_node_dict(sim_tree),
+            "score" : min_score_list[-1]
+            }
+            )
     return final_score_list
 
 def add_label_to_gen_trees(gen_subtrees):
@@ -124,13 +131,8 @@ def remove_all_inverters(gen_subtrees):
                 for edge in graph.out_edges(node):
                     graph.add_edge(parent_node, edge[1])
                     graph.remove_node(node)
-
-
         counter += 1
 
-        # plt.clf()
-        # nx.draw_networkx(graph)
-        # plt.savefig("post_graph_" + str(counter) + ".png")
 
 def remove_all_lat(gen_subtrees):
     for graph in gen_subtrees:
@@ -142,7 +144,7 @@ def gen_min_edit_distance_for_all_subtrees(e, sim_graph, gen_subtrees, max_iters
     min_score = None
     for g_tree in gen_subtrees:
         i = 0
-        for score in nx.optimize_graph_edit_distance(g_tree, sim_graph, node_match=custom_node_match):
+        for score in nx.optimize_graph_edit_distance(g_tree, sim_graph, node_match=custom_node_match, upper_bound=30):
             if min_score == None or score < min_score:
                 min_score = score
                 min_score_list.append(min_score)
