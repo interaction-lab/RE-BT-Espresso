@@ -15,7 +15,7 @@ num_conditions = 5
 condition_set = ["/env_state_var_" + str(i+1) for i in range(num_conditions)]
 
 root_set = ["parallel", "sequence"]
-composite_set = ["sequence", "repeat"] # sekector omitted, only used for conditions
+composite_set = ["sequence", "repeater"] # sekector omitted, only used for conditions
 leaf_set = ["condition", "action"]
 
 default_entry = {
@@ -64,9 +64,10 @@ def choose_random_condition():
 
 def create_parsel(leaf_entry):
 	global max_par_actions
-	leaf_entry["type"] = "parsel"
+	leaf_entry["type_"] = "parsel"
+	leaf_entry["name"] = leaf_entry["type_"]
 	child_list = []
-	for i in range(random.randint(2, max_par_actions + 1)):
+	for i in range(0, random.randint(2, max_par_actions)):
 		my_entry = copy.deepcopy(default_w_cond)
 		create_action(my_entry, False)
 		if my_entry != None:
@@ -76,7 +77,7 @@ def create_parsel(leaf_entry):
 def create_action(leaf_entry, include_parsel=True):
 	if len(action_set) == 0:
 		leaf_entry = None
-	elif random.random() < 0.2 and len(action_set) >= 2 and include_parsel:
+	elif random.random() < 0.3 and len(action_set) >= 2 and include_parsel:
 		create_parsel(leaf_entry)
 	else:
 		leaf_entry["type_"] = "action"
@@ -113,8 +114,8 @@ def create_composite_node(composite_entry):
 	global default_entry, max_things_in_composite
 	child_list = []
 
-	rand_num_things = random.randint(2, max_things_in_composite + 1)
-	for i in range(rand_num_things):
+	rand_num_things = random.randint(2, max_things_in_composite)
+	for i in range(0, rand_num_things):
 		my_entry = copy.deepcopy(default_w_cond)
 		if i == rand_num_things - 1:
 			create_action(my_entry) # last thing always action
@@ -148,8 +149,9 @@ def run_gen(expr_ext_name):
 	tree_dict = copy.deepcopy(default_w_child)
 	tree_dict["type_"] = get_root_type()
 	tree_dict["name"] = tree_dict["type_"] + "_root"
-	num_sub_trees = random.randint(2, max_sub_trees+1)
-	for i in range(num_sub_trees):
+	num_sub_trees = random.randint(2, max_sub_trees)
+	for i in range(0, num_sub_trees):
+		print(i)
 		gen_subtree(tree_dict)
 		reset_sets()
 	
