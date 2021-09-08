@@ -115,11 +115,8 @@ def create_composite_node(composite_entry):
 
 	rand_num_things = random.randint(2, max_things_in_composite + 1)
 	for i in range(rand_num_things):
-		print(i)
 		my_entry = copy.deepcopy(default_w_cond)
 		if i == rand_num_things - 1:
-			print("HERE")
-			print(i)
 			create_action(my_entry) # last thing always action
 		else:
 			create_leaf(my_entry)
