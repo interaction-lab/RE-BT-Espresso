@@ -71,13 +71,14 @@ class Action(pt.behaviour.Behaviour):
     
 class Repeater(pt.composites.Sequence):
     def __init__(self, 
-        num_repeats,
+        num_repeats=3,
         name: str="Repeat<>",
         memory: bool=True,
         children: typing.List[pt.behaviour.Behaviour]=None,
         ):
 
-        super().__init__(name=name, memory=memory, children=children)
+        super().__init__(name=name, children=children)
+        self.memory = memory
         self.num_repeats = num_repeats
         self.at_iter = 0
 

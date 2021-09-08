@@ -15,12 +15,13 @@ num_conditions = 5
 condition_set = ["/env_state_var_" + str(i+1) for i in range(num_conditions)]
 
 root_set = ["parallel", "sequence"]
-composite_set = ["sequence", "repeater"] # sekector omitted, only used for conditions
+# sekector omitted, only used for conditions
+composite_set = ["sequence", "repeater"]
 leaf_set = ["condition", "action"]
 
 default_entry = {
-	"name" : "DEFAULT",
-	"type_" : "DEFAULT",
+	"name": "DEFAULT",
+	"type_": "DEFAULT",
 }
 
 default_w_child = copy.deepcopy(default_entry)
@@ -40,15 +41,19 @@ expr_num = range(5, total_num_experiments)
 def reset_sets():
 	global action_set, condition_set
 	action_set = ["action_" + str(i) for i in range(num_actions)]
-	condition_set = ["/env_state_var_" + str(i+1) for i in range(num_conditions)]
+	condition_set = ["/env_state_var_" +
+					 str(i+1) for i in range(num_conditions)]
+
 
 def get_root_type():
 	global root_set
 	return random.sample(root_set, 1)[0]
 
+
 def choose_composite_type():
 	global composite_set
 	return random.sample(composite_set, 1)[0]
+
 
 def choose_random_action():
 	global action_set
@@ -56,11 +61,13 @@ def choose_random_action():
 	action_set.remove(rand_action)
 	return rand_action
 
+
 def choose_random_condition():
 	global condition_set
 	rand_cond = random.sample(condition_set, 1)[0]
 	condition_set.remove(rand_cond)
 	return rand_cond
+
 
 def create_parsel(leaf_entry):
 	global max_par_actions
@@ -74,6 +81,7 @@ def create_parsel(leaf_entry):
 			child_list.append(my_entry)
 	leaf_entry["child_list"] = copy.deepcopy(child_list)
 
+
 def create_action(leaf_entry, include_parsel=True):
 	if len(action_set) == 0:
 		leaf_entry = None
@@ -81,15 +89,18 @@ def create_action(leaf_entry, include_parsel=True):
 		create_parsel(leaf_entry)
 	else:
 		leaf_entry["type_"] = "action"
-		leaf_entry["name"] = choose_random_action() #TODO: make these only allow once
+		leaf_entry["name"] = choose_random_action()
+
 
 def create_single_condition(leaf_entry):
 	leaf_entry["type_"] = "condition"
-	leaf_entry["name"] = choose_random_condition() #TODO: make these only allow once
+	leaf_entry["name"] = choose_random_condition()
 	leaf_entry["target_state"] = leaf_entry["name"]
+	leaf_entry["inverted"] = random.random() > 0.3
+
 
 def create_condition(leaf_entry):
-	if random.random() < 0.2 and len(condition_set) >= 2: # configurable for % of selector conditions
+	if random.random() < 0.3 and len(condition_set) >= 2:  # configurable for % of selector conditions
 		leaf_entry["type_"] = "selector"
 		leaf_entry["name"] = leaf_entry["type_"]
 
@@ -100,11 +111,10 @@ def create_condition(leaf_entry):
 		leaf_entry["child_list"] = [leaf_one, leaf_two]
 	else:
 		create_single_condition(leaf_entry)
-	
 
 
 def create_leaf(leaf_entry):
-	if random.random() < 0.5 or len(condition_set) == 0:
+	if random.random() < 0.4 or len(condition_set) == 0:
 		create_action(leaf_entry)
 	else:
 		create_condition(leaf_entry)
@@ -118,14 +128,15 @@ def create_composite_node(composite_entry):
 	for i in range(0, rand_num_things):
 		my_entry = copy.deepcopy(default_w_cond)
 		if i == rand_num_things - 1:
-			create_action(my_entry) # last thing always action
+			create_action(my_entry)  # last thing always action
 		else:
 			create_leaf(my_entry)
-		
+
 		if my_entry != None:
 			child_list.append(my_entry)
 
 	composite_entry["child_list"] = copy.deepcopy(child_list)
+
 
 def gen_subtree(tree_dict):
 	# compositechoice
@@ -135,7 +146,9 @@ def gen_subtree(tree_dict):
 	create_composite_node(composite_entry)
 	tree_dict["child_list"].append(composite_entry)
 
+
 pp = pprint.PrettyPrinter(indent=4)
+
 
 def already_genned_tree(tree_dict):
 	global all_tree_dicts
@@ -144,6 +157,7 @@ def already_genned_tree(tree_dict):
 			return True
 	return False
 
+
 def run_gen(expr_ext_name):
 	global default_w_child, max_sub_trees, output_path, all_tree_dicts
 	tree_dict = copy.deepcopy(default_w_child)
@@ -151,24 +165,26 @@ def run_gen(expr_ext_name):
 	tree_dict["name"] = tree_dict["type_"] + "_root"
 	num_sub_trees = random.randint(2, max_sub_trees)
 	for i in range(0, num_sub_trees):
-		print(i)
 		gen_subtree(tree_dict)
 		reset_sets()
-	
-	if already_genned_tree(tree_dict): # make sure no duplicates
+
+	if already_genned_tree(tree_dict):  # make sure no duplicates
 		tree_dict = dict()
 		print("Duplicate tree generated, regenerating")
 		run_gen(expr_ext_name)
-		return # none inf recur
-	
+		return  # none inf recur
+
 	all_tree_dicts.append(copy.deepcopy(tree_dict))
-	write_expr(output_path, "expr" + expr_ext_name +".json", tree_dict)
+	write_expr(output_path, "expr" + expr_ext_name + ".json", tree_dict)
 
 
 all_tree_dicts = []
+
+
 def run_gen_all():
 	for i in expr_num:
 		run_gen(str(i))
+
 
 def write_expr(output_path, filename, tree_dict):
 	tree_path = output_path + "/" + filename
@@ -177,8 +193,10 @@ def write_expr(output_path, filename, tree_dict):
 		json.dump(tree_dict, outfile)
 	print(f"Tree output to {tree_path}")
 
+
 def main():
 	run_gen_all()
-		
+
+
 if __name__ == '__main__':
 	main()
