@@ -79,7 +79,7 @@ def find_graph_sim(generated_graph, sim_graph):
     sim_subtrees = [get_subtree_graph(sim_graph, edges[1]) for edges in sim_graph.out_edges(sim_root)]
 
     # possibly split all expriment sub_trees as well
-    max_iters = 2 # tunable, possibly look at timeouts
+    max_iters = 1 # tunable, possibly look at timeouts
     max_time = 30 # tunable
     clean_graphs_for_ged(gen_subtrees)
     add_label_to_gen_trees(gen_subtrees)
@@ -99,7 +99,7 @@ def find_graph_sim(generated_graph, sim_graph):
             "num_nodes_in_subtree" : total_num_nodes(sim_tree),
             "num_uniq_nodes_in_subtree" : num_unique_nodes(sim_tree),
             "unique_node_dict" : get_freq_unique_node_dict(sim_tree),
-            "score" : min_score_list[-1]
+            "score" : min_score_list[-1] if len(min_score_list) > 0 else -1
             }
             )
     return final_score_list
