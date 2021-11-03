@@ -1,6 +1,6 @@
 # RE:BT-Espresso, Representation Exploitation of BT-Espresso for Behavior Trees Learned from Robot Demonstrations 
 
-IMPORTANT: The repo is not clean in the slightest as it is divulging near deadlines. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `re_bt_espresso`.
+IMPORTANT: Although this repo may not be the cleanest code, we have tried to make it more readable. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `re_bt_espresso`.
 
 ---
 ## Install
