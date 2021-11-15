@@ -1,2 +1,4 @@
-- [ ] pull globals to top
+- [x] pull globals to top
+- [ ] reorg file
+  - [ ] Common helpers
 - [ ] pull out to importing files

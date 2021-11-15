@@ -10,20 +10,6 @@ import pipeline_constants as constants
 from BTBuilderGlobals import *
 
 
-def find_max_index(numpy_1D_array):
-    """Finds and returns first max argument index in numpy array
-
-    Args:
-        numpy_1D_array (np.arr[int]): numpy array to find max of
-        ex: [[  0.   100.  194.   194.   0.   0.]] -> 2
-
-    Returns:
-    int	: index of max element in array
-    """
-    max_element = np.amax(numpy_1D_array)
-    index = np.where(numpy_1D_array == max_element)
-    return index[1][0]
-
 def find_max_indices_given_percent(numpy_1D_array):
     """Finds array of max indices within a given percent
        ex. [[10, 0, 9.5, 7]], 0.1 -> [0,2]
