@@ -1,24 +1,30 @@
-from lxml import etree
 import numpy as np
-import copy
-from numpy.core.arrayprint import _void_scalar_repr
 import networkx as nx
-
 import py_trees.decorators
 import py_trees.display
-
 import re
 import pyeda
 from pyeda.inter import *
 from pyeda.boolalg.expr import _LITS
-
-
 import pipeline_constants as constants
 
-# something to do with grabbing an inverted variable in process leaf or process non leaf leading to things that should not be ther, maybe a counter issue?
 
+# globals #######
 
+# [variable_symbol] -> condition
+lat_cond_lookup = dict()
+# [lat_action] -> prior action
+act_to_lat_sets_dict = dict() 
+# set of all binary features
 binary_feature_set = set()
+# Counter for number of variables processed, used for unique naming
+var_cycle_count = 0
+# Used to give unique names to selector/sequence/inverter nodes to avoid stars
+node_name_counter = 0
+# Number of cycle nodes, used for unique naming
+cycle_node_counter = 0
+# [action][lat_action] -> conditions that came with lat minus lat cond
+act_lat_conditions_dict = dict() 
 
 def find_max_index(numpy_1D_array):
     """Finds and returns first max argument index in numpy array
@@ -111,8 +117,6 @@ def get_key(dictionary, val):
 def is_last_action_taken_condition(condition):
     return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition and not "No Entry" in condition
 
-# [variable_symbol] -> condition
-lat_cond_lookup = dict()
 def build_last_action_taken_dict(condition, cond_symbol):
     global lat_cond_lookup
     if is_last_action_taken_condition(condition) and cond_symbol not in lat_cond_lookup:
@@ -176,14 +180,11 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
                             label_names)
     # remove all LAT from string
 
-
-var_cycle_count = 0
 def get_current_var_name():
     global var_cycle_count    
     tmp = "VAR" + str(var_cycle_count)
     var_cycle_count += 1
     return tmp
-
 
 def add_to_vec_hash_dict(dictionary, key, value):
     '''Adds to a dictionary of the following, appending to end of set
@@ -200,7 +201,6 @@ def add_to_vec_hash_dict(dictionary, key, value):
         dictionary[key] = {value}
     else:
         dictionary[key].add(value)
-
 
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -224,18 +224,6 @@ def is_bool_feature(dt, node_index, feature_names):
     global binary_feature_set
     name = feature_names[dt.feature[node_index]]
     return name in binary_feature_set or is_last_action_taken_condition(name) or ("True" in name)
-
-# sym_lookup format:
-# {'tsla <= 19.14': 'a',
-#  'exerciseSubmissionResult_Correct == False': 'b',
-#  'exerciseSubmissionResult_No Entry == False': 'c',
-#  'ScaffLeft <= 0.5': 'd', ...}
-
-# action_to_pstring:
-# {'Dialogue: 3': 'a & b & c & d & e',
-#  'PPA': 'a & b & c & d & ~e | ~a & h & i & ~j | ~a & ~h',
-#  'Dialogue: 4': 'a & b & c & ~d | a & b & ~c & f & ~g',
-#  'Dialogue: 1': 'a & b & ~c & f & g | a & b & ~c & ~f', ...}
 
 def dt_to_pstring(dt, feature_names, label_names):
     sym_lookup = {}
@@ -379,8 +367,6 @@ def factorize_pstring(pstring_dict):
 
     return pstring_dict
 
-# Used to give unique names to selector/sequence/inverter nodes to avoid stars
-node_name_counter = 0
 def get_node_name_counter():
     global node_name_counter
     _ = f"({node_name_counter})"
@@ -518,8 +504,6 @@ def convert_actions_back_to_expr_rep(action_minimized):
         if isinstance(action_minimized[action], str):
             action_minimized[action] = expr(action_minimized[action])
 
-act_to_lat_sets_dict = dict() # 
-
 def contains_latcond(str_rep_cond):
     for key in lat_cond_lookup:
         # (?<!~) is "is not preceded with ~" to avoid inverted conditions 
@@ -548,7 +532,6 @@ def convert_double_dict_to_expr(dictionary):
         for key2 in dictionary[key1]:
             dictionary[key1][key2] = expr(dictionary[key1][key2])
 
-act_lat_conditions_dict = dict() # [action][lat_action] -> conditions that came with lat minus lat cond
 def create_action_min_wo_lat_dict(action_minimized):
     global act_lat_conditions_dict
     global lat_cond_lookup
@@ -605,7 +588,6 @@ def update_freq_dict(dictionary, key, val):
     else:
         dictionary[key] = val
 
-cycle_node_counter = 0
 def get_cycles_node_name():
     global cycle_node_counter
     name = constants.CYLCE_NODE + str(cycle_node_counter)

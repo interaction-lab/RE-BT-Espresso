@@ -20,7 +20,7 @@ usage: run_experiments.py [-h] [-c CONFIG] [-r] [-m] [-k]
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        Name of experiment config json, without this flag it will recurse though all experiments
+                        Name of experiment config json, without this flag it will recurse though all experiments. `expr0.json` as an example.
   -r, --recolor         Run recoloring of all trees
   -m, --multiprocess    Run experiments in ||
   -k, --kevin           Run w original BT-Espresso also
@@ -49,6 +49,7 @@ optional arguments:
 - [py_trees](https://py-trees.readthedocs.io/en/devel/)
 - [pyeda](https://pypi.org/project/pyeda/)
 - [networkx](https://networkx.org/)
+- [pydot](https://pypi.org/project/pydot/)
 
 Easy copy paste:
 ```

@@ -1,0 +1,2 @@
+- [ ] pull globals to top
+- [ ] pull out to importing files
