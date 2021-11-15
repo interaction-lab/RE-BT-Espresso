@@ -187,8 +187,6 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         action, 
         current_pstring)
 
-def is_last_action_taken_no_entry(condition):
-    return condition == constants.LAST_ACTION_TAKEN_COLUMN_NAME_NO_ENTRY
 
 def is_bool_feature(dt, node_index, feature_names):
     global binary_feature_set
@@ -469,11 +467,6 @@ def convert_expr_ast_to_str_rep(expr_ast):
         result = str(int_to_condition(expr_ast[1]))
     return result
 
-def convert_actions_back_to_expr_rep(action_minimized):
-    for action in action_minimized:
-        if isinstance(action_minimized[action], str):
-            action_minimized[action] = expr(action_minimized[action])
-
 def contains_latcond(str_rep_cond):
     for key in lat_cond_lookup:
         # (?<!~) is "is not preceded with ~" to avoid inverted conditions 
@@ -551,12 +544,6 @@ def espresso_reduction(action_to_pstring, action_minimized):
             continue
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
-
-def update_freq_dict(dictionary, key, val):
-    if key in dictionary:
-        dictionary[key] += val
-    else:
-        dictionary[key] = val
 
 def get_cycles_node_name():
     global cycle_node_counter

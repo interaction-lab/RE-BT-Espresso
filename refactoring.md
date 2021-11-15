@@ -1,4 +1,5 @@
 - [x] pull globals to top
+- [x] remove functions not being used anymore
 - [ ] reorg file
   - [ ] Common helpers
 - [ ] pull out to importing files
