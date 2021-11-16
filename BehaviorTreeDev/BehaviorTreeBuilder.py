@@ -9,7 +9,6 @@ from pyeda.boolalg.expr import _LITS
 import pipeline_constants as constants
 from BTBuilderGlobals import *
 
-
 def find_max_indices_given_percent(numpy_1D_array):
     """Finds array of max indices within a given percent
        ex. [[10, 0, 9.5, 7]], 0.1 -> [0,2]
@@ -77,7 +76,7 @@ def is_leaf_node(dt, node_index):
     """
     return (dt.children_left[node_index] == -1
             and dt.children_right[node_index] == -1)
-56  
+ 
 def get_key(dictionary, val):
     for key, value in dictionary.items():
         if val == value:
@@ -186,7 +185,6 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         action_to_pstring, 
         action, 
         current_pstring)
-
 
 def is_bool_feature(dt, node_index, feature_names):
     global binary_feature_set

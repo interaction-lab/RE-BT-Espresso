@@ -2,4 +2,7 @@
 - [x] remove functions not being used anymore
 - [ ] reorg file
   - [ ] Common helpers
+  - [ ] reductions
+  - [ ] lat sequence
+  - [ ] repeater
 - [ ] pull out to importing files
