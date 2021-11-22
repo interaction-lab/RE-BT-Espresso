@@ -2,6 +2,13 @@
 
 IMPORTANT: Although this repo may not be the cleanest code, we have tried to make it more readable. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `re_bt_espresso`.
 
+`BehaviorTreeBuilder` is split up as the following:
+- `BTBuildGlobals.py` -> contains all global variables (mostly dictionary lookups) w/ descriptions
+- `BTBuilderData.py` -> contains functions that build global data (typically dictionaries)
+- `BTBuilderHelpers.py` -> contains helper functions (e.g., `save_tree`)
+- `BTBuilderLAT.py` -> contains functions for the Last Action Taken Sequence/Cycles algorithm (algorithm 2 within the paper)
+- `BehaviorTreeBuilder.py` -> contains the RE-BT:Espresso algorithm code using all of the above (algorithm 1 within the paper)
+
 ---
 ## Install
 1. Clone repo
