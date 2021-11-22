@@ -9,8 +9,6 @@ from BTBuilderHelpers import *
 from BTBuilderLAT import *
 from BTBuilderData import *
 
-
-
 # Algo
 def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
     if is_leaf_node(dt, node_index):
@@ -198,17 +196,6 @@ def factorize_pstring(pstring_dict):
             pstring_dict[action] = expr(new_pstring).to_nnf()
 
     return pstring_dict
-
-# Tree
-def save_tree(tree, filename):
-    """Saves generated BehaviorTree to dot, svg, and png files
-
-    Args:
-        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
-        filename (str): full filename with path for tree to be saved to
-    """
-    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
-                                     with_blackboard_variables=False, target_directory=filename)
 
 # Algo
 def recursive_build(pstring_expr, sym_lookup_dict):

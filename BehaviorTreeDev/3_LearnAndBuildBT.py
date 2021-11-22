@@ -7,18 +7,11 @@ Attributes:
 """
 from sklearn import tree
 import graphviz
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
-from sklearn.compose import make_column_transformer
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
 import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 import os
-import shutil
-import json
 import BehaviorTreeBuilder as btBuilder
 from json_manager import JsonManager
 import pipeline_constants as constants

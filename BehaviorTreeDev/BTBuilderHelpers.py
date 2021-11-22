@@ -219,3 +219,15 @@ def generate_action_nodes(action):
         seq.add_child(seq_for_mult_action_node)
         final_node = seq
     return final_node
+
+
+# Tree
+def save_tree(tree, filename):
+    """Saves generated BehaviorTree to dot, svg, and png files
+
+    Args:
+        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
+        filename (str): full filename with path for tree to be saved to
+    """
+    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
+                                     with_blackboard_variables=False, target_directory=filename)
