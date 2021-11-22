@@ -1,4 +1,3 @@
-import networkx as nx
 import py_trees.decorators
 import py_trees.display
 import re
@@ -8,20 +7,9 @@ from pyeda.boolalg.expr import _LITS
 import pipeline_constants as constants
 from BTBuilderGlobals import *
 from BTBuilderHelpers import *
+from BTBuilderLAT import *
+from BTBuilderData import *
 
-# Data
-def add_condition_to_action_dictionary(dictionary, key, value):
-    """Adds condition to [action] -> condition string dictionary
-
-    Args:
-        dictionary (dict[str,str]): action dictionary from action -> condition string
-        key (str): action string
-        value (str): condition string
-    """
-    if not key in dictionary:
-        dictionary[key] = value
-    elif value != "": # deal with empty conditions
-        dictionary[key] = dictionary[key] + " | " +  value
 
 # Tree
 def is_leaf_node(dt, node_index):
@@ -37,12 +25,6 @@ def is_leaf_node(dt, node_index):
     return (dt.children_left[node_index] == -1
             and dt.children_right[node_index] == -1)
  
-# Data
-def build_last_action_taken_dict(condition, cond_symbol):
-    global lat_cond_lookup
-    if is_last_action_taken_condition(condition) and cond_symbol not in lat_cond_lookup:
-        lat_cond_lookup[cond_symbol] = condition.replace(constants.LAST_ACTION_TAKEN_COLUMN_NAME + "_", "")
-
 # Algo
 def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
     if is_leaf_node(dt, node_index):
@@ -103,23 +85,6 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
                             label_names)
     # remove all LAT from string
 
-# Data
-def add_to_vec_hash_dict(dictionary, key, value):
-    '''Adds to a dictionary of the following, appending to end of set
-    key: -3
-    value: -1
-    dictionary: {
-        -3 : {4,6}
-    }
-    result: {
-        -3 : {4,6,-1}
-    }
-    '''
-    if key not in dictionary:
-        dictionary[key] = {value}
-    else:
-        dictionary[key].add(value)
-
 # Algo
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
@@ -144,7 +109,7 @@ def dt_to_pstring(dt, feature_names, label_names):
                             action_to_pstring, feature_names, label_names)
     return sym_lookup, action_to_pstring
 
-# ALgo
+# Algo
 def get_common_conditions(condition_pstring):
     if condition_pstring.to_ast()[0] == constants.OR:
         all_condition_sets = []
@@ -158,32 +123,6 @@ def get_common_conditions(condition_pstring):
         return list(set.intersection(*map(set, all_condition_sets))), all_condition_sets
     else:
         return [], []
-
-# Data
-def generate_all_containing_float_variable_dict(sym_lookup):
-    containing_float_dict = {}
-    feature_look_up = {}
-    for key, value in sym_lookup.items():
-        if is_float_key(key):
-            f_key, f_val = get_key_from_float_expr(key)
-            if f_key not in feature_look_up:
-                feature_look_up[f_key] = [(f_val, value)]
-            else:
-                feature_look_up[f_key].append((f_val, value))
-
-    for f in feature_look_up:
-        feature_look_up[f].sort(key=lambda x: x[0])
-        l = feature_look_up[f]
-        for i in range(len(l) - 1):
-            tup = l[i]
-            sym = tup[1]
-            containing_float_dict[sym] = {x[1] for x in l[i+1:]}
-        feature_look_up[f].sort(key=lambda x: x[0], reverse=True)
-        for i in range(len(l) - 1):
-            tup = l[i]
-            sym = tup[1]
-            containing_float_dict['~' + sym] = {'~' + x[1] for x in l[i+1:]}
-    return containing_float_dict
 
 # Algo
 def remove_float_contained_variables(sym_lookup, pstring_dict):
@@ -388,47 +327,6 @@ def create_action_seq_node(action, action_dict, sym_lookup_dict):
 def max_prune(dt):
     return is_leaf_node(dt, 0)
 
-# Data
-def add_cond_to_double_dict(dictionary, key1, key2, val):
-    # check if val would lead to issue #91 aka it is a 1 in expr, 
-    # this would turn all vals in | condition to 1
-    if type(expr(val)) ==  pyeda.boolalg.expr._One:
-        return
-    if key1 in dictionary:
-        if key2 in dictionary[key1]:
-            dictionary[key1][key2] += " | " + val
-        else:
-            dictionary[key1][key2] = val
-    else:
-        dictionary[key1] = dict()
-        dictionary[key1][key2] = val
-
-# Data
-def create_action_min_wo_lat_dict(action_minimized):
-    global act_lat_conditions_dict
-    global lat_cond_lookup
-    global act_to_lat_sets_dict # [lat_action] -> prior action
-
-    action_min_wo_lat_dict = dict()
-    for action, condition in action_minimized.items():
-        cond_list = convert_expr_ast_to_str_rep(condition.to_ast()).split('|')
-        for cond in cond_list:
-            latcond = contains_latcond(cond)
-            if latcond != "":
-                final_cond = remove_all_lat_conditions(cond)
-                add_cond_to_double_dict(action_min_wo_lat_dict, action, lat_cond_lookup[latcond], final_cond)
-                add_to_vec_hash_dict(act_to_lat_sets_dict, action, lat_cond_lookup[latcond])
-    
-    convert_double_dict_to_expr(action_min_wo_lat_dict)
-    return action_min_wo_lat_dict
-
-# Algo
-def remove_all_lat_conditions(final_cond):
-    for key in lat_cond_lookup:
-        final_cond = re.sub("(?<!~)" + key + "(?!\S)", " 1 " , final_cond)
-        final_cond = re.sub("~" + key + "(?!\S)", " 1 ", final_cond)
-    return final_cond
-
 # Algo
 def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso):
     action_minimized = action_min_wo_lat_dict = {}
@@ -457,77 +355,23 @@ def espresso_reduction(action_to_pstring, action_minimized):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
-# LAT
-def find_all_paths(outgoing_edge_dict):
-    if len(outgoing_edge_dict) == 0:
-        return [], []
-
-    source_nodes = []
-    end_nodes = []
-    cyclenode_to_path_dict = dict() # [cycle_node] -> cycle path list
- 
-    graph = create_di_graph(outgoing_edge_dict)
-    cycles = list(nx.simple_cycles(graph))
-    dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict)
-    find_source_and_end_nodes(source_nodes, end_nodes, graph)
-    non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
-    return non_cycles, cyclenode_to_path_dict
-
-# LAT
-def find_non_cycle_paths(source_nodes, end_nodes, graph):
-    non_cycles = list()
-    for source in source_nodes:
-        for end in end_nodes:
-            if end == source:
-                non_cycles.append([source]) # singular node, not caught in all_simple_paths
-                continue
-            for path in nx.all_simple_paths(graph, source, end):
-                non_cycles.append(path)
-    return non_cycles
-
-# LAT
-def find_source_and_end_nodes(source_nodes, end_nodes, graph):
-    for node in graph.nodes:
-
-        if graph.in_degree(node) == 0:
-            source_nodes.append(node)
-        if graph.out_degree(node) == 0: # cannot be elif, can be singular node in graph with node
-            end_nodes.append(node)
-
-# LAT
-def create_di_graph(outgoing_edge_dict):
-    graph = nx.DiGraph()
-    for d_node in outgoing_edge_dict:
-        for s_node in outgoing_edge_dict[d_node]:
-            graph.add_edge(s_node, d_node)
-    return graph
-
-# LAT
-def is_cycle_node(node):
-    return constants.CYLCE_NODE in node
-
-# LAT
-def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict):
-    for cycle in cycles:
-        n_name = get_cycles_node_name()
-        graph.add_node(n_name)
-        nodes_in_cycle_set = set(cycle) # avoid self looping
-        for node in cycle:
-            for edge in graph.in_edges(node):
-                if edge[0] not in nodes_in_cycle_set:
-                    graph.add_edge(edge[0], n_name)
-            for edge in graph.out_edges(node):
-                if edge[1] not in nodes_in_cycle_set:
-                    graph.add_edge(n_name, edge[1])
-        graph.remove_nodes_from(cycle)
-        cyclenode_to_path_dict[n_name] = cycle
-
 # Algo
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
     global act_to_lat_sets_dict # [lat] -> {actions}
     non_cycle_paths, cyclenode_to_path_dict = find_all_paths(act_to_lat_sets_dict)
     for path in non_cycle_paths:
         root.add_child(generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path))
+
+# Tree
+def save_tree(tree, filename):
+    """Saves generated BehaviorTree to dot, svg, and png files
+
+    Args:
+        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
+        filename (str): full filename with path for tree to be saved to
+    """
+    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
+                                     with_blackboard_variables=False, target_directory=filename)
 
 # LAT
 def generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path):
@@ -564,17 +408,6 @@ def generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_looku
             top_seq.add_child(generate_action_nodes(action))
         lat_action = action
     return top_seq
-
-# Tree
-def save_tree(tree, filename):
-    """Saves generated BehaviorTree to dot, svg, and png files
-
-    Args:
-        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
-        filename (str): full filename with path for tree to be saved to
-    """
-    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
-                                     with_blackboard_variables=False, target_directory=filename)
 
 # Algo
 def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal_bt_espresso=False):

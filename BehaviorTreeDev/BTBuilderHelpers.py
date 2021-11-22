@@ -140,3 +140,10 @@ def get_cycles_node_name():
 # Helper
 def is_last_action_taken_condition(condition):
     return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition and not "No Entry" in condition
+
+# Helper
+def remove_all_lat_conditions(final_cond):
+    for key in lat_cond_lookup:
+        final_cond = re.sub("(?<!~)" + key + "(?!\S)", " 1 " , final_cond)
+        final_cond = re.sub("~" + key + "(?!\S)", " 1 ", final_cond)
+    return final_cond
