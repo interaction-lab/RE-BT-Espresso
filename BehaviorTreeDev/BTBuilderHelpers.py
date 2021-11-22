@@ -1,4 +1,6 @@
 import pipeline_constants as constants
+import py_trees.decorators
+import py_trees.display
 import numpy as np
 from BTBuilderGlobals import *
 from pyeda.boolalg.expr import _LITS
@@ -147,3 +149,73 @@ def remove_all_lat_conditions(final_cond):
         final_cond = re.sub("(?<!~)" + key + "(?!\S)", " 1 " , final_cond)
         final_cond = re.sub("~" + key + "(?!\S)", " 1 ", final_cond)
     return final_cond
+
+# Tree
+def make_condition_node(sym_lookup_dict, every_operand):
+    need_inverter = False
+    value = str(ast2expr(every_operand))
+    if value[0] == "~":
+        need_inverter = True
+        value = value[1:]
+
+    condition = get_key(sym_lookup_dict, value)
+
+    node = py_trees.behaviours.Success(name=condition)
+    if need_inverter:
+        node = py_trees.decorators.Inverter(
+            node, name="Inverter" + get_node_name_counter())
+
+    return node
+
+# Tree
+def max_prune(dt):
+    return is_leaf_node(dt, 0)
+
+# Tree
+def is_leaf_node(dt, node_index):
+    """Checks if node at node_index is a leaf node to a DecisionTree
+
+    Args:
+        dt (sklearn.DecisionTree): decision tree to be examined
+        node_index (int): index of node in dt
+
+    Returns:
+        bool : whether node at index is a leaf node in dt
+    """
+    return (dt.children_left[node_index] == -1
+            and dt.children_right[node_index] == -1)
+ 
+ # Tree
+
+# Tree
+def cleaned_action_behavior(action):
+    return py_trees.behaviours.Success(
+        name=constants.ACTION_NODE_STR + re.sub('[^A-Za-z0-9]+', '', action))
+
+# Tree
+def generate_action_nodes(action):
+    last_action_taken_node = None
+    # TODO: I think this is done/deprecated
+    if constants.LAST_ACTION_TAKEN_SEPERATOR in action:
+        split_list = action.split(constants.LAST_ACTION_TAKEN_SEPERATOR)
+        last_action_taken = split_list[0]
+        action = split_list[1]
+        last_action_taken_node = cleaned_action_behavior(last_action_taken)
+
+    action_list = action.split(constants.MULTI_ACTION_PAR_SEL_SEPERATOR)
+    seq_for_mult_action_node = None
+    if len(action_list) > 1:
+        seq_for_mult_action_node = py_trees.composites.Selector(
+        name=constants.SEL_PAR_REPLACEABLE_NAME + get_node_name_counter())
+        for a in action_list:
+            seq_for_mult_action_node.add_child(cleaned_action_behavior(a))
+    else:
+        seq_for_mult_action_node = cleaned_action_behavior(action)
+    
+    final_node = seq_for_mult_action_node
+    if last_action_taken_node != None:
+        seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
+        seq.add_child(last_action_taken_node)
+        seq.add_child(seq_for_mult_action_node)
+        final_node = seq
+    return final_node

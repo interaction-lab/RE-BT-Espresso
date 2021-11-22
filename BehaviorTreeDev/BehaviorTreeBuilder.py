@@ -1,6 +1,5 @@
 import py_trees.decorators
 import py_trees.display
-import re
 import pyeda
 from pyeda.inter import *
 from pyeda.boolalg.expr import _LITS
@@ -11,20 +10,7 @@ from BTBuilderLAT import *
 from BTBuilderData import *
 
 
-# Tree
-def is_leaf_node(dt, node_index):
-    """Checks if node at node_index is a leaf node to a DecisionTree
 
-    Args:
-        dt (sklearn.DecisionTree): decision tree to be examined
-        node_index (int): index of node in dt
-
-    Returns:
-        bool : whether node at index is a leaf node in dt
-    """
-    return (dt.children_left[node_index] == -1
-            and dt.children_right[node_index] == -1)
- 
 # Algo
 def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
     if is_leaf_node(dt, node_index):
@@ -214,21 +200,15 @@ def factorize_pstring(pstring_dict):
     return pstring_dict
 
 # Tree
-def make_condition_node(sym_lookup_dict, every_operand):
-    need_inverter = False
-    value = str(ast2expr(every_operand))
-    if value[0] == "~":
-        need_inverter = True
-        value = value[1:]
+def save_tree(tree, filename):
+    """Saves generated BehaviorTree to dot, svg, and png files
 
-    condition = get_key(sym_lookup_dict, value)
-
-    node = py_trees.behaviours.Success(name=condition)
-    if need_inverter:
-        node = py_trees.decorators.Inverter(
-            node, name="Inverter" + get_node_name_counter())
-
-    return node
+    Args:
+        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
+        filename (str): full filename with path for tree to be saved to
+    """
+    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
+                                     with_blackboard_variables=False, target_directory=filename)
 
 # Algo
 def recursive_build(pstring_expr, sym_lookup_dict):
@@ -260,39 +240,6 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 
     return new_branch
 
-# Tree
-def cleaned_action_behavior(action):
-    return py_trees.behaviours.Success(
-        name=constants.ACTION_NODE_STR + re.sub('[^A-Za-z0-9]+', '', action))
-
-# Tree
-def generate_action_nodes(action):
-    last_action_taken_node = None
-    # TODO: I think this is done/deprecated
-    if constants.LAST_ACTION_TAKEN_SEPERATOR in action:
-        split_list = action.split(constants.LAST_ACTION_TAKEN_SEPERATOR)
-        last_action_taken = split_list[0]
-        action = split_list[1]
-        last_action_taken_node = cleaned_action_behavior(last_action_taken)
-
-    action_list = action.split(constants.MULTI_ACTION_PAR_SEL_SEPERATOR)
-    seq_for_mult_action_node = None
-    if len(action_list) > 1:
-        seq_for_mult_action_node = py_trees.composites.Selector(
-        name=constants.SEL_PAR_REPLACEABLE_NAME + get_node_name_counter())
-        for a in action_list:
-            seq_for_mult_action_node.add_child(cleaned_action_behavior(a))
-    else:
-        seq_for_mult_action_node = cleaned_action_behavior(action)
-    
-    final_node = seq_for_mult_action_node
-    if last_action_taken_node != None:
-        seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
-        seq.add_child(last_action_taken_node)
-        seq.add_child(seq_for_mult_action_node)
-        final_node = seq
-    return final_node
-
 # ALgo
 def pstring_to_btree(action_dict, sym_lookup_dict):
     root = py_trees.composites.Parallel(name="|| Root")
@@ -322,10 +269,6 @@ def create_action_seq_node(action, action_dict, sym_lookup_dict):
         final_behavior_node.add_child(generate_action_nodes(action))
     
         return final_behavior_node
-
-# Tree
-def max_prune(dt):
-    return is_leaf_node(dt, 0)
 
 # Algo
 def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso):
@@ -361,17 +304,6 @@ def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo
     non_cycle_paths, cyclenode_to_path_dict = find_all_paths(act_to_lat_sets_dict)
     for path in non_cycle_paths:
         root.add_child(generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path))
-
-# Tree
-def save_tree(tree, filename):
-    """Saves generated BehaviorTree to dot, svg, and png files
-
-    Args:
-        tree (py_trees.trees.BehaviourTree): BehaviorTree to be saved
-        filename (str): full filename with path for tree to be saved to
-    """
-    py_trees.display.render_dot_tree(tree, name=constants.BEHAVIOR_TREE_XML_FILENAME,
-                                     with_blackboard_variables=False, target_directory=filename)
 
 # LAT
 def generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path):
