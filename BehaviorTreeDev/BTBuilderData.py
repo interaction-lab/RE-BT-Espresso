@@ -5,7 +5,6 @@ import pipeline_constants as constants
 from pyeda.inter import *
 from pyeda.boolalg.expr import _LITS
 
-# Data
 def add_to_vec_hash_dict(dictionary, key, value):
     '''Adds to a dictionary of the following, appending to end of set
     key: -3
@@ -22,7 +21,6 @@ def add_to_vec_hash_dict(dictionary, key, value):
     else:
         dictionary[key].add(value)
 
-# Data
 def generate_all_containing_float_variable_dict(sym_lookup):
     containing_float_dict = {}
     feature_look_up = {}
@@ -48,7 +46,6 @@ def generate_all_containing_float_variable_dict(sym_lookup):
             containing_float_dict['~' + sym] = {'~' + x[1] for x in l[i+1:]}
     return containing_float_dict
 
-# Data
 def add_cond_to_double_dict(dictionary, key1, key2, val):
     # check if val would lead to issue #91 aka it is a 1 in expr, 
     # this would turn all vals in | condition to 1
@@ -63,7 +60,6 @@ def add_cond_to_double_dict(dictionary, key1, key2, val):
         dictionary[key1] = dict()
         dictionary[key1][key2] = val
 
-# Data
 def create_action_min_wo_lat_dict(action_minimized):
     global act_lat_conditions_dict
     global lat_cond_lookup
@@ -82,13 +78,11 @@ def create_action_min_wo_lat_dict(action_minimized):
     convert_double_dict_to_expr(action_min_wo_lat_dict)
     return action_min_wo_lat_dict
 
-# Data
 def build_last_action_taken_dict(condition, cond_symbol):
     global lat_cond_lookup
     if is_last_action_taken_condition(condition) and cond_symbol not in lat_cond_lookup:
         lat_cond_lookup[cond_symbol] = condition.replace(constants.LAST_ACTION_TAKEN_COLUMN_NAME + "_", "")
 
-# Data
 def add_condition_to_action_dictionary(dictionary, key, value):
     """Adds condition to [action] -> condition string dictionary
 

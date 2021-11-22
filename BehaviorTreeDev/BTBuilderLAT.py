@@ -2,7 +2,6 @@ from BehaviorTreeDev.BTBuilderHelpers import get_cycles_node_name
 import networkx as nx
 import pipeline_constants as constants
 
-# LAT
 def find_all_paths(outgoing_edge_dict):
     if len(outgoing_edge_dict) == 0:
         return [], []
@@ -18,7 +17,6 @@ def find_all_paths(outgoing_edge_dict):
     non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
     return non_cycles, cyclenode_to_path_dict
 
-# LAT
 def find_non_cycle_paths(source_nodes, end_nodes, graph):
     non_cycles = list()
     for source in source_nodes:
@@ -30,7 +28,6 @@ def find_non_cycle_paths(source_nodes, end_nodes, graph):
                 non_cycles.append(path)
     return non_cycles
 
-# LAT
 def find_source_and_end_nodes(source_nodes, end_nodes, graph):
     for node in graph.nodes:
 
@@ -39,7 +36,6 @@ def find_source_and_end_nodes(source_nodes, end_nodes, graph):
         if graph.out_degree(node) == 0: # cannot be elif, can be singular node in graph with node
             end_nodes.append(node)
 
-# LAT
 def create_di_graph(outgoing_edge_dict):
     graph = nx.DiGraph()
     for d_node in outgoing_edge_dict:
@@ -47,11 +43,9 @@ def create_di_graph(outgoing_edge_dict):
             graph.add_edge(s_node, d_node)
     return graph
 
-# LAT
 def is_cycle_node(node):
     return constants.CYLCE_NODE in node
 
-# LAT
 def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict):
     for cycle in cycles:
         n_name = get_cycles_node_name()
@@ -66,4 +60,3 @@ def dag_graph_from_cycles(graph, cycles, cyclenode_to_path_dict):
                     graph.add_edge(n_name, edge[1])
         graph.remove_nodes_from(cycle)
         cyclenode_to_path_dict[n_name] = cycle
-

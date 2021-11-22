@@ -7,7 +7,6 @@ from pyeda.boolalg.expr import _LITS
 from pyeda.inter import *
 import re
 
-# Helper
 def find_max_indices_given_percent(numpy_1D_array):
     """Finds array of max indices within a given percent
        ex. [[10, 0, 9.5, 7]], 0.1 -> [0,2]
@@ -25,8 +24,6 @@ def find_max_indices_given_percent(numpy_1D_array):
     indices = np.where(tmp_arr >= min_val)[0]
     return indices
 
-
-# Helper
 def invert_expression(exp):
     """Inverts and returns logical operator expressions
        ex. "<" -> ">="
@@ -52,49 +49,38 @@ def invert_expression(exp):
     else:
         return exp
 
-# Helper
 def get_key(dictionary, val):
     for key, value in dictionary.items():
         if val == value:
             return key
     return "key doesn't exist"
 
-
-# Helper
 def get_current_var_name():
     global var_cycle_count    
     tmp = "VAR" + str(var_cycle_count)
     var_cycle_count += 1
     return tmp
 
-
-# Helper
 def is_bool_feature(dt, node_index, feature_names):
     global binary_feature_set
     name = feature_names[dt.feature[node_index]]
     return name in binary_feature_set or is_last_action_taken_condition(name) or ("True" in name)
 
-
-# Helper
 def int_to_condition(int_condition):
     return str(_LITS[int_condition])
 
-# Helper
 def is_float_key(k_in):
     return "<=" in k_in
 
-# Helper
 def get_key_from_float_expr(k_in):
     return k_in.split("<=")[0], float(k_in.split("<=")[1][1:])
 
-# Helper
 def get_node_name_counter():
     global node_name_counter
     _ = f"({node_name_counter})"
     node_name_counter += 1
     return _
 
-# Helper
 def convert_expr_ast_to_str_rep(expr_ast):
     # Note this only works for dnf expressions, maybe we will fix this bleh
     result = ""
@@ -114,7 +100,6 @@ def convert_expr_ast_to_str_rep(expr_ast):
         result = str(int_to_condition(expr_ast[1]))
     return result
 
-# Helper
 def contains_latcond(str_rep_cond):
     for key in lat_cond_lookup:
         # (?<!~) is "is not preceded with ~" to avoid inverted conditions 
@@ -124,33 +109,26 @@ def contains_latcond(str_rep_cond):
             return key_matches[0]
     return ""
 
-
-# Helper
 def convert_double_dict_to_expr(dictionary):
     for key1 in dictionary:
         for key2 in dictionary[key1]:
             dictionary[key1][key2] = expr(dictionary[key1][key2])
 
-
-# Helper
 def get_cycles_node_name():
     global cycle_node_counter
     name = constants.CYLCE_NODE + str(cycle_node_counter)
     cycle_node_counter += 1
     return name
 
-# Helper
 def is_last_action_taken_condition(condition):
     return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition and not "No Entry" in condition
 
-# Helper
 def remove_all_lat_conditions(final_cond):
     for key in lat_cond_lookup:
         final_cond = re.sub("(?<!~)" + key + "(?!\S)", " 1 " , final_cond)
         final_cond = re.sub("~" + key + "(?!\S)", " 1 ", final_cond)
     return final_cond
 
-# Tree
 def make_condition_node(sym_lookup_dict, every_operand):
     need_inverter = False
     value = str(ast2expr(every_operand))
@@ -167,11 +145,9 @@ def make_condition_node(sym_lookup_dict, every_operand):
 
     return node
 
-# Tree
 def max_prune(dt):
     return is_leaf_node(dt, 0)
 
-# Tree
 def is_leaf_node(dt, node_index):
     """Checks if node at node_index is a leaf node to a DecisionTree
 
@@ -185,14 +161,10 @@ def is_leaf_node(dt, node_index):
     return (dt.children_left[node_index] == -1
             and dt.children_right[node_index] == -1)
  
- # Tree
-
-# Tree
 def cleaned_action_behavior(action):
     return py_trees.behaviours.Success(
         name=constants.ACTION_NODE_STR + re.sub('[^A-Za-z0-9]+', '', action))
 
-# Tree
 def generate_action_nodes(action):
     last_action_taken_node = None
     # TODO: I think this is done/deprecated
@@ -220,8 +192,6 @@ def generate_action_nodes(action):
         final_node = seq
     return final_node
 
-
-# Tree
 def save_tree(tree, filename):
     """Saves generated BehaviorTree to dot, svg, and png files
 
