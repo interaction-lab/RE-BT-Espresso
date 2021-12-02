@@ -11,6 +11,7 @@ Attributes:
 
 import argparse
 from json_manager import JsonManager
+from BTBuilderGlobals import expr_name
 
 normalize_0 = __import__('0_NormalizeData')
 hotencode_1 = __import__('1_HotEncodeData')
@@ -55,6 +56,8 @@ def main():
 	'-r, --recolor' - [optional] runs recoloring when trees are done generating
 	"""
 	json_file_path, should_recolor, run_original_bt_espresso = parse_args()
+	global expr_name
+	expr_name = json_file_path
 	run_pipeline(json_file_path, should_recolor, DEFAULT_OUTPUT_PATH, run_original_bt_espresso)
 
 if __name__ == '__main__':

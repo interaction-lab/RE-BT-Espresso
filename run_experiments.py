@@ -81,7 +81,7 @@ def run_experiment(base_pipeline_config, experiment_file, should_recolor, run_or
 	bt_tree_filepath_list = run_pipeline.run_pipeline(pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log", run_original_bt_espresso)
 	simulated_tree_file = sim_data_output_path + sim_tree_name + ".dot"
 	bt_tree_filepath_list.insert(0, simulated_tree_file)
-	run_results.run_result_list(bt_tree_filepath_list[:-1], run_original_bt_espresso) # removes the tree with nothing in it / final prune
+	# run_results.run_result_list(bt_tree_filepath_list[:-1], run_original_bt_espresso) # removes the tree with nothing in it / final prune
 	
 
 def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):

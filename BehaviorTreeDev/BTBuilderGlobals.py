@@ -14,3 +14,7 @@ node_name_counter = 0
 cycle_node_counter = 0
 # [action][lat_action] -> conditions that came with lat minus lat cond
 act_lat_conditions_dict = dict() 
+# [cycle_node] -> cycle path list
+cyclenode_to_path_dict = dict()
+# expr (for global debugging)
+expr_name = ""
