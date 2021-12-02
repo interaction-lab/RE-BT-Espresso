@@ -47,11 +47,6 @@ def is_cycle_node(node):
     return constants.CYLCE_NODE in node
 
 
-import sys
-
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
 def dag_graph_from_cycles(graph, cyclenode_to_path_dict):
     cycles = list(nx.simple_cycles(graph))
     while len(cycles) > 0:
@@ -61,13 +56,6 @@ def dag_graph_from_cycles(graph, cyclenode_to_path_dict):
             remove_cycle(graph, cycle, n_name)
             cyclenode_to_path_dict[n_name] = cycle
         cycles = list(nx.simple_cycles(graph))
-        if len(cycles > 0):
-            global expr_name
-            print("raise multi_cylced~||~------------------------------------------------------------------------")
-            print(expr_name)
-            eprint("raise multi_cylced~||~------------------------------------------------------------------------")
-            eprint(expr_name)
-            raise "multi_cylced"
 
 
 def remove_cycle(graph, cycle, n_name):
