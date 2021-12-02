@@ -9,6 +9,7 @@ from BTBuilderHelpers import *
 from BTBuilderLAT import *
 from BTBuilderData import *
 
+
 def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal_bt_espresso=False):
     """Runs modified BT-Espresso algorithm with new reductions
 
@@ -23,32 +24,37 @@ def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal
     global binary_feature_set
     binary_feature_set = _binary_features
     global lat_cond_lookup
-    lat_cond_lookup = {} # reset from last run
+    lat_cond_lookup = {}  # reset from last run
     global act_to_lat_sets_dict
-    act_to_lat_sets_dict = {} # reset from last run
+    act_to_lat_sets_dict = {}  # reset from last run
 
     if max_prune(dt):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, no behavior tree to be made as the most likley action would always be chosen.")
-    
+
     sym_lookup, action_to_pstring = dt_to_pstring(
-        dt, 
-        feature_names, 
+        dt,
+        feature_names,
         label_names)
     action_minimized, action_minimized_wo_lat = minimize_bool_expression(
-        sym_lookup, 
+        sym_lookup,
         action_to_pstring,
         run_orginal_bt_espresso)
     btree = pstring_to_btree(action_minimized, sym_lookup)
-    
+
     if not run_orginal_bt_espresso:
-        add_last_action_taken_seq_chains(btree, action_minimized, action_minimized_wo_lat, sym_lookup)
+        add_last_action_taken_seq_chains(
+            btree, action_minimized, action_minimized_wo_lat, sym_lookup)
     return btree
+
 
 def dt_to_pstring_recursive(dt, node_index, current_pstring, sym_lookup, action_to_pstring, feature_names, label_names):
     if is_leaf_node(dt, node_index):
-        process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring)
+        process_leaf_node(dt, node_index, label_names,
+                          action_to_pstring, current_pstring)
     else:
-        process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names)
+        process_non_leaf_node(dt, node_index, feature_names, sym_lookup,
+                              current_pstring, action_to_pstring, label_names)
+
 
 def dt_to_pstring(dt, feature_names, label_names):
     sym_lookup = {}
@@ -57,12 +63,15 @@ def dt_to_pstring(dt, feature_names, label_names):
                             action_to_pstring, feature_names, label_names)
     return sym_lookup, action_to_pstring
 
+
 def pstring_to_btree(action_dict, sym_lookup_dict):
     root = py_trees.composites.Parallel(name="|| Root")
-    
+
     for action in action_dict:
-        root.add_child(create_action_seq_node(action, action_dict, sym_lookup_dict))
+        root.add_child(create_action_seq_node(
+            action, action_dict, sym_lookup_dict))
     return root
+
 
 def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pstring, action_to_pstring, label_names):
     global lat_cond_lookup
@@ -81,7 +90,7 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
     # Note: this is very jank, we invert the rules of the dt for true letters to be ~ because of set up of dtree
     if (not true_rule in sym_lookup) and (not false_rule in sym_lookup):
         add_condition_to_action_dictionary(
-            sym_lookup, 
+            sym_lookup,
             false_rule,
             get_current_var_name())
 
@@ -89,14 +98,15 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
     if false_rule in sym_lookup:
         false_letter = sym_lookup.get(false_rule)
         true_letter = "~" + false_letter
-    
-    build_last_action_taken_dict(false_rule, false_letter) # uses jank from above
+
+    build_last_action_taken_dict(
+        false_rule, false_letter)  # uses jank from above
 
     left_pstring = true_letter if current_pstring == "" else current_pstring + \
         " & " + true_letter
     right_pstring = false_letter if current_pstring == "" else current_pstring + \
         " & " + false_letter
-    
+
     # traverse left side of tree (true condition)
     dt_to_pstring_recursive(dt,
                             dt.children_left[node_index],
@@ -116,6 +126,7 @@ def process_non_leaf_node(dt, node_index, feature_names, sym_lookup, current_pst
                             label_names)
     # remove all LAT from string
 
+
 def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_pstring):
     max_indices = find_max_indices_given_percent(dt.value[node_index])
     action = ""
@@ -127,9 +138,10 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
         action += str(label_names[i])
     # process last action taken here?
     add_condition_to_action_dictionary(
-        action_to_pstring, 
-        action, 
+        action_to_pstring,
+        action,
         current_pstring)
+
 
 def get_common_conditions(condition_pstring):
     if condition_pstring.to_ast()[0] == constants.OR:
@@ -144,6 +156,7 @@ def get_common_conditions(condition_pstring):
         return list(set.intersection(*map(set, all_condition_sets))), all_condition_sets
     else:
         return [], []
+
 
 def remove_float_contained_variables(sym_lookup, pstring_dict):
     """Removes float variables that "consume" the others
@@ -165,7 +178,7 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
     # remove lower variable
     for action, condition_pstring in pstring_dict.items():
         if(condition_pstring == ""):
-            continue # deal with empty conditions likely from LAT, still valid
+            continue  # deal with empty conditions likely from LAT, still valid
         new_pstring = "("
         new_pstring_list = []
 
@@ -202,10 +215,11 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
         pstring_dict[action] = expr(new_pstring).to_nnf()
     return pstring_dict
 
+
 def factorize_pstring(pstring_dict):
     for action, condition_pstring in pstring_dict.items():
         if(condition_pstring == ""):
-            continue # deal with empty conditions likely from LAT, still valid
+            continue  # deal with empty conditions likely from LAT, still valid
         can_simplify = condition_pstring.to_ast()[0] == constants.OR
         conditions_in_all, all_condition_sets = get_common_conditions(
             condition_pstring)
@@ -231,6 +245,7 @@ def factorize_pstring(pstring_dict):
             pstring_dict[action] = expr(new_pstring).to_nnf()
 
     return pstring_dict
+
 
 def recursive_build(pstring_expr, sym_lookup_dict):
     operator = pstring_expr.to_ast()[0]
@@ -261,25 +276,29 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 
     return new_branch
 
+
 def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso):
     action_minimized = action_min_wo_lat_dict = {}
     espresso_reduction(action_to_pstring, action_minimized)
     if not run_original_bt_espresso:
         action_minimized = remove_float_contained_variables(
             sym_lookup, action_minimized)
-        action_min_wo_lat_dict = create_action_min_wo_lat_dict(action_minimized)
+        action_min_wo_lat_dict = create_action_min_wo_lat_dict(
+            action_minimized)
         action_minimized = factorize_pstring(
             action_minimized)
         dict_copy = dict(action_min_wo_lat_dict)
         for action in dict_copy:
-            action_min_wo_lat_dict[action]= factorize_pstring(action_min_wo_lat_dict[action])
+            action_min_wo_lat_dict[action] = factorize_pstring(
+                action_min_wo_lat_dict[action])
     return action_minimized, action_min_wo_lat_dict
+
 
 def espresso_reduction(action_to_pstring, action_minimized):
     for action in action_to_pstring:
         if action_to_pstring[action] == "":
             action_minimized[action] = ""
-            continue # no conditions, likely a LAT, continue
+            continue  # no conditions, likely a LAT, continue
         expression = expr(action_to_pstring[action])
         # happens in case of VARX | ~VARX
         if(not expression.is_dnf() or type(expression) == pyeda.boolalg.expr._Zero):
@@ -287,69 +306,75 @@ def espresso_reduction(action_to_pstring, action_minimized):
         dnf = expression.to_dnf()
         action_minimized[action] = espresso_exprs(dnf)[0]
 
+
 def add_last_action_taken_seq_chains(root, action_minimized, action_minimized_wo_lat, sym_lookup_dict):
-    global act_to_lat_sets_dict # [lat] -> {actions}
-    non_cycle_paths, cyclenode_to_path_dict = find_all_paths(act_to_lat_sets_dict)
+    global act_to_lat_sets_dict  # [lat] -> {actions}
+    non_cycle_paths, cyclenode_to_path_dict = find_all_paths(
+        act_to_lat_sets_dict)
     for path in non_cycle_paths:
-        root.add_child(generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path))
+        root.add_child(generate_non_cycle_seq_node(
+            action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path))
+
 
 def generate_non_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict, path):
-    top_seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME+ get_node_name_counter())
+    top_seq = py_trees.composites.Sequence(
+        name=constants.LAT_SEQ_NAME + get_node_name_counter())
     lat_action = ""
     for action in path:
-        if is_cycle_node(action):
-            top_seq.add_child(generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict[action]))
-        elif lat_action == "": # first action in chain    
-            if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
-                top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
-            top_seq.add_child(generate_action_nodes(action))
-        else:
-            if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) != pyeda.boolalg.expr._One:
-                top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
-            top_seq.add_child(generate_action_nodes(action))
+        process_action(action_minimized, action_minimized_wo_lat,
+                       sym_lookup_dict, path, top_seq, action, lat_action)
         lat_action = action
     return top_seq
+
 
 def create_action_seq_node(action, action_dict, sym_lookup_dict):
-        if(action not in action_dict or action_dict[action] == ""):
-            return generate_action_nodes(action) # empty condition set likely from LAT, still valid, deal and continue
-        
-        top_conditional_seq_node = recursive_build(
-            action_dict[action], sym_lookup_dict)
+    if(action not in action_dict or action_dict[action] == ""):
+        # empty condition set likely from LAT, still valid, deal and continue
+        return generate_action_nodes(action)
 
-        final_behavior_node = None
+    top_conditional_seq_node = recursive_build(
+        action_dict[action], sym_lookup_dict)
 
-        if not isinstance(top_conditional_seq_node, py_trees.composites.Sequence):
-            top_seq_node_addition = py_trees.composites.Sequence(
-                name="Sequence")
-            top_seq_node_addition.add_child(top_conditional_seq_node)
-            final_behavior_node = top_seq_node_addition
-        else:
-            final_behavior_node = top_conditional_seq_node
+    final_behavior_node = None
 
-        final_behavior_node.add_child(generate_action_nodes(action))
-    
-        return final_behavior_node
+    if not isinstance(top_conditional_seq_node, py_trees.composites.Sequence):
+        top_seq_node_addition = py_trees.composites.Sequence(
+            name="Sequence")
+        top_seq_node_addition.add_child(top_conditional_seq_node)
+        final_behavior_node = top_seq_node_addition
+    else:
+        final_behavior_node = top_conditional_seq_node
+
+    final_behavior_node.add_child(generate_action_nodes(action))
+
+    return final_behavior_node
+
 
 def generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path):
-    top_seq = py_trees.composites.Sequence(name=constants.REPEAT_SEQ_NAME + get_node_name_counter())
+    top_seq = py_trees.composites.Sequence(
+        name=constants.REPEAT_SEQ_NAME + get_node_name_counter())
     lat_action = ""
     for action in path:
-        if is_cycle_node(action): # multi cycle
-            top_seq.add_child(generate_cycle_seq_node(action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict[action]))
-        else:
-            process_action(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path, top_seq, action, lat_action)
+        if len(path) == 1:  # self cycle
+            lat_action = action
+
+        process_action(action_minimized, action_minimized_wo_lat,
+                       sym_lookup_dict, path, top_seq, action, lat_action)
         lat_action = action
     return top_seq
 
+
 def process_action(action_minimized, action_minimized_wo_lat, sym_lookup_dict, path, top_seq, action, lat_action):
-    if len(path) == 1: # self cycle
-        lat_action = action
-    if lat_action == "": # first action in chain    
-        if action in action_minimized and type(action_minimized[action]) !=  pyeda.boolalg.expr._One:
-            top_seq.add_child(recursive_build(action_minimized[action], sym_lookup_dict))
+    if is_cycle_node(action) and lat_action != action:  # multi cycle but not self cycle
+        top_seq.add_child(generate_cycle_seq_node(
+            action_minimized, action_minimized_wo_lat, sym_lookup_dict, cyclenode_to_path_dict[action]))
+    elif lat_action == "" or lat_action == action:  # first action in chain or self cycle
+        if action in action_minimized and type(action_minimized[action]) != pyeda.boolalg.expr._One:
+            top_seq.add_child(recursive_build(
+                action_minimized[action], sym_lookup_dict))
         top_seq.add_child(generate_action_nodes(action))
     else:
-        if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) !=  pyeda.boolalg.expr._One:
-           top_seq.add_child(recursive_build(action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
+        if action in action_minimized_wo_lat and lat_action in action_minimized_wo_lat[action] and type(action_minimized_wo_lat[action][lat_action]) != pyeda.boolalg.expr._One:
+            top_seq.add_child(recursive_build(
+                action_minimized_wo_lat[action][lat_action], sym_lookup_dict))
         top_seq.add_child(generate_action_nodes(action))
