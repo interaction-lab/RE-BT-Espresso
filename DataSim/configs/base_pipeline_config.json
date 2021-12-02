@@ -1,48 +1,35 @@
 {
-    "csv_folder_path": "RECONFIGURE_CSV_FOLDER_PATH",
-    "normalized_path": "RECONFIGURE_NORMALIZED_PATH",
-    "hotEncoded_path": "RECONFIGURE_HOTENCODED_PATH",
-    "upSampled_path": "RECONFIGURE_UPSAMPLED_PATH",
-    "output_package_path": "RECONFIGURE_OUTPUT_PATH",
-  
-    "feature_columns": [
-      "/stu_state_var_2",
-      "/stu_state_var_1",
-      "/env_state_var_3",
-      "/env_state_var_4",
-      "/stu_state_var_6",
-      "/success",
-      "/stu_state_var_4",
-      "/env_state_var_6",
-      "/env_state_var_1",
-      "/stu_state_var_3",
-      "/Time",
-      "/stu_state_var_5",
-      "/env_state_var_2",
-      "/env_state_var_5"
-    ],
-  
-  
-    "categorical_features": [ 
-     
-    ],
-    "binary_features": [
-  
-    ],
-  
-  
-    "label_columns": [
-      "/robot_action"
-    ],
-  
-    "lag_features": [],
-    "sliding_window_length": 1,
-    "add_last_action_taken": true,
-    
-    "decision_tree_depth": 5,
-    "k_fold": 5,
-    "SVMSMOTE_upsampling": false,
-    "random_state": null
-  }
-  
-  
+  "csv_folder_path": "RECONFIGURE_CSV_FOLDER_PATH",
+  "normalized_path": "RECONFIGURE_NORMALIZED_PATH",
+  "hotEncoded_path": "RECONFIGURE_HOTENCODED_PATH",
+  "upSampled_path": "RECONFIGURE_UPSAMPLED_PATH",
+  "output_package_path": "RECONFIGURE_OUTPUT_PATH",
+  "feature_columns": [
+    "/stu_state_var_2",
+    "/stu_state_var_1",
+    "/env_state_var_3",
+    "/env_state_var_4",
+    "/stu_state_var_6",
+    "/success",
+    "/stu_state_var_4",
+    "/env_state_var_6",
+    "/env_state_var_1",
+    "/stu_state_var_3",
+    "/Time",
+    "/stu_state_var_5",
+    "/env_state_var_2",
+    "/env_state_var_5"
+  ],
+  "categorical_features": [],
+  "binary_features": [],
+  "label_columns": [
+    "/robot_action"
+  ],
+  "lag_features": [],
+  "sliding_window_length": 1,
+  "add_last_action_taken": true,
+  "decision_tree_depth": 5,
+  "k_fold": 5,
+  "SVMSMOTE_upsampling": false,
+  "random_state": null
+}

@@ -17,7 +17,7 @@ def find_all_paths(outgoing_edge_dict):
     dag_graph_from_cycles(graph, cyclenode_to_path_dict)
     find_source_and_end_nodes(source_nodes, end_nodes, graph)
     non_cycles = find_non_cycle_paths(source_nodes, end_nodes, graph)
-   
+
     return non_cycles, cyclenode_to_path_dict
 
 

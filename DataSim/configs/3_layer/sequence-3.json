@@ -2,10 +2,10 @@
     "type": "parallel",
     "child_list": [
         {
-            "name" : "sequence",
-            "inverted" : false,
+            "name": "sequence",
+            "inverted": false,
             "type": "composite",
-            "child_list" : [
+            "child_list": [
                 {
                     "name": "selector",
                     "inverted": false,
@@ -66,5 +66,3 @@
         }
     ]
 }
-  
-  

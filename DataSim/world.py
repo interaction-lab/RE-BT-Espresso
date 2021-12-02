@@ -2,10 +2,11 @@ import py_trees as pt
 import random
 from globals import*
 
+
 class World():
     def __init__(self):
         self.setup()
-        
+
     def setup(self):
         self.blackboard = pt.blackboard.Client(name="World")
         self.init_read_write_access()
@@ -13,7 +14,8 @@ class World():
 
     def init_read_write_access(self):
         for key in env_vars:
-            self.blackboard.register_key(key=key, access=pt.common.Access.WRITE)
+            self.blackboard.register_key(
+                key=key, access=pt.common.Access.WRITE)
         for key in student_vars:
             self.blackboard.register_key(key=key, access=pt.common.Access.READ)
 
@@ -22,7 +24,7 @@ class World():
             self.blackboard.set(key, 0, True)
 
     def update(self):
-        #update random state variable
+        # update random state variable
         key = random.randint(1, len(env_vars)-1)
         state_var = env_vars[key]
         new_value = random.random()

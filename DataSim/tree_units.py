@@ -7,11 +7,13 @@ from globals import robot_vars, env_vars, student_vars
 from robot_behaviors import*
 
 '''Tree base class'''
+
+
 class Tree():
     def __init__(self):
         self.root = None
         self.setup()
-        
+
     def setup(self):
         self.robot_blackboard = pt.blackboard.Client(name="Robot")
         self.define_tree()
@@ -20,21 +22,26 @@ class Tree():
 
     def init_read_write_access(self):
         for key in robot_vars:
-            self.robot_blackboard.register_key(key=key, access=pt.common.Access.WRITE)
+            self.robot_blackboard.register_key(
+                key=key, access=pt.common.Access.WRITE)
         for key in env_vars:
-            self.robot_blackboard.register_key(key=key, access=pt.common.Access.READ)
+            self.robot_blackboard.register_key(
+                key=key, access=pt.common.Access.READ)
         for key in student_vars:
-            self.robot_blackboard.register_key(key=key, access=pt.common.Access.READ)
-    
+            self.robot_blackboard.register_key(
+                key=key, access=pt.common.Access.READ)
+
     def reset_robot_state(self):
         self.robot_blackboard.robot_action = None
 
     def define_tree(self):
         pass
-        
+
     def render_tree(self, output_path, n_in):
-        pt.display.render_dot_tree(self.root, target_directory=output_path, name=n_in)
-        
+        pt.display.render_dot_tree(
+            self.root, target_directory=output_path, name=n_in)
+
+
 class Tree_Basic(Tree):
     def __init__(self, type_, name, child_list):
         self.child_list = child_list
@@ -50,11 +57,11 @@ class Tree_Basic(Tree):
             "parsel"
         }
         super().__init__()
-        
+
     def define_tree(self):
         self.build_tree(self.root, self.type_, self.name, self.child_list)
         self.b_tree = pt.trees.BehaviourTree(self.root)
-        
+
     def build_tree(self, root, type_, name_, c_list):
         composite_node = self.create_composite(type_, name_)
         if composite_node:
@@ -62,13 +69,12 @@ class Tree_Basic(Tree):
         for child in c_list:
             self.add_child_to_root(root, child)
 
-
-
     def add_child_to_root(self, root, child):
         if child["type_"] in self.composite_set:
             if "inverted" in child and child["inverted"]:
                 pt.decorators.Inverter(name="Inverter", child=root)
-            self.build_tree(root, child["type_"], child['name'], child["child_list"])
+            self.build_tree(root, child["type_"],
+                            child['name'], child["child_list"])
         elif child["type_"] == "action":
             a_node = Action(child["name"], child["p_success"])
             if "inverted" in child and child["inverted"]:
@@ -76,7 +82,8 @@ class Tree_Basic(Tree):
             root.add_child(a_node)
         elif child["type_"] == "condition":
             # made name target state for easier matching
-            c_node = Condition(child["target_state"], child["p_success"], child['target_state'], child["threshold"])
+            c_node = Condition(
+                child["target_state"], child["p_success"], child['target_state'], child["threshold"])
             if "inverted" in child and child["inverted"]:
                 c_node = pt.decorators.Inverter(name="Inverter", child=c_node)
             root.add_child(c_node)
@@ -109,7 +116,7 @@ class Tree_Basic(Tree):
                 name = name.replace("selector", "Selector")
             else:
                 name = "Selector_" + name
-            name = "Selector" #hardcoded for analysis
+            name = "Selector"  # hardcoded for analysis
         return pt.composites.Selector(name=name)
 
     def create_sequence_node(self, name):
@@ -118,18 +125,17 @@ class Tree_Basic(Tree):
                 name = name.replace("sequence", "Sequence")
             else:
                 name = "Sequence_" + name
-            name = "Sequence" #hardcoded for analysis
+            name = "Sequence"  # hardcoded for analysis
         return pt.composites.Sequence(name=name)
-
 
     def create_parallel_node(self, name):
         if "||" not in name:
             name = "||_" + name
-        name = "||" #hardcoded for analysis
+        name = "||"  # hardcoded for analysis
         return pt.composites.Parallel(name=name)
 
     def create_repeater_node(self, name):
-        return Repeater(num_repeats=3, name="Repeat<>") # configurable
+        return Repeater(num_repeats=3, name="Repeat<>")  # configurable
 
     def create_par_sel_node(self, name):
         return pt.composites.Parallel(name="|| / Selector")

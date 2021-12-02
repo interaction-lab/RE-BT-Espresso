@@ -1,6 +1,6 @@
 {
     "type_": "sequence",
-    "name" : "sequence_1",
+    "name": "sequence_1",
     "child_list": [
         {
             "name": "action_1",
@@ -16,5 +16,3 @@
         }
     ]
 }
-  
-  

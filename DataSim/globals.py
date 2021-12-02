@@ -30,24 +30,28 @@ student_vars = [
     "stu_state_var_5",
     "stu_state_var_6"
 ]
-    
+
 robot_vars = [
     "robot_action",
     "success"
 ]
 
+
 def combine_folder_and_working_dir(folder_name, working_directory):
-	if working_directory:
-		return os.fsdecode(os.path.join(working_directory, folder_name))
-	return folder_name
+    if working_directory:
+        return os.fsdecode(os.path.join(working_directory, folder_name))
+    return folder_name
+
 
 def does_folder_exist_in_directory(folder_name, working_directory=None):
-	potential_directory = combine_folder_and_working_dir(folder_name, working_directory)
-	return os.path.isdir(potential_directory), potential_directory
+    potential_directory = combine_folder_and_working_dir(
+        folder_name, working_directory)
+    return os.path.isdir(potential_directory), potential_directory
+
 
 def remove_folder_if_exists(folder_name, working_directory=None):
-	dir_exists, dir_path = does_folder_exist_in_directory(\
-		folder_name, working_directory)
-	if dir_exists:
-		print(f"Removing prior directory {dir_path}")
-		shutil.rmtree(dir_path)
+    dir_exists, dir_path = does_folder_exist_in_directory(
+        folder_name, working_directory)
+    if dir_exists:
+        print(f"Removing prior directory {dir_path}")
+        shutil.rmtree(dir_path)

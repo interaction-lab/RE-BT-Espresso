@@ -1,4 +1,6 @@
 import threading
+
+
 class StoppableThread(threading.Thread):
     def __init__(self, name='StoppableThread'):
         """ constructor, setting initial variables """

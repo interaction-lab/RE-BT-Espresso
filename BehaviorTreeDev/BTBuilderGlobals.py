@@ -3,7 +3,7 @@
 # [variable_symbol] -> condition
 lat_cond_lookup = dict()
 # [lat_action] -> prior action
-act_to_lat_sets_dict = dict() 
+act_to_lat_sets_dict = dict()
 # set of all binary features
 binary_feature_set = set()
 # Counter for number of variables processed, used for unique naming
@@ -13,13 +13,13 @@ node_name_counter = 0
 # Number of cycle nodes, used for unique naming
 cycle_node_counter = 0
 # [action][lat_action] -> conditions that came with lat minus lat cond
-act_lat_conditions_dict = dict() 
+act_lat_conditions_dict = dict()
 # [cycle_node] -> cycle path list
 cyclenode_to_path_dict = dict()
-## Global debugging vars
+# Global debugging vars
 # expriment name
 expr_name = ""
 # current prune #
 cur_prune_num = {
-    "val" : 0
+    "val": 0
 }

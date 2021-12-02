@@ -6,7 +6,8 @@ from BTBuilderGlobals import *
 from pyeda.boolalg.expr import _LITS
 from pyeda.inter import *
 import re
-import traceback # debugging
+import traceback  # debugging
+
 
 def find_max_indices_given_percent(numpy_1D_array):
     """Finds array of max indices within a given percent
@@ -21,9 +22,11 @@ def find_max_indices_given_percent(numpy_1D_array):
     """
     assert constants.ACTION_DIFF_TOLERANCE["val"] >= 0 and constants.ACTION_DIFF_TOLERANCE["val"] <= 1.0
     tmp_arr = numpy_1D_array[0]
-    min_val = np.amax(numpy_1D_array) * (1.0 - constants.ACTION_DIFF_TOLERANCE["val"])
+    min_val = np.amax(numpy_1D_array) * \
+        (1.0 - constants.ACTION_DIFF_TOLERANCE["val"])
     indices = np.where(tmp_arr >= min_val)[0]
     return indices
+
 
 def invert_expression(exp):
     """Inverts and returns logical operator expressions
@@ -50,37 +53,45 @@ def invert_expression(exp):
     else:
         return exp
 
+
 def get_key(dictionary, val):
     for key, value in dictionary.items():
         if val == value:
             return key
     return "key doesn't exist"
 
+
 def get_current_var_name():
-    global var_cycle_count    
+    global var_cycle_count
     tmp = "VAR" + str(var_cycle_count)
     var_cycle_count += 1
     return tmp
+
 
 def is_bool_feature(dt, node_index, feature_names):
     global binary_feature_set
     name = feature_names[dt.feature[node_index]]
     return name in binary_feature_set or is_last_action_taken_condition(name) or ("True" in name)
 
+
 def int_to_condition(int_condition):
     return str(_LITS[int_condition])
+
 
 def is_float_key(k_in):
     return "<=" in k_in
 
+
 def get_key_from_float_expr(k_in):
     return k_in.split("<=")[0], float(k_in.split("<=")[1][1:])
+
 
 def get_node_name_counter():
     global node_name_counter
     _ = f"({node_name_counter})"
     node_name_counter += 1
     return _
+
 
 def convert_expr_ast_to_str_rep(expr_ast):
     # Note this only works for dnf expressions, maybe we will fix this bleh
@@ -89,7 +100,8 @@ def convert_expr_ast_to_str_rep(expr_ast):
         print("This should not happen, should pass in ast with at least one literal, returning empty string, likely will break rest of algo")
         return result
     elif(expr_ast[0] == constants.AND):
-        list_conditions = [int_to_condition(condition[1]) for condition in expr_ast[1:]]
+        list_conditions = [int_to_condition(
+            condition[1]) for condition in expr_ast[1:]]
         result = " & ".join(list_conditions)
     elif(expr_ast[0] == constants.OR):
         # loop through all literals and join
@@ -97,23 +109,26 @@ def convert_expr_ast_to_str_rep(expr_ast):
         for and_expr in expr_ast[1:]:
             res_str_list.append(convert_expr_ast_to_str_rep(and_expr))
         result = " | ".join(res_str_list)
-    else: # single literal
+    else:  # single literal
         result = str(int_to_condition(expr_ast[1]))
     return result
 
+
 def contains_latcond(str_rep_cond):
     for key in lat_cond_lookup:
-        # (?<!~) is "is not preceded with ~" to avoid inverted conditions 
+        # (?<!~) is "is not preceded with ~" to avoid inverted conditions
         # (?!\S) is nothing or whitespace to avoid VAR1 - VAR10 issue
         key_matches = re.findall("(?<!~)" + key + "(?!\S)", str_rep_cond)
         if len(key_matches) > 0:
             return key_matches[0]
     return ""
 
+
 def convert_double_dict_to_expr(dictionary):
     for key1 in dictionary:
         for key2 in dictionary[key1]:
             dictionary[key1][key2] = expr(dictionary[key1][key2])
+
 
 def get_cycles_node_name():
     global cycle_node_counter
@@ -121,14 +136,17 @@ def get_cycles_node_name():
     cycle_node_counter += 1
     return name
 
+
 def is_last_action_taken_condition(condition):
     return constants.LAST_ACTION_TAKEN_COLUMN_NAME in condition and not "No Entry" in condition
 
+
 def remove_all_lat_conditions(final_cond):
     for key in lat_cond_lookup:
-        final_cond = re.sub("(?<!~)" + key + "(?!\S)", " 1 " , final_cond)
+        final_cond = re.sub("(?<!~)" + key + "(?!\S)", " 1 ", final_cond)
         final_cond = re.sub("~" + key + "(?!\S)", " 1 ", final_cond)
     return final_cond
+
 
 def make_condition_node(sym_lookup_dict, every_operand):
     need_inverter = False
@@ -146,8 +164,10 @@ def make_condition_node(sym_lookup_dict, every_operand):
 
     return node
 
+
 def max_prune(dt):
     return is_leaf_node(dt, 0)
+
 
 def is_leaf_node(dt, node_index):
     """Checks if node at node_index is a leaf node to a DecisionTree
@@ -161,10 +181,12 @@ def is_leaf_node(dt, node_index):
     """
     return (dt.children_left[node_index] == -1
             and dt.children_right[node_index] == -1)
- 
+
+
 def cleaned_action_behavior(action):
     return py_trees.behaviours.Success(
         name=constants.ACTION_NODE_STR + re.sub('[^A-Za-z0-9]+', '', action))
+
 
 def generate_action_nodes(action):
     last_action_taken_node = None
@@ -179,19 +201,21 @@ def generate_action_nodes(action):
     seq_for_mult_action_node = None
     if len(action_list) > 1:
         seq_for_mult_action_node = py_trees.composites.Selector(
-        name=constants.SEL_PAR_REPLACEABLE_NAME + get_node_name_counter())
+            name=constants.SEL_PAR_REPLACEABLE_NAME + get_node_name_counter())
         for a in action_list:
             seq_for_mult_action_node.add_child(cleaned_action_behavior(a))
     else:
         seq_for_mult_action_node = cleaned_action_behavior(action)
-    
+
     final_node = seq_for_mult_action_node
     if last_action_taken_node != None:
-        seq = py_trees.composites.Sequence(name=constants.LAT_SEQ_NAME + get_node_name_counter())
+        seq = py_trees.composites.Sequence(
+            name=constants.LAT_SEQ_NAME + get_node_name_counter())
         seq.add_child(last_action_taken_node)
         seq.add_child(seq_for_mult_action_node)
         final_node = seq
     return final_node
+
 
 def save_tree(tree, filename):
     """Saves generated BehaviorTree to dot, svg, and png files

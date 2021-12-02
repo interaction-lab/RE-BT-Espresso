@@ -1,4 +1,14 @@
 # For Paths
+from joblib import Parallel, delayed
+import multiprocessing as mp
+import glob
+from multiprocessing import process
+import argparse
+import bt_sim
+import run_pipeline
+import json_manager
+from json_manager import JsonManager
+import run_results
 import sys
 import os
 
@@ -25,18 +35,6 @@ output_file_path = "output.log"
 should_recolor = run_multiprocess = run_original_bt_espresso = False
 
 # global imports
-import run_results
-from json_manager import JsonManager
-import json_manager
-import run_pipeline
-import bt_sim
-import argparse
-from multiprocessing import process
-import glob
-import multiprocessing as mp
-from joblib import Parallel, delayed
-
-
 
 
 def parse_args():

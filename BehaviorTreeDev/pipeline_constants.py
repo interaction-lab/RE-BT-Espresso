@@ -25,7 +25,7 @@ LABEL_COLUMN_NAME = "Label"
 COLUMN_AXIS = 1
 
 MULTI_ACTION_PAR_SEL_SEPERATOR = "~||~"
-LAST_ACTION_TAKEN_SEPERATOR="~<-LAT~"
+LAST_ACTION_TAKEN_SEPERATOR = "~<-LAT~"
 LAT_REMOVAL_COND = " 0 "
 
 SEL_PAR_REPLACEABLE_NAME = "|| / Selector"
@@ -40,32 +40,37 @@ AND = "and"
 OR = "or"
 
 ACTION_DIFF_TOLERANCE = {
-	"val" : 0.3
+    "val": 0.3
 }
 
 # Description: creates and adds folder called folder_name to directory: working_directory,
 #			   returns path to folder
 # ex: folder_name = "normalizedCSVs", working_directory = /path/to/directory
 # return: "/path/to/directory/normalizedCSVs"
+
+
 def add_folder_to_directory(folder_name, working_directory):
-	new_directory = os.fsdecode(os.path.join(working_directory, folder_name))
-	if not os.path.isdir(new_directory): 
-		os.makedirs(new_directory)
-	return new_directory
+    new_directory = os.fsdecode(os.path.join(working_directory, folder_name))
+    if not os.path.isdir(new_directory):
+        os.makedirs(new_directory)
+    return new_directory
 
 
 def combine_folder_and_working_dir(folder_name, working_directory):
-	if working_directory:
-		return os.fsdecode(os.path.join(working_directory, folder_name))
-	return folder_name
+    if working_directory:
+        return os.fsdecode(os.path.join(working_directory, folder_name))
+    return folder_name
+
 
 def does_folder_exist_in_directory(folder_name, working_directory=None):
-	potential_directory = combine_folder_and_working_dir(folder_name, working_directory)
-	return os.path.isdir(potential_directory), potential_directory
+    potential_directory = combine_folder_and_working_dir(
+        folder_name, working_directory)
+    return os.path.isdir(potential_directory), potential_directory
+
 
 def remove_folder_if_exists(folder_name, working_directory=None):
-	dir_exists, dir_path = does_folder_exist_in_directory(\
-		folder_name, working_directory)
-	if dir_exists:
-		print(f"Removing prior directory {dir_path}")
-		shutil.rmtree(dir_path)
+    dir_exists, dir_path = does_folder_exist_in_directory(
+        folder_name, working_directory)
+    if dir_exists:
+        print(f"Removing prior directory {dir_path}")
+        shutil.rmtree(dir_path)

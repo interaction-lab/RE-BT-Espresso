@@ -1,1 +1,63 @@
-{"name": "parallel_root", "type_": "parallel", "child_list": [{"name": "repeater", "type_": "repeater", "child_list": [{"name": "action_1", "type_": "action", "p_success": 1, "inverted": false, "threshold": 0.5}, {"name": "parsel", "type_": "parsel", "p_success": 1, "inverted": false, "threshold": 0.5, "child_list": [{"name": "action_3", "type_": "action", "p_success": 1, "inverted": false, "threshold": 0.5}, {"name": "action_0", "type_": "action", "p_success": 1, "inverted": false, "threshold": 0.5}]}]}, {"name": "sequence", "type_": "sequence", "child_list": [{"name": "/env_state_var_2", "type_": "condition", "p_success": 1, "inverted": false, "threshold": 0.5, "target_state": "/env_state_var_2"}, {"name": "action_3", "type_": "action", "p_success": 1, "inverted": false, "threshold": 0.5}]}]}
+{
+    "name": "parallel_root",
+    "type_": "parallel",
+    "child_list": [
+        {
+            "name": "repeater",
+            "type_": "repeater",
+            "child_list": [
+                {
+                    "name": "action_1",
+                    "type_": "action",
+                    "p_success": 1,
+                    "inverted": false,
+                    "threshold": 0.5
+                },
+                {
+                    "name": "parsel",
+                    "type_": "parsel",
+                    "p_success": 1,
+                    "inverted": false,
+                    "threshold": 0.5,
+                    "child_list": [
+                        {
+                            "name": "action_3",
+                            "type_": "action",
+                            "p_success": 1,
+                            "inverted": false,
+                            "threshold": 0.5
+                        },
+                        {
+                            "name": "action_0",
+                            "type_": "action",
+                            "p_success": 1,
+                            "inverted": false,
+                            "threshold": 0.5
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "sequence",
+            "type_": "sequence",
+            "child_list": [
+                {
+                    "name": "/env_state_var_2",
+                    "type_": "condition",
+                    "p_success": 1,
+                    "inverted": false,
+                    "threshold": 0.5,
+                    "target_state": "/env_state_var_2"
+                },
+                {
+                    "name": "action_3",
+                    "type_": "action",
+                    "p_success": 1,
+                    "inverted": false,
+                    "threshold": 0.5
+                }
+            ]
+        }
+    ]
+}

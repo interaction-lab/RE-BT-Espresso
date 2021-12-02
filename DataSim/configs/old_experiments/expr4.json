@@ -1,12 +1,12 @@
 {
     "type_": "sequence",
-    "name" : "root",
+    "name": "root",
     "child_list": [
         {
             "name": "sequence_1",
             "inverted": false,
             "type_": "sequence",
-            "child_list" : [
+            "child_list": [
                 {
                     "name": "condition_1",
                     "inverted": false,
@@ -27,20 +27,20 @@
                     "type_": "action",
                     "p_success": 1
                 }
-                ]
-        }, 
+            ]
+        },
         {
             "name": "sequence_2",
             "inverted": false,
             "type_": "sequence",
-            "child_list" : [
+            "child_list": [
                 {
                     "name": "condition_2",
                     "inverted": false,
                     "type_": "condition",
                     "p_success": 1,
                     "target_state": "env_state_var_2",
-                    "threshold": 0.5   
+                    "threshold": 0.5
                 },
                 {
                     "name": "action_4",
@@ -52,5 +52,3 @@
         }
     ]
 }
-  
-  

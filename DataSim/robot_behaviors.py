@@ -16,9 +16,11 @@ class Condition(pt.behaviour.Behaviour):
         self.target_state = target_state
         self.threshold = threshold
         self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)
-        self.blackboard.register_key(key=target_state, access=pt.common.Access.READ)
-            
+        self.blackboard.register_key(
+            key="robot_action", access=pt.common.Access.WRITE)
+        self.blackboard.register_key(
+            key=target_state, access=pt.common.Access.READ)
+
     def update(self):
         if random.random() <= self.p_correct:
             status = self.check()
@@ -26,37 +28,43 @@ class Condition(pt.behaviour.Behaviour):
         else:
             status = self.fail_check()
             return status
-    
+
     def check(self):
         if self.blackboard.get(self.target_state) < self.threshold:
             return pt.common.Status.SUCCESS
         else:
             return pt.common.Status.FAILURE
-        
+
     def fail_check(self):
         if self.blackboard.get(self.target_state) < self.threshold:
             return pt.common.Status.FAILURE
         else:
             return pt.common.Status.SUCCESS
-        
+
+
 write_this_turn = True
+
+
 class Action(pt.behaviour.Behaviour):
     def __init__(self, name, p_correct):
         super().__init__(name=name)
         self.p_correct = p_correct
         if "action" not in self.name:
-            self.name = "action_" + self.name # needed for results
+            self.name = "action_" + self.name  # needed for results
         self.blackboard = self.attach_blackboard_client(name=self.name)
-        self.blackboard.register_key(key="success", access=pt.common.Access.WRITE)
-        self.blackboard.register_key(key="robot_action", access=pt.common.Access.WRITE)
-            
+        self.blackboard.register_key(
+            key="success", access=pt.common.Access.WRITE)
+        self.blackboard.register_key(
+            key="robot_action", access=pt.common.Access.WRITE)
+
     def update(self):
         global write_this_turn
 
         status = self.do_act() if random.random() <= self.p_correct else self.fail_act()
         write_this_turn = random.random() > 0.4
         if write_this_turn:
-            g.csv_writer.writerow(pt.blackboard.Blackboard.storage) # how to deal with repeaters....
+            # how to deal with repeaters....
+            g.csv_writer.writerow(pt.blackboard.Blackboard.storage)
             return status
         return pt.common.Status.RUNNING
 
@@ -64,18 +72,19 @@ class Action(pt.behaviour.Behaviour):
         self.blackboard.robot_action = self.name
         self.blackboard.success = True
         return pt.common.Status.SUCCESS
-    
+
     def fail_act(self):
         self.blackboard.success = False
         return pt.common.Status.FAILURE
-    
+
+
 class Repeater(pt.composites.Sequence):
-    def __init__(self, 
-        num_repeats=3,
-        name: str="Repeat<>",
-        memory: bool=True,
-        children: typing.List[pt.behaviour.Behaviour]=None,
-        ):
+    def __init__(self,
+                 num_repeats=3,
+                 name: str = "Repeat<>",
+                 memory: bool = True,
+                 children: typing.List[pt.behaviour.Behaviour] = None,
+                 ):
 
         super().__init__(name=name, children=children)
         self.memory = memory
@@ -100,7 +109,7 @@ class Repeater(pt.composites.Sequence):
                     child.stop(common.Status.INVALID)
             # user specific initialisation
             self.initialise()
-            self.at_iter = 0 # reset repeater
+            self.at_iter = 0  # reset repeater
         else:  # self.memory is True and status is RUNNING
             index = self.children.index(self.current_child)
 
@@ -134,4 +143,3 @@ class Repeater(pt.composites.Sequence):
 
         self.stop(common.Status.SUCCESS)
         yield self
-
