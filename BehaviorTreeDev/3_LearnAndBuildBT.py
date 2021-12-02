@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import BehaviorTreeBuilder as btBuilder
+from BTBuilderGlobals import cur_prune_num
 from json_manager import JsonManager
 import pipeline_constants as constants
 import numpy as np
@@ -207,7 +208,9 @@ class Runner:
 		i = 0
 		ccp_alpha_list_copy = ccp_alphas.copy()
 		bt_tree_filepath_list = []
+		global cur_prune_num
 		for ccp_alpha in ccp_alpha_list_copy:
+			cur_prune_num["val"] = i
 			if ccp_alpha < 0: # bug in sklearn I think
 				ccp_alpha *= -1
 			if ccp_alpha in run_alphas: # dublicate zero ccp due to low rounding float

@@ -39,7 +39,9 @@ ACTION_NODE_STR = "A->"
 AND = "and"
 OR = "or"
 
-ACTION_DIFF_TOLERANCE = 0.3
+ACTION_DIFF_TOLERANCE = {
+	"val" : 0.3
+}
 
 # Description: creates and adds folder called folder_name to directory: working_directory,
 #			   returns path to folder

@@ -5,6 +5,7 @@ import pipeline_constants as constants
 from pyeda.inter import *
 from pyeda.boolalg.expr import _LITS
 
+
 def add_to_vec_hash_dict(dictionary, key, value):
     '''Adds to a dictionary of the following, appending to end of set
     key: -3
@@ -20,6 +21,7 @@ def add_to_vec_hash_dict(dictionary, key, value):
         dictionary[key] = {value}
     else:
         dictionary[key].add(value)
+
 
 def generate_all_containing_float_variable_dict(sym_lookup):
     containing_float_dict = {}
@@ -46,10 +48,11 @@ def generate_all_containing_float_variable_dict(sym_lookup):
             containing_float_dict['~' + sym] = {'~' + x[1] for x in l[i+1:]}
     return containing_float_dict
 
+
 def add_cond_to_double_dict(dictionary, key1, key2, val):
-    # check if val would lead to issue #91 aka it is a 1 in expr, 
+    # check if val would lead to issue #91 aka it is a 1 in expr,
     # this would turn all vals in | condition to 1
-    if type(expr(val)) ==  pyeda.boolalg.expr._One:
+    if type(expr(val)) == pyeda.boolalg.expr._One:
         return
     if key1 in dictionary:
         if key2 in dictionary[key1]:
@@ -60,10 +63,11 @@ def add_cond_to_double_dict(dictionary, key1, key2, val):
         dictionary[key1] = dict()
         dictionary[key1][key2] = val
 
+
 def create_action_min_wo_lat_dict(action_minimized):
     global act_lat_conditions_dict
     global lat_cond_lookup
-    global act_to_lat_sets_dict # [lat_action] -> prior action
+    global act_to_lat_sets_dict  # [lat_action] -> prior action
 
     action_min_wo_lat_dict = dict()
     for action, condition in action_minimized.items():
@@ -72,16 +76,21 @@ def create_action_min_wo_lat_dict(action_minimized):
             latcond = contains_latcond(cond)
             if latcond != "":
                 final_cond = remove_all_lat_conditions(cond)
-                add_cond_to_double_dict(action_min_wo_lat_dict, action, lat_cond_lookup[latcond], final_cond)
-                add_to_vec_hash_dict(act_to_lat_sets_dict, action, lat_cond_lookup[latcond])
-    
+                add_cond_to_double_dict(
+                    action_min_wo_lat_dict, action, lat_cond_lookup[latcond], final_cond)
+                add_to_vec_hash_dict(act_to_lat_sets_dict,
+                                     action, lat_cond_lookup[latcond])
+
     convert_double_dict_to_expr(action_min_wo_lat_dict)
     return action_min_wo_lat_dict
+
 
 def build_last_action_taken_dict(condition, cond_symbol):
     global lat_cond_lookup
     if is_last_action_taken_condition(condition) and cond_symbol not in lat_cond_lookup:
-        lat_cond_lookup[cond_symbol] = condition.replace(constants.LAST_ACTION_TAKEN_COLUMN_NAME + "_", "")
+        lat_cond_lookup[cond_symbol] = condition.replace(
+            constants.LAST_ACTION_TAKEN_COLUMN_NAME + "_", "")
+
 
 def add_condition_to_action_dictionary(dictionary, key, value):
     """Adds condition to [action] -> condition string dictionary
@@ -93,5 +102,5 @@ def add_condition_to_action_dictionary(dictionary, key, value):
     """
     if not key in dictionary:
         dictionary[key] = value
-    elif value != "": # deal with empty conditions
-        dictionary[key] = dictionary[key] + " | " +  value
+    elif value != "":  # deal with empty conditions
+        dictionary[key] = dictionary[key] + " | " + value

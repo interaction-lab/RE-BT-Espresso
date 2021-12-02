@@ -78,6 +78,8 @@ def find_graph_sim(generated_graph, sim_graph):
     gen_subtrees = [get_subtree_graph(generated_graph, edges[1]) for edges in generated_graph.out_edges(gen_root)]
     sim_subtrees = [get_subtree_graph(sim_graph, edges[1]) for edges in sim_graph.out_edges(sim_root)]
 
+
+    # TODO: remove threading as it clogs CPU
     # possibly split all expriment sub_trees as well
     max_iters = 1 # tunable, possibly look at timeouts
     max_time = 30 # tunable

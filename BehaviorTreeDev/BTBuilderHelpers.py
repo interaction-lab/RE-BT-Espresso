@@ -6,6 +6,7 @@ from BTBuilderGlobals import *
 from pyeda.boolalg.expr import _LITS
 from pyeda.inter import *
 import re
+import traceback # debugging
 
 def find_max_indices_given_percent(numpy_1D_array):
     """Finds array of max indices within a given percent
@@ -18,9 +19,9 @@ def find_max_indices_given_percent(numpy_1D_array):
     Returns:
         np.arr(int) : indices of array falling within percdiff 
     """
-    assert constants.ACTION_DIFF_TOLERANCE >= 0 and constants.ACTION_DIFF_TOLERANCE <= 1.0
+    assert constants.ACTION_DIFF_TOLERANCE["val"] >= 0 and constants.ACTION_DIFF_TOLERANCE["val"] <= 1.0
     tmp_arr = numpy_1D_array[0]
-    min_val = np.amax(numpy_1D_array) * (1.0 - constants.ACTION_DIFF_TOLERANCE)
+    min_val = np.amax(numpy_1D_array) * (1.0 - constants.ACTION_DIFF_TOLERANCE["val"])
     indices = np.where(tmp_arr >= min_val)[0]
     return indices
 

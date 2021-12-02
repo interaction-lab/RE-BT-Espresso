@@ -28,6 +28,9 @@ def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal
     global act_to_lat_sets_dict
     act_to_lat_sets_dict = {}  # reset from last run
 
+    if run_orginal_bt_espresso:
+        constants.ACTION_DIFF_TOLERANCE["val"] = 0
+
     if max_prune(dt):
         return py_trees.composites.Parallel(name="Decision Tree is Only 1 Level, no behavior tree to be made as the most likley action would always be chosen.")
 
@@ -40,7 +43,7 @@ def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal
         action_to_pstring,
         run_orginal_bt_espresso)
     btree = pstring_to_btree(action_minimized, sym_lookup)
-
+    global cur_prune_num
     if not run_orginal_bt_espresso:
         add_last_action_taken_seq_chains(
             btree, action_minimized, action_minimized_wo_lat, sym_lookup)
@@ -133,10 +136,7 @@ def process_leaf_node(dt, node_index, label_names, action_to_pstring, current_ps
     for i in max_indices:
         if action != "":
             action += constants.MULTI_ACTION_PAR_SEL_SEPERATOR
-        # else: -> I think this is an old bug, may or may not be fixed, likely from physical data issue
-        #     print(action)
         action += str(label_names[i])
-    # process last action taken here?
     add_condition_to_action_dictionary(
         action_to_pstring,
         action,
@@ -179,6 +179,9 @@ def remove_float_contained_variables(sym_lookup, pstring_dict):
     for action, condition_pstring in pstring_dict.items():
         if(condition_pstring == ""):
             continue  # deal with empty conditions likely from LAT, still valid
+        if type(condition_pstring) == pyeda.boolalg.expr._One:
+            pstring_dict[action] = condition_pstring
+            continue
         new_pstring = "("
         new_pstring_list = []
 
@@ -259,6 +262,9 @@ def recursive_build(pstring_expr, sym_lookup_dict):
         recursive = True
         new_branch = py_trees.composites.Selector(
             name="Selector" + get_node_name_counter())
+    # check for One
+    elif type(pstring_expr) == pyeda.boolalg.expr._One:
+        return None
     else:
         new_branch = make_condition_node(
             sym_lookup_dict, pstring_expr.to_ast())
@@ -268,13 +274,17 @@ def recursive_build(pstring_expr, sym_lookup_dict):
             if every_operand[0] == constants.AND or every_operand[0] == constants.OR:
                 node = recursive_build(
                     ast2expr(every_operand), sym_lookup_dict)
-                new_branch.add_child(node)
+                if node != None:
+                    new_branch.add_child(node)
             else:
                 condition_node = make_condition_node(
                     sym_lookup_dict, every_operand)
-                new_branch.add_child(condition_node)
+                if condition_node != None:
+                    new_branch.add_child(condition_node)
 
     return new_branch
+
+# when this is 1, look up var0 kind of thing
 
 
 def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso):
@@ -332,6 +342,7 @@ def create_action_seq_node(action, action_dict, sym_lookup_dict):
         # empty condition set likely from LAT, still valid, deal and continue
         return generate_action_nodes(action)
 
+    # can be None
     top_conditional_seq_node = recursive_build(
         action_dict[action], sym_lookup_dict)
 
@@ -340,12 +351,16 @@ def create_action_seq_node(action, action_dict, sym_lookup_dict):
     if not isinstance(top_conditional_seq_node, py_trees.composites.Sequence):
         top_seq_node_addition = py_trees.composites.Sequence(
             name="Sequence")
-        top_seq_node_addition.add_child(top_conditional_seq_node)
+        if top_conditional_seq_node != None:
+            top_seq_node_addition.add_child(top_conditional_seq_node)
         final_behavior_node = top_seq_node_addition
     else:
         final_behavior_node = top_conditional_seq_node
 
-    final_behavior_node.add_child(generate_action_nodes(action))
+    if final_behavior_node != None:
+        final_behavior_node.add_child(generate_action_nodes(action))
+    else:
+        final_behavior_node = generate_action_nodes(action)
 
     return final_behavior_node
 

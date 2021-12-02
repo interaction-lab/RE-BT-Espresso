@@ -16,5 +16,10 @@ cycle_node_counter = 0
 act_lat_conditions_dict = dict() 
 # [cycle_node] -> cycle path list
 cyclenode_to_path_dict = dict()
-# expr (for global debugging)
+## Global debugging vars
+# expriment name
 expr_name = ""
+# current prune #
+cur_prune_num = {
+    "val" : 0
+}
