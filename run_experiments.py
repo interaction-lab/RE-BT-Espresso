@@ -80,20 +80,12 @@ def main():
 
 def run_all_experiments(run_multiprocess):
     if run_multiprocess:
-        #processes = []
         pool = multiprocessing.Pool()
-      
-        
         for config_file in glob.glob(experiments_folder + "/*.json"):
               pool.apply_async(run_experiment, [config_file])
         pool.close()
         pool.join()
-        #     p = mp.Process(target=run_experiment, args=(
-        #         base_pipeline_config, config_file, should_recolor, run_original_bt_espresso))
-        #     processes.append(p)
-        #     p.start()
-        # for process in processes:
-        #     process.join()
+
     else:
         for config_file in glob.glob(experiments_folder + "/*.json"):
             run_experiment(config_file)
