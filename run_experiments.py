@@ -1,14 +1,3 @@
-# For Paths
-from joblib import Parallel, delayed
-import multiprocessing as mp
-import glob
-from multiprocessing import process
-import argparse
-import bt_sim
-import run_pipeline
-import json_manager
-from json_manager import JsonManager
-import run_results
 import sys
 import os
 
@@ -29,6 +18,19 @@ sys.path.append(os.path.join(os.path.dirname(
 # result analysis imports
 sys.path.append(os.path.join(os.path.dirname(
     __file__), '.', result_analysis_folder))
+
+# For Paths
+from joblib import Parallel, delayed
+import multiprocessing as mp
+import glob
+from multiprocessing import process
+import argparse
+import bt_sim
+import run_pipeline
+import json_manager
+from json_manager import JsonManager
+import run_results
+
 
 json_file_path = "config.json"
 output_file_path = "output.log"
