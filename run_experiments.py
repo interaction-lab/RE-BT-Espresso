@@ -1,3 +1,4 @@
+import multiprocessing
 import sys
 import os
 
@@ -59,43 +60,49 @@ def parse_args():
     return json_file_path, should_recolor, run_multiprocess, run_original_bt_espresso
 
 
+# this should not be moved
+base_pipeline_config = "DataSim/configs/base_pipeline_config.json"
+should_recolor = False
+run_original_bt_espresso = False
 def main():
     """Runs the simulator and full pipeline end to end
     '-c, --config' - [optional] Path to json config
     """
     print("Start Experiments")
-    global experiments_folder
-    # this should not be moved
-    base_pipeline_config = "DataSim/configs/base_pipeline_config.json"
+    global experiments_folder, should_recolor, run_original_bt_espresso
 
     single_experiment_filename, should_recolor, run_multiprocess, run_original_bt_espresso = parse_args()
     if single_experiment_filename:
-        run_experiment(base_pipeline_config, experiments_folder + "/" +
-                       single_experiment_filename, should_recolor, run_original_bt_espresso)
+        run_experiment(experiments_folder + "/" + single_experiment_filename)
     else:
-        run_all_experiments(base_pipeline_config, should_recolor,
-                            run_multiprocess, run_original_bt_espresso)
+        run_all_experiments(base_pipeline_config)
 
 
-def run_all_experiments(base_pipeline_config, should_recolor, run_multiprocess, run_original_bt_espresso):
+def run_all_experiments(run_multiprocess):
     if run_multiprocess:
-        processes = []
+        #processes = []
+        pool = multiprocessing.Pool()
+      
+        
         for config_file in glob.glob(experiments_folder + "/*.json"):
-            p = mp.Process(target=run_experiment, args=(
-                base_pipeline_config, config_file, should_recolor, run_original_bt_espresso))
-            processes.append(p)
-            p.start()
-        for process in processes:
-            process.join()
+              pool.apply_async(run_experiment, [config_file])
+        pool.close()
+        pool.join()
+        #     p = mp.Process(target=run_experiment, args=(
+        #         base_pipeline_config, config_file, should_recolor, run_original_bt_espresso))
+        #     processes.append(p)
+        #     p.start()
+        # for process in processes:
+        #     process.join()
     else:
         for config_file in glob.glob(experiments_folder + "/*.json"):
-            run_experiment(base_pipeline_config, config_file,
-                           should_recolor, run_original_bt_espresso)
+            run_experiment(config_file)
 
     print("Finished all experiments")
 
 
-def run_experiment(base_pipeline_config, experiment_file, should_recolor, run_original_bt_espresso):
+def run_experiment(experiment_file):
+    global base_pipeline_config, should_recolor, run_original_bt_espresso
     sim_data_output_path, sim_tree_name = bt_sim.run_sim(experiment_file)
     pipeline_config_path = write_pipeline_config(
         base_pipeline_config, sim_data_output_path, sim_data_output_path + "output")
@@ -103,7 +110,7 @@ def run_experiment(base_pipeline_config, experiment_file, should_recolor, run_or
         pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log", run_original_bt_espresso)
     simulated_tree_file = sim_data_output_path + sim_tree_name + ".dot"
     bt_tree_filepath_list.insert(0, simulated_tree_file)
-    # run_results.run_result_list(bt_tree_filepath_list[:-1], run_original_bt_espresso) # removes the tree with nothing in it / final prune
+    run_results.run_result_list(bt_tree_filepath_list[:-1], run_original_bt_espresso) # removes the tree with nothing in it / final prune
 
 
 def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):

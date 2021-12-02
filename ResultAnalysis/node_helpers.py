@@ -1,8 +1,6 @@
 import re
 import networkx as nx
-import time
 from thread_helpers import StoppableThread
-import threading
 import matplotlib.pyplot as plt
 import copy
 
@@ -89,10 +87,8 @@ def find_graph_sim(generated_graph, sim_graph):
     sim_subtrees = [get_subtree_graph(sim_graph, edges[1])
                     for edges in sim_graph.out_edges(sim_root)]
 
-    # TODO: remove threading as it clogs CPU
-    # possibly split all expriment sub_trees as well
     max_iters = 1  # tunable, possibly look at timeouts
-    max_time = 30  # tunable
+
     clean_graphs_for_ged(gen_subtrees)
     add_label_to_gen_trees(gen_subtrees)
     clean_graphs_for_ged(sim_subtrees)
@@ -100,13 +96,9 @@ def find_graph_sim(generated_graph, sim_graph):
     final_score_list = []
     for i, sim_tree in enumerate(sim_subtrees):
         min_score_list = []
-        e = threading.Event()
-        t = threading.Thread(target=gen_min_edit_distance_for_all_subtrees, args=(
-            e, sim_tree, gen_subtrees, max_iters, min_score_list))
-        t.start()
-        t.join(max_time)
-        e.set()
-        t.join()
+
+        gen_min_edit_distance_for_all_subtrees(sim_tree, gen_subtrees, max_iters, min_score_list)
+
         final_score_list.append({
             "sim_tree_num": i,
             "num_nodes_in_subtree": total_num_nodes(sim_tree),
@@ -161,7 +153,7 @@ def remove_all_lat(gen_subtrees):
                 graph.remove_node(node)
 
 
-def gen_min_edit_distance_for_all_subtrees(e, sim_graph, gen_subtrees, max_iters, min_score_list):
+def gen_min_edit_distance_for_all_subtrees(sim_graph, gen_subtrees, max_iters, min_score_list):
     min_score = None
     for g_tree in gen_subtrees:
         i = 0
@@ -170,6 +162,6 @@ def gen_min_edit_distance_for_all_subtrees(e, sim_graph, gen_subtrees, max_iters
                 min_score = score
                 min_score_list.append(min_score)
             i += 1
-            if i == max_iters or e.isSet():
+            if i == max_iters:
                 break
     return min_score
