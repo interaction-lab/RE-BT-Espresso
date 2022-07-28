@@ -14,7 +14,7 @@ from sympy import*
 import re
 from pyeda.inter import *
 
-def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal_bt_espresso=False, run_my_method=False):
+def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal_bt_espresso=False, run_with_gfactor=False):
     """Runs modified BT-Espresso algorithm with new reductions
 
     Args:
@@ -46,7 +46,7 @@ def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal
         sym_lookup,
         action_to_pstring,
         run_orginal_bt_espresso,
-        run_my_method)
+        run_with_gfactor)
     btree = pstring_to_btree(action_minimized, sym_lookup)
     global cur_prune_num
     if not run_orginal_bt_espresso:
@@ -299,7 +299,7 @@ v = symbols(f"var0:{X}")
 v_dict = {f"var{i}": v[i] for i in range(X)}
 v_dict.update(V_dict)
 
-def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso, run_my_method):
+def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso, run_with_gfactor):
     action_minimized = action_min_wo_lat_dict = {}
     espresso_reduction(action_to_pstring, action_minimized)
     if not run_original_bt_espresso:
@@ -311,12 +311,12 @@ def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espr
             action_minimized)
         ############################
         # run our method:
-        if run_my_method:
-            my_method_rules = []
+        if run_with_gfactor:
+            our_method_rules = []
             for key, value in action_minimized.items():
-                my_method_rules.append(str(value))
+                our_method_rules.append(str(value))
 
-            logic_rules = convert_input_to_minimization_into_logic(my_method_rules)
+            logic_rules = convert_input_to_minimization_into_logic(our_method_rules)
             alg_rules= convert_logic_rules_into_algebraic_expression(logic_rules)
             min_rules_alg = []
             for rule in alg_rules:

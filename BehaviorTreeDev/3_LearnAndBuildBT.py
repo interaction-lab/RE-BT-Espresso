@@ -53,14 +53,14 @@ def process_command_line_args():
     return args["config"], args["outputlog"], "kevin" in args and args["kevin"] != None and args['kevin']
 
 
-def run_behaviortree(json_file_path, log_file_path, run_original_bt_espresso, run_my_method):
+def run_behaviortree(json_file_path, log_file_path, run_original_bt_espresso, run_with_gfactor):
     """Summary	
     Args:
         json_file_path (str): Full filepath to config.json
         log_file_path (str): Full filepath to output.log file 
     """
 
-    r = Runner(json_file_path, log_file_path, run_original_bt_espresso, run_my_method)
+    r = Runner(json_file_path, log_file_path, run_original_bt_espresso, run_with_gfactor)
     return r.run()
 
 
@@ -73,7 +73,7 @@ class Runner:
         log_file (_io.TextIOWrapper): Log file used for formatting
     """
 
-    def __init__(self, json_file_path, log_file_path, run_original_bt_espresso, run_my_method):
+    def __init__(self, json_file_path, log_file_path, run_original_bt_espresso, run_with_gfactor):
         """Summary
 
         Args:
@@ -85,7 +85,7 @@ class Runner:
         self.json_manager = JsonManager(json_file_path)
         self.log_file = open(log_file_path, "r")
         self.run_original_bt_espresso = run_original_bt_espresso
-        self.run_my_method = run_my_method
+        self.run_with_gfactor = run_with_gfactor
 
     def get_file_fmt_and_label_encoding(self):
         """Summary
@@ -299,10 +299,10 @@ class Runner:
                     self.features_data.columns,
                     label_encoding,
                     self.json_manager.get_binary_features(), False,
-                    True)  # run my method
+                    True)  # run our method
 
                 original_path = constants.add_folder_to_directory(
-                    "my_method", newPrunePath)
+                    "gfactor", newPrunePath)
                 btBuilder.save_tree(behavior_tree_obj, original_path)
 
             i += 1
@@ -345,8 +345,8 @@ class Runner:
 def main():
     """Runs the behavior tree via command line arguments
     """
-    json_file_path, fmt_file_path, run_original_bt_espresso, run_my_method = process_command_line_args()
-    run_behaviortree(json_file_path, fmt_file_path, run_original_bt_espresso, run_my_method)
+    json_file_path, fmt_file_path, run_original_bt_espresso, run_with_gfactor = process_command_line_args()
+    run_behaviortree(json_file_path, fmt_file_path, run_original_bt_espresso, run_with_gfactor)
 
 
 if __name__ == '__main__':

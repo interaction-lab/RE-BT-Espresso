@@ -14,8 +14,8 @@ def parse_args():
                     help="Path to dot file")
     ap.add_argument("-k", "--kevin", required=False,
                     action='store_true', help="Run w original BT-Espresso also")
-    ap.add_argument("-g", "--my_method", required=False,
-                    action='store_true', help="Run w original my method also")
+    ap.add_argument("-g", "--gfactor", required=False,
+                    action='store_true', help="Run RE:BT with GFACTOR method also")
     args = vars(ap.parse_args())
 
     path_to_dot = None
@@ -25,11 +25,11 @@ def parse_args():
     return path_to_dot, "kevin" in args and args["kevin"] != None and args['kevin']
 
 
-def run_result_list(paths, run_original_bt_espresso, run_my_method):
+def run_result_list(paths, run_original_bt_espresso, run_with_gfactor):
     results_dict = dict()
     for path in paths:
         print("The path is", path)
-        run_result(path, results_dict, run_original_bt_espresso, run_my_method)
+        run_result(path, results_dict, run_original_bt_espresso, run_with_gfactor)
 
     # first path in list is simulated
     basename = os.path.basename(paths[0]).replace(".dot", "")
@@ -38,7 +38,7 @@ def run_result_list(paths, run_original_bt_espresso, run_my_method):
     write_results(results_path, results_filename, results_dict)
 
 
-def run_result(path_to_tree_dot_file, results_dict, run_original_bt_espresso, run_my_method):
+def run_result(path_to_tree_dot_file, results_dict, run_original_bt_espresso, run_with_gfactor):
     print(f"Start results on generated {path_to_tree_dot_file}")
     graph = nx.nx_pydot.from_pydot(
         pydot.graph_from_dot_file(path_to_tree_dot_file)[0])
@@ -51,11 +51,11 @@ def run_result(path_to_tree_dot_file, results_dict, run_original_bt_espresso, ru
         orig_path = os.path.join(orig_path, filename)
         graph = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(orig_path)[0])
         generate_results(orig_path, results_dict, graph)
-    if run_my_method and is_generated(path_to_tree_dot_file):
+    if run_with_gfactor and is_generated(path_to_tree_dot_file):
         print("Process RE:BT-Espresso + factorization Results")
         directory = os.path.dirname(path_to_tree_dot_file)
         filename = os.path.basename(path_to_tree_dot_file)
-        orig_path = os.path.join(directory, "my_method/")
+        orig_path = os.path.join(directory, "gfactor/")
         orig_path = os.path.join(orig_path, filename)
         graph = nx.nx_pydot.from_pydot(pydot.graph_from_dot_file(orig_path)[0])
         generate_results(orig_path, results_dict, graph)
@@ -68,14 +68,14 @@ def is_generated(path):
 def is_original_bt_espresso(path):
     return "original_bt_espresso" in path
 
-def is_my_method(path):
-    return "my_method" in path
+def is_gfactor(path):
+    return "gfactor" in path
 
 
 # possibly move these out to functions, will leave here for now for convenience
 is_generated_key = "is_generated"
 is_original_bt_espresso_key = "is_original_bt_espresso"
-is_my_method_key = "is_my_method"
+is_gfactor_key = "is_gfactor"
 num_unique_nodes_key = "num_unique_nodes"
 total_nodes_key = "total_nodes"
 unique_node_freq_key = "unique_node_freq"
@@ -92,7 +92,7 @@ def generate_results(key, results_dict, graph):
     results_dict[key][is_generated_key] = is_generated(key)
     results_dict[key][is_original_bt_espresso_key] = is_original_bt_espresso(
         key)
-    results_dict[key][is_my_method_key] = is_my_method(
+    results_dict[key][is_gfactor_key] = is_gfactor(
         key)
     results_dict[key][num_unique_nodes_key] = nh.num_unique_nodes(graph)
     results_dict[key][total_nodes_key] = nh.total_num_nodes(graph)
@@ -116,9 +116,9 @@ def write_results(output_path, results_filename, results_dict):
 
 
 def main():
-    path_to_dot, run_original_bt_espresso, run_my_method = parse_args()
+    path_to_dot, run_original_bt_espresso, run_with_gfactor = parse_args()
     results_dict = dict()
-    run_result(path_to_dot, results_dict, run_original_bt_espresso, run_my_method)
+    run_result(path_to_dot, results_dict, run_original_bt_espresso, run_with_gfactor)
 
 
 if __name__ == '__main__':
