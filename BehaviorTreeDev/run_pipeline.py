@@ -30,6 +30,8 @@ def parse_args():
                     action='store_true', help="Run recoloring of all trees")
     ap.add_argument("-k", "--kevin", required=False,
                     action='store_true', help="Run w original BT-Espresso also")
+    ap.add_argument("-g", "--my_method", required=False,
+                    action='store_true', help="Run w original my method also")
     args = vars(ap.parse_args())
     json_file_path = ""
     if "config" in args and args["config"] != None:
@@ -37,10 +39,11 @@ def parse_args():
 
     should_recolor = "recolor" in args and args["recolor"] != None and args['recolor']
     run_original_bt_espresso = "kevin" in args and args["kevin"] != None and args['kevin']
-    return json_file_path, should_recolor, run_original_bt_espresso
+    run_my_method = "my_method" in args and args["my_method"] != None and args['my_method']
+    return json_file_path, should_recolor, run_original_bt_espresso, run_my_method
 
 
-def run_pipeline(json_file_path, should_recolor, fmt_file_path, run_original_bt_espresso):
+def run_pipeline(json_file_path, should_recolor, fmt_file_path, run_original_bt_espresso, run_my_method):
     print("Start BTBuilder pipeline")
     json_manager = JsonManager(json_file_path)
 
@@ -48,7 +51,7 @@ def run_pipeline(json_file_path, should_recolor, fmt_file_path, run_original_bt_
     hotencode_1.run_hotencode(json_file_path, fmt_file_path)
     upsample_2.run_upsample(json_file_path, fmt_file_path)
     bt_tree_filepath_list = behaviortree_3.run_behaviortree(
-        json_file_path, fmt_file_path, run_original_bt_espresso)
+        json_file_path, fmt_file_path, run_original_bt_espresso, run_my_method)
 
     if should_recolor:
         color_bt_trees.run_color(json_manager.get_output_path())
@@ -61,11 +64,11 @@ def main():
     '-c, --config' - [optional] Path to json config
     '-r, --recolor' - [optional] runs recoloring when trees are done generating
     """
-    json_file_path, should_recolor, run_original_bt_espresso = parse_args()
+    json_file_path, should_recolor, run_original_bt_espresso, run_my_method = parse_args()
     global expr_name
     expr_name = json_file_path
     run_pipeline(json_file_path, should_recolor,
-                 DEFAULT_OUTPUT_PATH, run_original_bt_espresso)
+                 DEFAULT_OUTPUT_PATH, run_original_bt_espresso, run_my_method)
 
 
 if __name__ == '__main__':
