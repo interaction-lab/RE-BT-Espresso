@@ -123,34 +123,32 @@ def run_normalize(json_file_path):
                     header_row_being_read = False
                     continue
 
-                if len(timeseries_row)!=0:
+                label_values = [timeseries_row[index]
+                                for index in label_indices]
+                label_value = next((label_value for label_value in label_values
+                                    if label_value), None)
 
-                    label_values = [timeseries_row[index]
-                                    for index in label_indices]
-                    label_value = next((label_value for label_value in label_values
-                                        if label_value), None)
-
-                    if label_value:
-                        new_normalize_row = []
-                        for column_name, column_index in feature_columns.items():
-                            if column_name in lag_features:
-                                index = lag_features.index(column_name)
-                                lagged_feature = update_lag_feature_queue(
-                                    all_lag_queues[index], timeseries_row[column_index])
-                                new_normalize_row.append(lagged_feature)
-                            elif column_name == constants.LAST_ACTION_TAKEN_COLUMN_NAME:
-                                new_normalize_row.append(last_action_taken)
-                            else:
-                                new_normalize_row.append(
-                                    timeseries_row[feature_columns[column_name]])
-                        new_normalize_row.append(label_value)
-                        last_action_taken = label_value
-                        csv_writer.writerow(new_normalize_row)
-                    else:
-                        for column_index, column_name in enumerate(lag_features):
-                            value = timeseries_row[feature_columns[column_name]]
-                            update_lag_feature_queue(
-                                all_lag_queues[column_index], value)
+                if label_value:
+                    new_normalize_row = []
+                    for column_name, column_index in feature_columns.items():
+                        if column_name in lag_features:
+                            index = lag_features.index(column_name)
+                            lagged_feature = update_lag_feature_queue(
+                                all_lag_queues[index], timeseries_row[column_index])
+                            new_normalize_row.append(lagged_feature)
+                        elif column_name == constants.LAST_ACTION_TAKEN_COLUMN_NAME:
+                            new_normalize_row.append(last_action_taken)
+                        else:
+                            new_normalize_row.append(
+                                timeseries_row[feature_columns[column_name]])
+                    new_normalize_row.append(label_value)
+                    last_action_taken = label_value
+                    csv_writer.writerow(new_normalize_row)
+                else:
+                    for column_index, column_name in enumerate(lag_features):
+                        value = timeseries_row[feature_columns[column_name]]
+                        update_lag_feature_queue(
+                            all_lag_queues[column_index], value)
 
             current_csv_obj.close()
             normalized_csv_obj.close()
