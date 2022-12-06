@@ -16,7 +16,6 @@ DataSim/simulated_data.csv
 *pipeline_output/
 *env/
 *.vscode/
-*.csv
 *sim_data/
 *output/
 *results/
