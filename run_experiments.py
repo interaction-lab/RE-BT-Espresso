@@ -50,6 +50,8 @@ def parse_args():
                     action='store_true', help="Run experiments in ||")
     ap.add_argument("-k", "--kevin", required=False,
                     action='store_true', help="Run w original BT-Espresso also")
+    ap.add_argument("-g", "--gfactor", required=False,
+                    action='store_true', help="Run RE:BT with GFACTOR method also")
     args = vars(ap.parse_args())
     json_file_path = None
     if "config" in args and args["config"] != None:
@@ -57,21 +59,24 @@ def parse_args():
     should_recolor = "recolor" in args and args["recolor"] != None and args['recolor']
     run_multiprocess = "multiprocess" in args and args["multiprocess"] != None and args['multiprocess']
     run_original_bt_espresso = "kevin" in args and args["kevin"] != None and args['kevin']
-    return json_file_path, should_recolor, run_multiprocess, run_original_bt_espresso
+    run_with_gfactor = "gfactor" in args and args["gfactor"] != None and args['gfactor']
+    return json_file_path, should_recolor, run_multiprocess, run_original_bt_espresso,run_with_gfactor
 
 
 # this should not be moved
 base_pipeline_config = "DataSim/configs/base_pipeline_config.json"
 should_recolor = False
 run_original_bt_espresso = False
+run_with_gfactor  = False
 def main():
     """Runs the simulator and full pipeline end to end
     '-c, --config' - [optional] Path to json config
     """
     print("Start Experiments")
-    global experiments_folder, should_recolor, run_original_bt_espresso
+    global experiments_folder, should_recolor, run_original_bt_espresso, run_with_gfactor
 
-    single_experiment_filename, should_recolor, run_multiprocess, run_original_bt_espresso = parse_args()
+    single_experiment_filename, should_recolor, run_multiprocess, run_original_bt_espresso, run_with_gfactor = parse_args()
+
     if single_experiment_filename:
         run_experiment(experiments_folder + "/" + single_experiment_filename)
     else:
@@ -94,15 +99,16 @@ def run_all_experiments(run_multiprocess):
 
 
 def run_experiment(experiment_file):
-    global base_pipeline_config, should_recolor, run_original_bt_espresso
+    global base_pipeline_config, should_recolor, run_original_bt_espresso, run_with_gfactor
+    single_experiment_filename, should_recolor, run_multiprocess, run_original_bt_espresso, run_with_gfactor = parse_args()
     sim_data_output_path, sim_tree_name = bt_sim.run_sim(experiment_file)
     pipeline_config_path = write_pipeline_config(
         base_pipeline_config, sim_data_output_path, sim_data_output_path + "output")
     bt_tree_filepath_list = run_pipeline.run_pipeline(
-        pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log", run_original_bt_espresso)
+        pipeline_config_path, should_recolor, sim_data_output_path + "fmt.log", run_original_bt_espresso, run_with_gfactor)
     simulated_tree_file = sim_data_output_path + sim_tree_name + ".dot"
     bt_tree_filepath_list.insert(0, simulated_tree_file)
-    run_results.run_result_list(bt_tree_filepath_list[:-1], run_original_bt_espresso) # removes the tree with nothing in it / final prune
+    #run_results.run_result_list(bt_tree_filepath_list[:-1], run_original_bt_espresso, run_with_gfactor) # removes the tree with nothing in it / final prune
 
 
 def write_pipeline_config(base_pipeline_config, sim_data_output_path, output_folder):

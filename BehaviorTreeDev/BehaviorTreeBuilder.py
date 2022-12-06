@@ -9,8 +9,12 @@ from BTBuilderHelpers import *
 from BTBuilderLAT import *
 from BTBuilderData import *
 
+#new imports
+from sympy import*
+import re
+from pyeda.inter import *
 
-def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal_bt_espresso=False):
+def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal_bt_espresso=False, run_with_gfactor=False):
     """Runs modified BT-Espresso algorithm with new reductions
 
     Args:
@@ -41,7 +45,8 @@ def re_bt_espresso(dt, feature_names, label_names, _binary_features, run_orginal
     action_minimized, action_minimized_wo_lat = minimize_bool_expression(
         sym_lookup,
         action_to_pstring,
-        run_orginal_bt_espresso)
+        run_orginal_bt_espresso,
+        run_with_gfactor)
     btree = pstring_to_btree(action_minimized, sym_lookup)
     global cur_prune_num
     if not run_orginal_bt_espresso:
@@ -286,8 +291,15 @@ def recursive_build(pstring_expr, sym_lookup_dict):
 
 # when this is 1, look up var0 kind of thing
 
+# build the variables in sympy
+X=150
+V = symbols(f"VAR0:{X}")
+V_dict = {f"VAR{i}": V[i] for i in range(X)}
+v = symbols(f"var0:{X}")
+v_dict = {f"var{i}": v[i] for i in range(X)}
+v_dict.update(V_dict)
 
-def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso):
+def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espresso, run_with_gfactor):
     action_minimized = action_min_wo_lat_dict = {}
     espresso_reduction(action_to_pstring, action_minimized)
     if not run_original_bt_espresso:
@@ -297,12 +309,175 @@ def minimize_bool_expression(sym_lookup, action_to_pstring, run_original_bt_espr
             action_minimized)
         action_minimized = factorize_pstring(
             action_minimized)
+        ############################
+        # run our method:
+        if run_with_gfactor:
+            our_method_rules = []
+            for key, value in action_minimized.items():
+                our_method_rules.append(str(value))
+
+            logic_rules = convert_input_to_minimization_into_logic(our_method_rules)
+            alg_rules= convert_logic_rules_into_algebraic_expression(logic_rules)
+            min_rules_alg = []
+            for rule in alg_rules:
+                rule= rule.replace("~VAR", "var")
+                rule = sympify(rule, locals=v_dict)
+                rule_factor = gfactor(rule)
+                rule_factor = str(rule_factor).replace("*", " & ").replace("+", "|").replace("var", "~VAR")
+                rule_factor = expr(rule_factor)
+                min_rules_alg.append(rule_factor)
+
+            action_minimized_copy = dict(action_minimized)
+            i=0
+            for action in action_minimized_copy:
+                action_minimized[action] = min_rules_alg[i]
+                i += 1
+
+        ############################ 
+         
         dict_copy = dict(action_min_wo_lat_dict)
         for action in dict_copy:
             action_min_wo_lat_dict[action] = factorize_pstring(
                 action_min_wo_lat_dict[action])
     return action_minimized, action_min_wo_lat_dict
 
+################### new functions ########################
+
+def convert_input_to_minimization_into_logic(input_to_minimization):
+    logic_horn_rules= []
+    for rule in input_to_minimization:
+        logic_rule=""
+        rule=str(rule)
+        logic_rule=sympify(str(rule), locals=v_dict)
+        logic_horn_rules.append(logic_rule)  
+    return logic_horn_rules
+
+
+def upper_repl(match):
+     return match.group(1).upper()
+
+def convert_logic_rules_into_algebraic_expression(Horn_rules_logic):
+    algebraic_rules = []
+    for logic_expression in Horn_rules_logic:
+        logic_expression = str(logic_expression)
+        logic_expression = logic_expression.replace("|", "+").replace(" & ", "*")
+        logic_expression = re.sub(r'~([a-z])', upper_repl, logic_expression)
+        algebraic_rules.append(logic_expression)  
+    return algebraic_rules
+
+
+def gfactor(f):
+    d = divisor(f)
+    if d == "0":
+        return f   
+    q, r = divide(f,d)
+    if q[0] == 1: #double check
+        print("I am here in q=0")
+        return f
+    #only one variable
+    if len(str(q[0])) < 8:
+        return lf(f, q[0])   
+    else:
+        q = make_cube_free(q[0])
+        d,r =  divide(f,q)
+        if d[0] == 0 :
+            return f
+        if cube_free(d[0]):
+            if "1" not in q:
+                q = gfactor(q)
+            #if d!=1:
+            d = gfactor(d[0])
+            if (r != 0):
+                r = gfactor(r)
+            return sympify(q, locals=v_dict)*sympify(d, locals=v_dict) + sympify(r, locals=v_dict)
+        else:
+            c = common_cube(d)
+            return lf(f,c)
+    
+def lf(f, l):
+    l= str(l).replace("[","").replace("]","")
+    q, r = divide (f,l)
+    q = gfactor(q[0])
+    #it should work even without
+    if (r != 0):
+        r = gfactor(r)
+    return sympify(l, locals=v_dict)*q + r
+
+def common_cube(f):
+    # one addedum
+    if "+" not in str(f):
+        return f
+    cubes =  str(f).replace(" + ","+").replace("[","").replace("]","").split("+")
+    c1 = cubes[0]
+    c1_var = c1.split("*")
+    common_chars_list = []
+    for c in range(1, len(cubes)):
+        common_chars = ''.join([i for i in c1_var if re.search(i, cubes[c])])
+        common_chars_list.append(common_chars)
+        if common_chars == [""]:
+            return ""
+    if len(common_chars) == 0:
+        return ""
+    elif len(common_chars) == 1:
+        common_var = common_chars[0]
+    else:
+        for i in range(1, len(common_chars),1):
+            s1=common_chars[0]
+            common_var = ''.join(sorted(set(s1) &
+            set(common_chars[i]), key = s1.index)) 
+            s1= common_var
+    if common_var == "":
+            return ""
+    common_cube= sympify(common_var, locals=v_dict) 
+    return common_cube
+
+def make_cube_free(f):
+    if cube_free(f):
+        return str(f)
+    cube = common_cube(f)
+    if str(cube) != "":
+        f_cube_free, remainder = divide(f, str(cube))
+        return str(f_cube_free).replace("[","").replace("]","")
+    else:
+        return str(f)
+    
+
+def cube_free(f):
+    if "+" not in str(f):
+        return False
+    f_str =  str(f).replace(" ","").replace("+","*").replace("[","").replace("]","")
+    literals = f_str.split("*")
+    for l in literals:
+        q, r = divide(f, l)
+        if r == 0:
+            return False
+    return True
+
+def divide(f, d):
+    q, r = reduced(f, [d])
+    #Needed for a bug in the sympy library
+    r = str(r)
+    if "-" in r:
+        q= [0]
+        r= f
+        return q,r
+    r = sympify (r, locals=v_dict)
+    return q,r
+
+def divisor(f):
+    frequencies = {}
+    f_str = str(f).replace(" ","").replace("+","*")
+    keys = f_str.split("*")
+    frequencies = dict()
+    for i in keys:
+        frequencies[i] = frequencies.get(i, 0) + 1
+    most_common_condition = max(frequencies, key=frequencies.get)
+    if frequencies[most_common_condition]>1:
+        return most_common_condition
+    else:
+        return "0"
+
+##########################################################
 
 def espresso_reduction(action_to_pstring, action_minimized):
     for action in action_to_pstring:
