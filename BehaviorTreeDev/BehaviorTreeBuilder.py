@@ -371,14 +371,17 @@ def gfactor(f):
     if d == "0":
         return f   
     q, r = divide(f,d)
-    #if q has only one term
-    if q[0] == 1:
+    if q[0] == 1: #double check
+        print("I am here in q=0")
         return f
-    if len(str(q[0])) == 1:
+    #only one variable
+    if len(str(q[0])) < 8:
         return lf(f, q[0])   
     else:
         q = make_cube_free(q[0])
         d,r =  divide(f,q)
+        if d[0] == 0 :
+            return f
         if cube_free(d[0]):
             if "1" not in q:
                 q = gfactor(q)
@@ -391,11 +394,11 @@ def gfactor(f):
             c = common_cube(d)
             return lf(f,c)
     
-def lf(f, c):
-    l = best_literal (f,c)  
+def lf(f, l):
+    l= str(l).replace("[","").replace("]","")
     q, r = divide (f,l)
-    c = common_cube(q)
     q = gfactor(q[0])
+    #it should work even without
     if (r != 0):
         r = gfactor(r)
     return sympify(l, locals=v_dict)*q + r
@@ -468,21 +471,11 @@ def divisor(f):
     frequencies = dict()
     for i in keys:
         frequencies[i] = frequencies.get(i, 0) + 1
-    most_common_literal = max(frequencies, key=frequencies.get)
-    if frequencies[most_common_literal]>1:
-        return most_common_literal
+    most_common_condition = max(frequencies, key=frequencies.get)
+    if frequencies[most_common_condition]>1:
+        return most_common_condition
     else:
         return "0"
-
-def best_literal(f,c):
-    frequencies = {}
-    f_str = str(f).replace(" ","").replace("+","*")
-    keys = f_str.split("*")
-    frequencies = dict()
-    for i in keys:
-        frequencies[i] = frequencies.get(i, 0) + 1
-    best_literal = max(frequencies, key=frequencies.get)
-    return best_literal
 
 ##########################################################
 
