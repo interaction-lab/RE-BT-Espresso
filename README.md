@@ -1,6 +1,6 @@
 # RE:BT-Espresso, Representation Exploitation of BT-Espresso for Behavior Trees Learned from Robot Demonstrations 
 
-IMPORTANT: Although this repo may not be the cleanest code, we have tried to make it more readable. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `re_bt_espresso`. Feel free to contact groechel@usc.edu if you have any questions.
+IMPORTANT: Although this repo may not be the cleanest code, we have tried to make it more readable. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `re_bt_espresso`. Feel free to contact groechel@usc.edu if you have any questions. Note from Tom: I just finished my Ph.D. and am workinig in industry/do not currently have bandwidth to support this repo. If someone else would like to own it, feel free! I am happy to answer questions.
 
 `BehaviorTreeBuilder` is split up as the following:
 - `BTBuildGlobals.py` -> contains all global variables (mostly dictionary lookups) w/ descriptions
