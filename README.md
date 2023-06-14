@@ -1,6 +1,23 @@
 # RE:BT-Espresso, Representation Exploitation of BT-Espresso for Behavior Trees Learned from Robot Demonstrations 
 
-IMPORTANT: Although this repo may not be the cleanest code, we have tried to make it more readable. This will be cited as "`open-source`" in the sense that all code can be audited/read. I personally find pseudo code within papers more difficult to read than poorly written real code. If you are looking for the algorithm described within the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `re_bt_espresso`. Feel free to contact groechel@usc.edu if you have any questions. Note from Tom: I just finished my Ph.D. and am working in industry/do not currently have bandwidth to support this repo. If someone else would like to own it, feel free! I am happy to answer questions.
+This repo is a pipeline for learning behavior trees from demonstration. It resulted in the following paper:
+```
+@inproceedings{wathieu2022re,
+  title={RE: BT-Espresso: Improving Interpretability and Expressivity of Behavior Trees Learned from Robot Demonstrations},
+  author={Wathieu, Adam and Groechel, Thomas R and Lee, Haemin Jenny and Kuo, Chloe and Matari{\'c}, Maja J},
+  booktitle={2022 International Conference on Robotics and Automation (ICRA)},
+  pages={11518--11524},
+  year={2022},
+  organization={IEEE}
+}
+```
+
+If you are looking for the algorithm described from the paper, you will want to look at `BehaviorTreeDev/BehaviorTreeBuilder.py` starting with function `re_bt_espresso`. I would also encourage you to check out [the work that cites this paper](https://scholar.google.com/scholar?cites=3027011272102626473&as_sdt=400005&sciodt=0,14&hl=en), there are some great learning behavior tree algorithms being researched.
+
+Feel free to contact trgroechel@gmail.com if you have any questions. Note that I do not currently have bandwidth to support this project directly. If someone else would like to own it, feel free! I am happy to answer any questions.
+
+
+## Repo Outline
 
 `BehaviorTreeBuilder` is split up as the following:
 - `BTBuildGlobals.py` -> contains all global variables (mostly dictionary lookups) w/ descriptions
@@ -9,7 +26,6 @@ IMPORTANT: Although this repo may not be the cleanest code, we have tried to mak
 - `BTBuilderLAT.py` -> contains functions for the Last Action Taken Sequence/Cycles algorithm (algorithm 2 within the paper)
 - `BehaviorTreeBuilder.py` -> contains the RE-BT:Espresso algorithm code using all of the above (algorithm 1 within the paper)
 
----
 ## Install
 1. Clone repo
 2. Install python3 dependencies below (you can create a  python3 [virtual environment](https://docs.python.org/3/library/venv.html) and activate it if you would like first)
@@ -76,5 +92,8 @@ pip3 install matplotlib seaborn
 ### Pyeda Literal Error
 There is a bug is Pyeda library that also need to be fixed. See [#17](https://github.com/interaction-lab/BTFromSARDemostration/issues/17) for fix.
 
+
+### Random Note
+The title of the paper stems from a response (hence RE:) to [BT-Espresso](https://ieeexplore.ieee.org/document/8794104) - a paper from the University of Michigan [Labratory for Progress](https://progress.eecs.umich.edu/) led by [Prof. Chad Jenkins](https://web.eecs.umich.edu/~ocj/). This was the lab I was a part of in undergrad :)
 
 
